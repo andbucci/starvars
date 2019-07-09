@@ -2,7 +2,6 @@
 #Carico le library
 library(afmtools)
 library(bcp)
-library(BigVAR)
 library(changepoint)
 library(ecp)
 library(forecast)
@@ -35,26 +34,39 @@ library(xlsx)
 library(xtable)
 rm(list=ls(all=TRUE))
 #----------------CROSS COUNTRY----------------------------------------------------------------------------
-setwd("C:/Users/Andrea Bucci/OneDrive - Università Politecnica delle Marche/Articolo VLSTAR/Dati New")
-setwd("C:/Users/andre/OneDrive - Università Politecnica delle Marche/Articolo VLSTAR/Dati New")
+setwd("C:/Users/Andrea Bucci/OneDrive - Universit? Politecnica delle Marche/Articolo VLSTAR/Dati New")
+setwd("C:/Users/andre/OneDrive - Universit? Politecnica delle Marche/Articolo VLSTAR/Dati New")
 
 #CARICO I DATI DA EXCEL------------------------
-Date1 <- seq(as.Date("1990/7/1"), by = "month", length.out = 336 )
-#Date2 <- seq(as.Date("1970/4/1"), by = "month", length.out = 579 )
+Date1 <- seq(as.Date("1970/3/1"), by = "month", length.out = 580 )
+Date2 <- seq(as.Date("1970/4/1"), by = "month", length.out = 579 )
 
 ## 1.Originali con Black
 source('VLSTAR.nls.R')
-dati <- read.xlsx('Nuove_Esogene.xlsx',2)
+dati <- read.xlsx('rcholexo1.xlsx',1)
 y1 <- dati[,1:10]
-x1 <- dati[,11:48] #Con Black
+x1 <- dati[,11:30] #Con Black
 
 m=2
 st <- dati$y1_1
 constant = T
 
 
+start.time <- Sys.time()
+mod1 <- VLSTAR.nls(y1, x1, m, st, n.combi = 15, n.iter = 200, constant = T)
+end.time <- Sys.time()
+end.time - start.time
 
-## IPJNP filtrata con Black
+## 2. Originali con Black e September
+x1 <- dati[,11:31] #Con Black e September
+
+start.time <- Sys.time()
+mod2 <- VLSTAR.nls(y1, x1, m, st, n.combi = 15, n.iter = 200, constant = T)
+end.time <- Sys.time()
+end.time - start.time
+
+
+## 3.IPJNP filtrata con Black
 filtrodummy <- function(dato, indice1, indice2 = NULL){
   dato <- as.matrix(dato)
   nrowy <- nrow(dato)
@@ -65,41 +77,21 @@ filtrodummy <- function(dato, indice1, indice2 = NULL){
     dummy2[indice2] <- 1
     lm1 <- lm(dato ~ dummy1 + dummy2)
   } else{
-    lm1 <- lm(dato ~ dummy1)
+    lm1 <- lm(dato ~ dummy1)  
   }
   res1 <- residuals(lm1)
   res1
 }
 
-ipjpn <- filtrodummy(dati$IP_JPN, indice1 = 249, indice2  = 221:224)
+ipjpn <- filtrodummy(dati$IP_JPN, indice1 = 493, indice2  = 466:471)
 
 dati1 <- dati
 dati1$IP_JPN <- ipjpn
 
-x2 <- dati1[,11:48]#Con Black
-
-x2 <- dati1[, -which(names(dati1) %in% c('Black', 'US_3'))]
-
-VARX <- list()
-VARX$k <- 10
-VARX$s <- 1
-T1=floor(nrow(y1)/3)
-T2=floor(2*nrow(y1)/3)
-Y <- as.matrix(x2[, -which(names(x2) %in% c('y1_1', 'y2_1', 'y3_1', 'y4_1','y5_1',
-                                  'y6_1', 'y7_1', 'y8_1', 'y9_1', 'y10_1'))])
-mod_lasso <- constructModel(Y, p = 1, struct = 'SparseOO', gran = c(100,100), VARX = VARX, T1 = T1, T2 = T2)
-mod_lasso_a <- constructModel(Y, p = 1, struct = 'BGR', gran = c(100,100), VARX = VARX, T1 = T1, T2 = T2)
-mod_lasso1 <- BigVAR.est(mod_lasso_a)
-
-###Sparse VARX
-y2 <- as.matrix(y1)
-xx <- as.matrix(x2[, 21:46])
-mod_a <- sparseVARX(y2, xx, p = 1, s = 1, VARXpen = 'L1')
-
+x2 <- dati1[,11:30]#Con Black
 
 start.time <- Sys.time()
-mod1 <- VLSTAR.nls(y1, x2, p=1, m = m, st, n.combi = 15, n.iter = 200,
-                   constant = T, epsilon = 10^(-3), exo = T)
+mod3 <- VLSTAR.nls(y1, x2, m, st, n.combi = 15, n.iter = 200, constant = T)
 end.time <- Sys.time()
 end.time - start.time
 
@@ -149,13 +141,13 @@ for (i in 1:174){
                         epsilon = 10^-3, exo = F)
   fore1[i, ] <- modello$Fitted[406,]
   i
-}
+  }
 n <- 4
 m5 <- matrix(NA, 174,10)
 
 Nlf <- fore1
 for (i in 1:174){
-
+  
   m1 <- matrix(NA, n, n)
   m1[lower.tri(m1, diag=TRUE)] <- as.matrix(Nlf[i,])
   m2 <- t(m1)
@@ -185,15 +177,15 @@ coeff <- cbind(var_est$varresult$y1$coefficients,
 
 tmp <- summary(var_est)
 covbb <- cbind(tmp$varresult$y1$coefficients[,2],
-               tmp$varresult$y2$coefficients[,2],
-               tmp$varresult$y3$coefficients[,2],
-               tmp$varresult$y4$coefficients[,2],
-               tmp$varresult$y5$coefficients[,2],
-               tmp$varresult$y6$coefficients[,2],
-               tmp$varresult$y7$coefficients[,2],
-               tmp$varresult$y8$coefficients[,2],
-               tmp$varresult$y9$coefficients[,2],
-               tmp$varresult$y10$coefficients[,2])
+              tmp$varresult$y2$coefficients[,2],
+              tmp$varresult$y3$coefficients[,2],
+              tmp$varresult$y4$coefficients[,2],
+              tmp$varresult$y5$coefficients[,2],
+              tmp$varresult$y6$coefficients[,2],
+              tmp$varresult$y7$coefficients[,2],
+              tmp$varresult$y8$coefficients[,2],
+              tmp$varresult$y9$coefficients[,2],
+              tmp$varresult$y10$coefficients[,2])
 
 pval <- cbind(tmp$varresult$y1$coefficients[,4],
               tmp$varresult$y2$coefficients[,4],
@@ -225,9 +217,9 @@ bhat1 <- matrix(nrow = nrow(pval), ncol = ncol(pval))
 for(i in 1:nrow(pval)){
   for(j in 1:ncol(pval)){
     bhat1[i,j] <- paste(round(BBhat[i,j],4), signifi[i,j], "&", "(", round(covbb[i,j],4),
-                        ")", sep = '')
+                        ")", sep = '')  
   }
-}
+}  
 ##Test
 arch.test(var_est, lags.single = 5, multivariate.only = F)
 
