@@ -1,0 +1,263 @@
+#------------------------------------------
+#Carico le library
+library(afmtools)
+library(bcp)
+library(BigVAR)
+library(changepoint)
+library(ecp)
+library(forecast)
+library(gap)
+library(ghyp)
+library(lmtest)
+library(matrixcalc)
+library(MCS)
+library(parma)#porfolio optimization
+library(portes)
+library(PortfolioAnalytics)
+library(PSTR)
+library(quadprog)
+library(glmnet)
+library(rmgarch)
+library(glmnet)
+library(rugarch)
+library(stats)
+library(foreach)
+library(quantmod)
+library(doParallel)
+library(strucchange)
+library(twinkle)
+library(tsDyn)
+library(hydroTSM)
+library(vars)
+library(tis)
+library(mgarchBEKK)
+library(xlsx)
+library(xtable)
+rm(list=ls(all=TRUE))
+#----------------CROSS COUNTRY----------------------------------------------------------------------------
+setwd("C:/Users/Andrea Bucci/OneDrive - Universit? Politecnica delle Marche/Articolo VLSTAR/Dati New")
+setwd("C:/Users/andre/OneDrive - Universit? Politecnica delle Marche/Articolo VLSTAR/Dati New")
+
+#CARICO I DATI DA EXCEL------------------------
+Date1 <- seq(as.Date("1990/7/1"), by = "month", length.out = 336 )
+#Date2 <- seq(as.Date("1970/4/1"), by = "month", length.out = 579 )
+
+## 1.Originali con Black
+source('VLSTAR.nls.R')
+dati <- read.xlsx('Nuove_Esogene.xlsx',2)
+y1 <- dati[,1:10]
+x1 <- dati[,11:48] #Con Black
+
+m=2
+st <- dati$y1_1
+constant = T
+
+
+
+## IPJNP filtrata con Black
+filtrodummy <- function(dato, indice1, indice2 = NULL){
+  dato <- as.matrix(dato)
+  nrowy <- nrow(dato)
+  dummy1 <- rep(0, nrowy)
+  dummy1[indice1] <- 1
+  if(!is.null(indice2)){
+    dummy2 <- rep(0, nrowy)
+    dummy2[indice2] <- 1
+    lm1 <- lm(dato ~ dummy1 + dummy2)
+  } else{
+    lm1 <- lm(dato ~ dummy1)  
+  }
+  res1 <- residuals(lm1)
+  res1
+}
+
+ipjpn <- filtrodummy(dati$IP_JPN, indice1 = 249, indice2  = 221:224)
+
+dati1 <- dati
+dati1$IP_JPN <- ipjpn
+
+x2 <- dati1[,11:48]#Con Black
+
+x2 <- dati1[, -which(names(dati1) %in% c('Black', 'US_3'))]
+
+VARX <- list()
+VARX$k <- 10
+VARX$s <- 1
+T1=floor(nrow(y1)/3)
+T2=floor(2*nrow(y1)/3)
+Y <- as.matrix(x2[, -which(names(x2) %in% c('y1_1', 'y2_1', 'y3_1', 'y4_1','y5_1',
+                                  'y6_1', 'y7_1', 'y8_1', 'y9_1', 'y10_1'))])
+mod_lasso <- constructModel(Y, p = 1, struct = 'SparseOO', gran = c(100,100), VARX = VARX, T1 = T1, T2 = T2)
+mod_lasso_a <- constructModel(Y, p = 1, struct = 'BGR', gran = c(100,100), VARX = VARX, T1 = T1, T2 = T2)
+mod_lasso1 <- BigVAR.est(mod_lasso_a)
+
+###Sparse VARX
+y2 <- as.matrix(y1)
+xx <- as.matrix(x2[, 21:46])
+mod_a <- sparseVARX(y2, xx, p = 1, s = 1, VARXpen = 'L1') 
+
+
+start.time <- Sys.time()
+mod1 <- VLSTAR.nls(y1, x2, p=1, m = m, st, n.combi = 15, n.iter = 200, 
+                   constant = T, epsilon = 10^(-3), exo = T)
+end.time <- Sys.time()
+end.time - start.time
+
+
+## 4. IPJPN Filtrata con Black e Sep
+set.seed(26101988)
+
+x2 <- dati1[,11:31]#Con Black
+# x2 <- dati1[,11:20]#Con Black
+
+start.time <- Sys.time()
+mod4 <- VLSTAR.nls(y1, x2, m, st, n.combi = 15, n.iter = 200, constant = T)
+end.time <- Sys.time()
+end.time - start.time
+
+
+loglike2 <- function(y, resid1, omega){
+  nrowy <- nrow(as.matrix(y))
+  logll <- -(nrowy/2)*log(2*pi) -(nrowy/2)*log(omega) - t(resid1%*%resid1)/(2*omega)
+  return(logll)
+}
+
+
+residui <- mod4$Residuals
+omega1 <- diag(mod4$Omega)
+k <- nrow(mod4$Bhat)
+ll1 <- NULL
+AIC1 <- NULL
+BIC1 <- NULL
+for (l in 1:10){
+  ll1[l] <- loglike2(y1[,l], mod4$Residuals[,l], omega1[l])
+  AIC1[l] <- 2*k - 2*ll1[l]
+  BIC1[l] <- -2*ll1[l] + k*log(580)
+}
+
+
+
+##Out-of-sample
+gammac <- read.csv2('Gammac.csv')
+gammac <- gammac[,-1]
+fore1 <- matrix(ncol = 10, nrow = 174)
+for (i in 1:174){
+  y2 <- y1[i:(405+i),]
+  x3 <- x2[i:(405+i),]
+  st1 <- dati$y1_1[i:(405+i)]
+  modello <- VLSTAR.nls(y2, x3, m, st1, n.combi = 15, n.iter = 10, constant = T, starting = gammac,
+                        epsilon = 10^-3, exo = F)
+  fore1[i, ] <- modello$Fitted[406,]
+  i
+}
+n <- 4
+m5 <- matrix(NA, 174,10)
+
+Nlf <- fore1
+for (i in 1:174){
+  
+  m1 <- matrix(NA, n, n)
+  m1[lower.tri(m1, diag=TRUE)] <- as.matrix(Nlf[i,])
+  m2 <- t(m1)
+  m1[is.na(m1)] <- 0
+  m2[is.na(m2)] <- 0
+  m3 <- m1 %*% m2
+  m4 <- m3
+  m5[i,] <- m4[lower.tri(m4, diag=T)]
+}
+
+
+x1 <- x2
+
+#### VAR
+
+var_est <- VAR(y1, p = 3, type = 'const', exogen = x2[,11:21])
+coeff <- cbind(var_est$varresult$y1$coefficients,
+               var_est$varresult$y2$coefficients,
+               var_est$varresult$y3$coefficients,
+               var_est$varresult$y4$coefficients,
+               var_est$varresult$y5$coefficients,
+               var_est$varresult$y6$coefficients,
+               var_est$varresult$y7$coefficients,
+               var_est$varresult$y8$coefficients,
+               var_est$varresult$y9$coefficients,
+               var_est$varresult$y10$coefficients)
+
+tmp <- summary(var_est)
+covbb <- cbind(tmp$varresult$y1$coefficients[,2],
+               tmp$varresult$y2$coefficients[,2],
+               tmp$varresult$y3$coefficients[,2],
+               tmp$varresult$y4$coefficients[,2],
+               tmp$varresult$y5$coefficients[,2],
+               tmp$varresult$y6$coefficients[,2],
+               tmp$varresult$y7$coefficients[,2],
+               tmp$varresult$y8$coefficients[,2],
+               tmp$varresult$y9$coefficients[,2],
+               tmp$varresult$y10$coefficients[,2])
+
+pval <- cbind(tmp$varresult$y1$coefficients[,4],
+              tmp$varresult$y2$coefficients[,4],
+              tmp$varresult$y3$coefficients[,4],
+              tmp$varresult$y4$coefficients[,4],
+              tmp$varresult$y5$coefficients[,4],
+              tmp$varresult$y6$coefficients[,4],
+              tmp$varresult$y7$coefficients[,4],
+              tmp$varresult$y8$coefficients[,4],
+              tmp$varresult$y9$coefficients[,4],
+              tmp$varresult$y10$coefficients[,4])
+signifi <- matrix('',nrow = nrow(pval), ncol = ncol(pval))
+for(i in 1:nrow(pval)){
+  for(j in 1:ncol(pval)){
+    if(pval[i,j] < 0.01)
+    {signifi[i,j] <- '***'}
+    else if(pval[i,j] <=0.05 & pval[i,j]>0.01){
+      signifi[i,j] <- '**'
+    }
+    else if(pval[i,j] <= 0.1 & pval[i,j]>0.05){
+      signifi[i,j] <- '*'
+    }
+  }
+}
+
+BBhat <- coeff
+
+bhat1 <- matrix(nrow = nrow(pval), ncol = ncol(pval))
+for(i in 1:nrow(pval)){
+  for(j in 1:ncol(pval)){
+    bhat1[i,j] <- paste(round(BBhat[i,j],4), signifi[i,j], "&", "(", round(covbb[i,j],4),
+                        ")", sep = '')  
+  }
+}  
+##Test
+arch.test(var_est, lags.single = 5, multivariate.only = F)
+
+arch.test(var_est, lags.single = 10, multivariate.only = F)
+
+Box.test(var_est$varresult$y1$residuals, lag = 5, type = 'Ljung')
+
+SSE     <- sum( mylm$resid^2 )
+
+
+#Joint
+source('VLSTAR.joint.R')
+x2 <- x1
+VLSTAR.jointest(y1, x2, st=x2[,1])
+VLSTAR.jointest(y1, x2, st=x2[,2])
+VLSTAR.jointest(y1, x2, st=x2[,3])
+VLSTAR.jointest(y1, x2, st=x2[,4])
+VLSTAR.jointest(y1, x2, st=x2[,5])
+VLSTAR.jointest(y1, x2, st=x2[,6])
+VLSTAR.jointest(y1, x2, st=x2[,7])
+VLSTAR.jointest(y1, x2, st=x2[,8])
+VLSTAR.jointest(y1, x2, st=x2[,9])
+VLSTAR.jointest(y1, x2, st=x2[,10])
+VLSTAR.jointest(y1, x2, st=x2[,11])
+VLSTAR.jointest(y1, x2, st=x2[,12])
+VLSTAR.jointest(y1, x2, st=x2[,13])
+VLSTAR.jointest(y1, x2, st=x2[,14])
+VLSTAR.jointest(y1, x2, st=x2[,15])
+VLSTAR.jointest(y1, x2, st=x2[,16])
+VLSTAR.jointest(y1, x2, st=x2[,17])
+VLSTAR.jointest(y1, x2, st=x2[,18])
+VLSTAR.jointest(y1, x2, st=x2[,19])
+
