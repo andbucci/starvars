@@ -5,15 +5,15 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "0",
+    "hash" : "2006142417",
     "id" : "F062C5E5",
-    "lastKnownWriteTime" : 1562680056,
-    "last_content_update" : 1562680056594,
+    "lastKnownWriteTime" : 1562683859,
+    "last_content_update" : 1562683859858,
     "path" : "~/starvars/man/VLSTAR.lm.Rd",
     "project_path" : "man/VLSTAR.lm.Rd",
     "properties" : {
-        "cursorPosition" : "4,20",
-        "scrollLine" : "0"
+        "cursorPosition" : "129,1",
+        "scrollLine" : "112"
     },
     "relative_order" : 3,
     "source_on_save" : false,

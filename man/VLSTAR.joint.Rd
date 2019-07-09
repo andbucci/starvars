@@ -68,7 +68,7 @@ projection matrix of Z, the LM test is specified as follows
 \deqn{LM = tr\big\{\widetilde{\Omega}^{-1}(Y - Z\widetilde{B}_{1})'S\big[S'(I_t - P_{Z})S\big]^{-1}S'(Y-Z\widetilde{B}_{1})\big\}.}
 Under the null, the test statistics is distributed as a \eqn{\chi^{2}} with \eqn{\widetilde{n}(p\cdot\widetilde{n} + k)} degrees of freedom.}
 %%  ~~ If necessary, more details than the description above ~~
-}
+
 \value{
 %%  ~Describe the value returned
 %%  If it is a LIST, use
@@ -99,7 +99,4 @@ The code was written by Bucci A.
 \examples{
 data(Realized)
 VLSTAR.joint(y1, x2, st=x_a)
-
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-%\keyword{ ~VLSTAR }% use one of  RShowDoc("KEYWORDS")
+}

@@ -67,7 +67,7 @@ epsilon = 10^(-3), exo = T)
 The multivariate smooth transition model is an extension of the smooth transition regression model
 introduced by Bacon and Watts (1971)  (see also Anderson and Vahid, 1998). The general model is
 \deqn{y_{t} = \mu_0+\sum_{j=1}^{p}\Phi_{0,j}\,y_{t-j}+A_0 x_t \cdot G_t(s_t;\gamma,c)[\mu_{1}+\sum_{j=1}^{p}\Phi_{1,j}\,y_{t-j}+A_1x_t]+\varepsilon_t}
-where \eqn{\mu_{0}} and \mu_{1} are the \tilde{n} \times 1 vectors of intercepts, \Phi_{0,j} and \Phi_{1,j} are square
+where \eqn{\mu_{0}} and \eqn{\mu_{1}} are the \eqn{\tilde{n} \times 1} vectors of intercepts, \eqn{\Phi_{0,j}} and \eqn{\Phi_{1,j}} are square
 \eqn{\tilde{n}\times\tilde{n}} matrices of parameters for lags \eqn{j=1,2,\dots,p}, A_0 and A_1 are \eqn{\tilde{n}\times k} matrices of parameters,
 x_t is the \eqn{k \times 1} vector of exogenous variables and \eqn{\varepsilon_t} is the innovation. Finally, \eqn{G_t(s_t;\gamma,c)} is a \eqn{\tilde{n}
 \times \tilde{n}} diagonal matrix of transition function at time \emph{t}, such that
@@ -125,7 +125,7 @@ The code was written by Bucci A.
 data(Realized)
 VLSTAR.nls(Realized, p = 1, n.combi = 10,
 n.iter = 50, st = lag(Realized[,1]))
-
+}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 %\keyword{ ~VLSTAR }% use one of  RShowDoc("KEYWORDS")
