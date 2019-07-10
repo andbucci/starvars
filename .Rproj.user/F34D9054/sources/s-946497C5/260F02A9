@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1562755225372.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "260F02A9",
+    "lastKnownWriteTime" : 1562755977,
+    "last_content_update" : 1562755977181,
+    "path" : "~/starvars/R/rcov.R",
+    "project_path" : "R/rcov.R",
+    "properties" : {
+        "cursorPosition" : "208,0",
+        "scrollLine" : "186"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

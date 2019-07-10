@@ -83,7 +83,7 @@ Terasvirta T. and Yang Y. (2015), Linearity and Misspecification Tests for Vecto
 %% ~put references to the literature/web site here ~
 }
 \author{
-The code was written by Bucci A.
+The code was written by Andrea Bucci
 %%  ~~who you are~~
 }
 \note{

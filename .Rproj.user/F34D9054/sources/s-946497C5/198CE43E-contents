@@ -1,0 +1,117 @@
+#STIMA DCC E CONFRONTO CON MODELLO CHOLESKY
+#------------------------------------------
+#Carico le library
+library(afmtools)
+library(bcp)
+library(changepoint)
+library(ecp)
+library(forecast)
+library(gap)
+library(ghyp)
+library(lmtest)
+library(matrixcalc)
+library(MCS)
+library(parma)#porfolio optimization
+library(portes)
+library(PortfolioAnalytics)
+library(PSTR)
+library(quadprog)
+library(glmnet)
+library(rmgarch)
+library(glmnet)
+library(rugarch)
+library(stats)
+library(foreach)
+library(quantmod)
+library(doParallel)
+library(strucchange)
+library(twinkle)
+library(tsDyn)
+library(hydroTSM)
+library(vars)
+library(mgarchBEKK)
+library(xlsx)
+library(xtable)
+rm(list=ls(all=TRUE))
+#----------------CROSS COUNTRY----------------------------------------------------------------------------
+setwd("C:/Users/Andrea Bucci/OneDrive - Università Politecnica delle Marche/Articolo VLSTAR/Dati New")
+
+
+#Monthly return
+indices6 <- read.xlsx('Indices_6days.xlsx',1)
+indices <- read.xlsx('Indices.xlsx',1)
+
+indices$dd <- formatC(format="d",indices$dd,flag="0",width=ceiling(2))
+indices$mm <- formatC(format="d",indices$mm,flag="0",width=ceiling(2))
+
+indices6$dd <- formatC(format="d",indices6$dd,flag="0",width=ceiling(2))
+indices6$mm <- formatC(format="d",indices6$mm,flag="0",width=ceiling(2))
+
+indices6$Date <- as.Date(paste(indices6$dd,indices6$mm,indices6$yy, sep='/'), format = '%d/%m/%Y')
+indices$Date <-  as.Date(paste(indices$dd,indices$mm,indices$yy, sep ='/'), format = '%d/%m/%Y')
+
+dati6 <- zoo(cbind(indices6[,c(4:7)]), order.by = indices6$Date)
+
+dati <- zoo(cbind(indices[,c(4:7)]), order.by = indices$Date)
+
+dati6 <- xts(dati6, order.by = index(dati6))
+dati <- xts(dati, order.by = index(dati))
+
+
+day6SP <- dailyReturn(dati6$SP_index)*100
+day6NK <- dailyReturn(dati6$Nikkei_index)*100
+day6UK <- dailyReturn(dati6$FTSE_index)*100
+day6DE <- dailyReturn(dati6$DAX_index)*100
+
+day6 <- cbind(day6SP, day6NK, day6UK, day6DE)
+
+daySP <- dailyReturn(dati$SP_index)*100
+dayNK <- dailyReturn(dati$Nikkei_index)*100
+dayUK <- dailyReturn(dati$FTSE_index)*100
+dayDE <- dailyReturn(dati$DAX_index)*100
+
+day <- cbind(daySP, dayNK, dayUK, dayDE)
+
+dayRet <- rbind(day6, day)
+
+#Prodotti incrociati
+
+incro1 <- matrix(ncol = 10, nrow = length(dayRet[,1]))
+for (i in 1:length(dayRet[,1])){
+  incro <-t(dayRet[i,])%*%dayRet[i,]
+  incro1[i,] <- t(vech(incro))
+}
+incro2 <- zoo(incro1, order.by = index(dayRet))
+
+r1 <- apply.monthly(incro2[,1], sum)
+r2 <- apply.monthly(incro2[,2], sum)
+r3 <- apply.monthly(incro2[,3], sum)
+r4 <- apply.monthly(incro2[,4], sum)
+r5 <- apply.monthly(incro2[,5], sum)
+r6 <- apply.monthly(incro2[,6], sum)
+r7 <- apply.monthly(incro2[,7], sum)
+r8 <- apply.monthly(incro2[,8], sum)
+r9 <- apply.monthly(incro2[,9], sum)
+r10 <- apply.monthly(incro2[,10], sum)
+
+rcov <- cbind(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10)
+
+chol2 <- matrix(ncol = 10, nrow = 583)
+for (j in 1:583){
+  rcovmat <- invvech(as.matrix(rcov[j,]))
+  chol1 <- t(chol(rcovmat))
+  chol2[j,] <- vech(chol1)
+}
+
+
+##Logarithm
+library(expm)
+rcov <- as.matrix(rcov[,3:12])
+log2 <- matrix(ncol = 10, nrow = 583)
+for (j in 1:583){
+  rcovmat <- invvech(as.matrix(rcov[j,]))
+  log1 <-  logm(rcovmat)
+  log2[j,] <- vech(log1)
+}
+
+

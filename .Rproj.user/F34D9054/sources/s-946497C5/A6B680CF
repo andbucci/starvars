@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1562756346171.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2014496732",
+    "id" : "A6B680CF",
+    "lastKnownWriteTime" : 1562756353,
+    "last_content_update" : 1562756353455,
+    "path" : "~/starvars/man/VLSTAR.lm.Rd",
+    "project_path" : "man/VLSTAR.lm.Rd",
+    "properties" : {
+        "cursorPosition" : "112,36",
+        "scrollLine" : "112"
+    },
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_doc"
+}

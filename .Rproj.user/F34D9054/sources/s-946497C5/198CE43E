@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1562685577048.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "198CE43E",
+    "lastKnownWriteTime" : 1562685584,
+    "last_content_update" : 1562685584074,
+    "path" : "C:/Users/Andrea Bucci/OneDrive - Università Politecnica delle Marche/Articolo VLSTAR/Dati New/Cholesky110119.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "76,0",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
