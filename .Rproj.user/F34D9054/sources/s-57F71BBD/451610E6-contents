@@ -1,4 +1,4 @@
-#' @title Estimation of Coefficients in a Vector Smooth Transition Autoregressive Model with m regimes through nonlinear least squares
+#' @title Estimation of Coefficients in a Vector Smooth Transition Autoregressive Model with 2 regimes through nonlinear least squares
 #'
 #' @description This package  allows to estimate the coefficient in a VLSTAR model.
 #'
@@ -9,7 +9,6 @@
 VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = T, n.combi = 50, n.iter = 500,
                        starting = NULL, epsilon = 10^(-3), exo = T){
   require(vars)
-  require(data.table)
   require(nloptr)
   require(matrixcalc)
   require(MASS)
@@ -41,7 +40,7 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
   colnames(y) <- make.names(colnames(y))
   ##Definition of dimensions, creating variable x with constant
   yt <- zoo(y)
-  ylag <- stats::lag(yt, -c(1:p))
+  ylag <- stats::lag(yt, c(1:p))
   ylag <- as.matrix(ylag)
   y <- y[-p, ]
   ncoly <- ncol(y1)
@@ -73,6 +72,7 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
     for(t in 1:(m-1)){
     #Starting values for c and gamma
     sumsq <- matrix(ncol = ncoly, nrow = (n.combi*n.combi))
+    SUMSQ <- list()
     gamma <- matrix(ncol = ncoly, nrow = n.combi)
     cj <- matrix(ncol = ncoly, nrow = n.combi)
     gamma[1, ] <- param.init$gamma
@@ -100,6 +100,7 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
         In <- diag(ncoly)
         glog <- matrix(ncol=ncoly, nrow = nrowy)
         #GLOG <- list()
+        Gt <- list()
         GT <- list()
         Gtilde <- list()
         GG <- list()
@@ -202,26 +203,21 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
 
   #Sum of squared error to be optimized
   ssq1 <- function(param){
-    gamma <- param[1:((m-1)*ncoly)]
-    c <- param[(ncoly*(m-1)+1):length(param)]
-    gamma1 <- matrix(gamma, ncol = (m-1))
-    c1 <- matrix(c, ncol = (m-1))
+    gamma <- param[1:ncoly]
+    c <- param[(ncoly+1):(ncoly*2)]
     glog <- matrix(ncol=ncoly, nrow = nrowy)
-    GT <- list()
+    Gt <- list()
     Gtilde <- list()
     dify <- matrix(ncol = 1, nrow = nrow(y))
     ncoly <- dim(y)[2]
     In <- diag(ncoly)
     for (z in 1:nrow(y)){
-    for(t in 1:(m-1)){
       for (o in 1:ncoly){
-        gammao <- gamma1[o,t]
-        co <- c1[o,t]
+        gammao <- gamma[o]
+        co <- c[o]
         glog[z,o] <- (1L+exp(-gammao*(st[z]-co)))^(-1)}
-      Gt <- diag(glog[z,])
-      GT[[t]] <- Gt
-      }
-      Gtilde[[z]] <- t(cbind(In, list.cbind(GT)))
+      Gt[[z]] <- diag(glog[z,])
+      Gtilde[[z]] <- t(cbind(In, Gt[[z]]))
       dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
     }
     sumdif <- sum(dify)
@@ -230,26 +226,21 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
 
   #Maximum likelihood calculation
   loglike1 <- function(BB, param, Omega){
-    gamma <- param[1:((m-1)*ncoly)]
-    c <- param[(ncoly*(m-1)+1):length(param)]
-    gamma1 <- matrix(gamma, ncol = (m-1))
-    c1 <- matrix(c, ncol = (m-1))
+    gamma <- param[1:ncoly]
+    c <- param[(ncoly+1):(ncoly*2)]
     glog <- matrix(ncol=ncoly, nrow = nrowy)
-    GT <- list()
+    Gt <- list()
     Gtilde <- list()
     dify <- matrix(ncol = 1, nrow = nrow(y))
     ncoly <- dim(y)[2]
     In <- diag(ncoly)
     for (z in 1:nrow(y)){
-    for(t in 1:(m-1)){
       for (o in 1:ncoly){
         gammao <- gamma[o]
         co <- c[o]
         glog[z,o] <- (1L+exp(-gammao*(st[z]-co)))^(-1)}
-      Gt <- diag(glog[z,])
-      GT[[t]] <- Gt
-    }
-      Gtilde[[z]] <- t(cbind(In, list.cbind(GT)))
+      Gt[[z]] <- diag(glog[z,])
+      Gtilde[[z]] <- t(cbind(In, Gt[[z]]))
       dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
     }
     sumdif <- sum(dify)
@@ -266,11 +257,6 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
   bbhat <- list()
   omega <- list()
   #errdif <- 10^5
-  PARAM1 <- list()
-  for(t in 1:(m-1)){
-    PARAM1[[t]] <- as.data.frame(PARAM[[t]])
-  }
-  param <- rbindlist(PARAM1)
   param <- vec(param)
 
   cat('NLS estimation\n')
@@ -289,11 +275,11 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
     param1 <- optim(par = param, fn = ssq1, lower = c(low1, apply(y, 2, min)),
                     method="L-BFGS-B")
 
-    cgam1 <- matrix(param1$par, ncol = 2L, nrow = ncoly*(m-1))
+    cgam1 <- matrix(param1$par, ncol = 2L, nrow = ncoly)
 
     #2.NLS estimation of Bhat with new values of gamma and c
     glog <- matrix(ncol=ncoly, nrow = nrowy)
-    GT <- list()
+    Gt <- list()
     Gtilde <- list()
     GG <- list()
     XX <- list()
@@ -303,14 +289,11 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
     PsiOmegaPsi <- list()
     ggxx <- matrix(ncol = (q+ncoly)*m*ncoly, nrow = (q+ncoly)*m*ncoly)
     for (i in 1:nrowx){
-      for(t in 1:(m-1)){
       for (j in 1 : ncoly){
-        glog[i,j] <- (1+exp(-cgam1[((t-1)*ncoly + j),1]*(st[i]-cgam1[((t-1)*ncoly + j),2])))^(-1)
+        glog[i,j] <- (1+exp(-cgam1[j,1]*(st[i]-cgam1[j,2])))^(-1)
       }
-      Gt <- diag(glog[i,])
-      GT[[t]] <- Gt
-      }
-      Gtilde[[i]] <- t(cbind(In, list.cbind(GT)))
+      Gt[[i]] <- diag(glog[i,])
+      Gtilde[[i]] <- t(cbind(In, Gt[[i]]))
       GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
       XX[[i]] <- x[i,] %*%t(x[i,])
       GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
@@ -327,6 +310,7 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
     resiresi <- list()
     fitte <- matrix(nrow = nrowy, ncol = ncoly)
     #Ehat <- matrix(NA, ncol = ncoly, nrow = nrowy)
+    rm(o)
     for (o in 1:nrowx){
       resi[[o]] <- y[o, ] - t(Gtilde[[o]])%*%t(BB)%*%x[o,]
       resiresi[[o]] <- resi[[o]]%*%t(resi[[o]])
@@ -373,13 +357,8 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
   #Bhat2 <- c(Bhat1[1:(ncolx*m*ncoly/2)], (Bhat1[1:(ncolx*m*ncoly/2)]+Bhat1[((ncolx*m*ncoly/2)+1):(ncolx*m*ncoly)]))
   #BBhat <- invvec(Bhat2, ncol = ncoly, nrow = (ncolx*m))
   bb1 <- bbhat[[iter]][,1:ncoly]
-  bb2 <- list()
-  for(t in 1:(m-1)){
-   bb2[[t]] <- as.data.frame(bbhat[[iter]][,(ncoly*(t-1)+1):(ncoly*t)] +
-                               bbhat[[iter]][,(ncoly*(t)+1):(ncoly*(t+1))])
-  }
-  bb4 <- as.matrix(rbindlist(bb2))
-  BBhat <- rbind(bb1, bb4)
+  bb2 <- bb1 + bbhat[[iter]][,(ncoly+1):(ncoly*2)]
+  BBhat <- rbind(bb1, bb2)
   colnames(cgam1) <- c('gamma', 'c')
   covbb <- matrix(nrow = m*ncolx, ncol = ncoly)
   ttest <- matrix(nrow = m*ncolx, ncol = ncoly)
@@ -389,7 +368,7 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
     #covbb[,j] <- diag(ginv(t(x[[j]])%*%XX[[j]])*sqrt(varhat[j]))
     covbb[,j] <- sqrt(diag(ginv(t(x) %*%x))*varhat[j])
     ttest[,j] <- BBhat[,j]/covbb[,j]
-    pval[,j] <- 2*pt(abs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower = F)
+    pval[,j] <- 2*pt(abs(ttest[,j]),df=(nrowy-m*ncolx), lower = F)
   }
   signifi <- matrix('',nrow = nrow(pval), ncol = ncol(pval))
   for(i in 1:nrow(pval)){
@@ -428,14 +407,9 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
     AIC1[l] <- 2*k - 2*ll2[l]
     BIC1[l] <- -2*ll2[l] + k*log(nrowy)
   }
-  names <- list()
-  for(j in 1:m){
-    names1[[j]] <- as.data.frame(paste(colnames(x), 'm_', j))
-  }
-  names1 <- as.matrix(rbindlist(tmp))
-  rownames(BBhat) <- names1
+  rownames(BBhat) <- c(colnames(x), colnames(x))
   colnames(BBhat) <- colnames(y)
-  rownames(bhat1) <- names1
+  rownames(bhat1) <- c(colnames(x), colnames(x))
   colnames(bhat1) <- colnames(y)
   modeldata <- list(y, x)
   results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, bhat1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB)

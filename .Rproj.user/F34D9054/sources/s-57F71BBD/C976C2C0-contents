@@ -1,0 +1,676 @@
+#Legend
+#_s sta per sdo
+#_p sta per prescrizione
+library(icd.data)
+library(eeptools)
+library(QPXflight)
+library(data.table)
+library(dplyr)
+#library(plyr)
+library(BAS)
+library(MASS)
+library(BMA)
+library(tidyverse)
+library(broom)
+library(pROC)
+library(comorbidity)
+library(survival)
+library(reshape2)
+library(varhandle)
+library(PredictABEL)
+library(survminer)
+
+rm(list=ls(all=TRUE))
+
+setwd('C:/Users/Andrea Bucci/Documents')
+
+icd9sub <- icd9cm_hierarchy
+icd9sub <- unfactorize(icd9sub)
+
+icd9major <- split(icd9sub, icd9sub$major)
+icd9subcha <- split(icd9sub, icd9sub$sub_chapter)
+
+load('sdo.RData')
+load('ana_prescr.RData')
+load('pres_sdo14_15.RData')
+#load('ana.RData')
+
+#ana$cod_fisc <- NULL
+
+##Matcha Data decesso con data dimissioni per vedere morti in ospedale
+anasi <- ana[ana$data_decesso >=  as.Date('2016-01-01') | is.na(ana$data_decesso),] #morti prima del 2016
+anasi <- anasi[anasi$data_nascita <= as.Date('1970-01-01'),]
+anasi <- anasi[anasi$data_decesso <= as.Date('2017-12-31') | is.na(anasi$data_decesso),] #Tolgo morti dopo 2017
+anasi$age <- age_calc(anasi$data_nascita, as.Date('2017-01-01'))
+ana50 <- anasi[anasi$age > 600, ]
+ana50$Morto[ana50$data_decesso > as.Date('2015-12-31')] <- 1
+ana50$Morto[is.na(ana50$data_decesso)] <- 0
+
+ana50a <- ana50[ana50$data_decesso > as.Date('2017-01-01') | is.na(ana50$data_decesso),] #Tolgo morti prima del 2017
+ana50a <- ana50a[ana50a$data_nascita > as.Date('1905-01-01'),]
+ana50a <- ana50a[ana50a$data_fine_assistenza > as.Date('2017-01-01') | is.na(ana50a$data_fine_assistenza),]#Tolgo i trasferiti
+ana50a <- ana50a[ana50a$data_inizio_assistenza < as.Date('2015-01-01') | is.na(ana50a$data_fine_assistenza),]#Tolgo
+#i non residenti prima del 2015
+
+sdo <- rbind(sdo_15, sdo_2016)
+sdo <- sdo[sdo$id %in% ana50a$id,] #id in over 50
+
+prescr <- rbind(presc_15, prescr2016)
+prescr <- prescr[prescr$id %in% ana50a$id,] #id in over 50
+
+#List of diseases and conditions candidate to be tested as predictors of one-year mortality
+a1 <- list(c('042'), c('J05AF01', 'J05AR01', 'J05AR04', 'J05AR05', 'J05AF02',
+                                     'J05AF03', 'P01CX01', 'J04AB04', 'P01AX06'))
+names(a1) <- c('ICD9', 'ATC')#HIV
+a2 <- list(icd9sub$code[icd9sub$sub_chapter=='Tuberculosis'], 'J04AB')
+names(a2) <- c('ICD9', 'ATC')#Tubercolosis
+
+a3 <- list(c('20000','20001','20002','20003','20004','20005','20006','20007','20008','20010','20011','20012','20013',
+                   '20014','20015','20016','20017','20018','20020','20021','20022','20023','20024','20025','20026','20027',
+                   '20028','20030','20031','20032','20033','20034','20035','20036','20037','20038','20040','20041','20042',
+                   '20043','20044','20045','20046','20047','20048','20050','20051','20052','20053','20054','20055','20056',
+                   '20057','20058','20060','20061','20062','20063','20064','20065','20066','20067','20068','20070','20071',
+                   '20072','20073','20074','20075','20076','20077','20078','20080','20081','20082','20083','20084','20085',
+                   '20086','20087','20088','20100','20101','20102','20103','20104','20105','20106','20107','20108','20110',
+                   '20111','20112','20113','20114','20115','20116','20117','20118','20120','20121','20122','20123','20124',
+                   '20125','20126','20127','20128','20140','20141','20142','20143','20144','20145','20146','20147','20148',
+                   '20150','20151','20152','20153','20154','20155','20156','20157','20158','20160','20161','20162','20163',
+                   '20164','20165','20166','20167','20168','20170','20171','20172','20173','20174','20175','20176','20177',
+                   '20178','20190','20191','20192','20193','20194','20195','20196','20197','20198','20200','20201','20202',
+                   '20203','20204','20205','20206','20207','20208','20210','20211','20212','20213','20214','20215','20216',
+                   '20217','20218','20220','20221','20222','20223','20224','20225','20226','20227','20228','20230','20231',
+                   '20232','20233','20234','20235','20236','20237','20238','20250','20251','20252','20253','20254','20255',
+                   '20256','20257','20258','20260','20261','20262','20263','20264','20265','20266','20267','20268','20270',
+                   '20271','20272','20273','20274','20275','20276','20277','20278','20280','20281','20282','20283','20284',
+                   '20285','20286','20287','20288','20290','20291','20292','20293','20294','20295','20296','20297','20298',
+                   '20300','20301','2038','2386','2733','V1071','V1072','V1079'), 'NULL')
+names(a3) <- c('ICD9', 'ATC')#Lymphoma
+a4 <- list(c('1960','1961','1962','1963','1965','1966','1968','1969','1970','1971','1972',
+                       '1973','1974','1975','1976','1977','1978', '1980','1981','1982','1983',
+                       '1984','1985','1986','1987','19881','19882','19889','1990','1991'), 'NULL')
+names(a4) <- c('ICD9', 'ATC')#Metastatic
+a5 <- list(c('1400','1401','1403','1404','1405','1406','1408','1409','1410','1411','1412',
+                   '1413','1414','1415','1416','1418','1419','1420','1421','1422','1428','1429',
+                   '1430','1431','1438','1439','1440','1441','1448','1449','1450','1451','1452',
+                   '1453','1454','1455','1456','1458','1459','1460','1461','1462','1463','1464',
+                   '1465','1466','1467','1468','1469','1470','1471','1472','1473','1478','1479',
+                   '1480','1481','1482','1483','1488','1489','1490','1491','1498','1499','1500',
+                   '1501','1502','1503','1504','1505','1508','1509','1510','1511','1512','1513',
+                   '1514','1515','1516','1518','1519','1520','1521','1522','1523','1528','1529',
+                   '1530','1531','1532','1533','1534','1535','1536','1537','1538','1539','1540',
+                   '1541','1542','1543','1548','1550','1551','1552','1560','1561','1562','1568',
+                   '1569','1570','1571','1572','1573','1574','1578','1579','1580','1588','1589',
+                   '1590','1591','1598','1599','1600','1601','1602','1603','1604','1605','1608',
+                   '1609','1610','1611','1612','1613','1618','1619','1620','1622','1623','1624',
+                   '1625','1628','1629','1630','1631','1638','1639','1640','1641','1642','1643',
+                   '1648','1649','1650','1658','1659','1700','1701','1702','1703','1704','1705',
+                   '1706','1707','1708','1709','1710','1712','1713','1714','1715','1716','1717',
+                   '1718','1719','1720','1721','1722','1723','1724','1725','1726','1727','1728',
+                   '1729','1740','1741','1742','1743','1744','1745','1746','1748','1749','1750',
+                   '1759','179','1800','1801','1808','1809','181','1820','1821','1828','1830','1832',
+                   '1833','1834','1835','1838','1839','1840','1841','1842','1843','1844','1848','1849',
+                   '185','1860','1869',	'1871',	'1872',	'1873',	'1874',	'1875',	'1876',	'1877',	'1878',
+                   '1879','1880','1881','1882','1883','1884','1885','1886','1887','1888','1889','1890',
+                   '1891','1892','1893','1894','1898','1899','1900','1901','1902','1903','1904','1905',
+                   '1906','1907','1908','1909','1910','1911','1912','1913','1914','1915','1916','1917',
+                   '1918','1919','1920','1921','1922','1923','1928','1929','193','1940','1941','1943',
+                   '1944','1945','1946','1948','1949','1950','1951','1952','1953','1954','1955','1958',
+                   'V1000','V1001','V1002','V1003','V1004','V1005','V1006','V1007','V1009','V1011','V1012',
+                   'V1020','V1021','V1022','V1029','V103','V1040','V1041','V1042','V1043','V1044','V1045',
+                   'V1046','V1047','V1048','V1049','V1050','V1051','V1052','V1053','V1059','V1060','V1061',
+                   'V1062','V1063','V1069','V1071','V1081','V1082','V1083','V1084','V1085','V1086','V1087',
+                   'V1088','V1089','V1090','V1091'), 'NULL'
+                 )
+names(a5) <- c('ICD9', 'ATC')#Cancer
+
+a6 <- list('NULL',c('L01', 'C07AB05', 'L03AC', 'L03AA', 'A04'))
+names(a6) <- c('ICD9', 'ATC')#Malignancy medication con cancer
+
+a7 <- list(c('25000','25001','25002','25003','25010','25011','25012','25013','25020','25021','25022',
+                     '25023','25030','25031','25032','25033','25040','25041','25042','25043','25050','25051',
+                     '25052','25053',	'25060','25061','25062','25063','25070','25071','25072','25073','25080',
+                     '25081','25082','25083','25090','25091','25092','25093','3572','3620'), 'A10')
+names(a7) <- c('ICD9', 'ATC') #Diabetes
+
+a8 <- list(c('243','2440','2441','2442','2448','2449'), c('H03A','H03B'))
+names(a8) <- c('ICD9', 'ATC')#Hypothyroidism
+
+a9 <- list(c('27800', '27801'), 'A08')
+names(a9) <- c('ICD9', 'ATC') #Obesity
+
+a10 <- list(c('260','261','262','2630','2631','2632','2638','2639'), 'NULL')
+names(a10) <- c('ICD9', 'ATC') #Weight_loss
+
+a11 <- list(c('2760','2761','2762','2763','2764','27650','27651',
+                                '27652','27661','27669','2767','2768','2769'), 'NULL')
+names(a11) <- c('ICD9', 'ATC') #Disorders_of_fluid
+
+a12 <- list(c('27400','27401','27402','27403','27410','27411','27419','27481',
+                  '27482','27489','2749'), c('M04AC01', 'M04AA', 'M04AB'))
+names(a12) <- c('ICD9', 'ATC') #Gout
+
+a13 <- list(c('2860','2861','2862','2863','2864','28652','28653','28659','2866',
+                         '2867','2869','2871','28730','28731','28732','28733',
+                         '28739','28741','28749','2875'), 'NULL')
+names(a13) <- c('ICD9', 'ATC') #Coagulation
+
+a14 <- list(c('2800','2801','2808','2089','2810',
+              '2811','2812','2813','2814','2818','2819','2859'), c('L03AA','B03XA01'))
+names(a14) <- c('ICD9', 'ATC') #Anaemias
+
+a15 <- list(c('2900','29010','29011','29012','29013','29020','29021','2903','29040',
+              '29041','29042','29043','2908','2909'), 'NULL') #Dementia
+names(a15) <- c('ICD9', 'ATC') #Dementia
+
+a16 <- list(c('29500','29501','29502','29503','29504','29505','29510','29511','29512',
+              '29513','29514','29515','29520','29521','29522','29523','29524','29525',
+              '29530','29531','29532','29533','29534','29535','29540','29541','29542',
+              '29543','29544','29545','29550','29551','29552','29553','29554','29555',
+              '29560','29561','29562','29563','29564','29565','29570','29571','29572',
+              '29573','29574','29575','29580','29581','29582','29583','29584','29585',
+              '29590','29591','29592','29593','29594','29595','29600','29601','29602',
+              '29603','29604','29605','29606','29610','29611','29612','29613','29614',
+              '29615','29616','29620','29621','29622','29623','29624','29625','29626',
+              '29630','29631','29632','29633','29634','29635','29636','29640','29641',
+              '29642','29643','29644','29645','29646','29650','29651','29652','29653',
+              '29654','29655','29656','29660','29661','29662','29663','29664','29665',
+              '29666','2967','29680','29681','29682','29689','29690','29699','2970',
+              '2971','2972','2973','2978','2979','2980','2981','2982','2983','2984',
+              '2988','2989','29910','29911'), c('N05AD', 'N05AA', 'N05AB', 'N05AC', 'N05AX', 'N05AF04'))
+names(a16) <- c('ICD9', 'ATC') #Psychoses
+
+a17 <- list(c('3004','30112','3090','3091','311'),c('N06AA', 'N04BD', 'N06AF', 'N06AG', 'N06AB03', 'N06CA03'))
+names(a17) <- c('ICD9', 'ATC') #Depression
+
+a18 <- list(c('29600','29601','29602','29603','29604','29605','29606'), 'N05AN')
+names(a18) <- c('ICD9', 'ATC') #Bipolar
+
+a19 <- list(c('2911','2912','2915','29181','29182','29189','2919','30390','30391',
+              '30392','30393','30500','30501','30502','30503','V113'), 'NULL')
+names(a19) <- c('ICD9', 'ATC') #Alcohol
+
+a20 <- list(c('2920','29282','29283','29284','29285','29289','2929','30400',
+              '30401','30402','30403','30410','30411','30412','30413','30420',
+              '30421','30422','30423','30430','30431','30432','30433','30440',
+              '30441','30442','30443','30450','30451','30452','30453','30460',
+              '30461','30462','30463','30470','30471','30472','30473','30480',
+              '30481','30482','30483','30490','30491','30492','30493','30520',
+              '30521','30522','30523','30530','30531','30532','30533','30540',
+              '30541','30542','30543','30550','30551','30552','30553','30560',
+              '30561','30562','30563','30570','30571','30572','30573','30580',
+              '30581','30582','30583','30590','30591','30592','30593'),'NULL')
+names(a20) <- c('ICD9', 'ATC') #Drug
+
+a21 <- list(c('29384','30000','30002','30009','30921','30924','30928'),
+            c('N05BA', 'N05CD', 'N05BC01', 'N05BC51','N05BX', 'N05CF', 'N05CX01','N06BX'))
+names(a21) <- c('ICD9', 'ATC') #Anxiety
+
+a22 <- list(c('34200','34201','34202','34210','34211','34212','34290','34291',
+              '34292','3430','3431','3432','3433','3434','3438','3439','34400',
+              '34401','34402','34403','34404','34409','3441','3442',
+              '34430','34431','34432','34440','34441','34442','3445',
+              '34460','34461','34481','34489','3449'), 'NULL')
+names(a22) <- c('ICD9', 'ATC') #Hemiplegia and hemiparesis
+
+a23 <- list(c('3319','3320','3321','3334','3335','3336','33371','33372',
+              '33379','33381','33382','33383','33384','33385','33389',
+              '33390','33391','33392','33393','33394','33399','3340',
+              '3341','3342','3343','3344','3348','3349','3350','33510',
+              '33511','33519','33520','33521','33522','33523','33524',
+              '33529','3358','3359','340','3410','3411','34120','34121',
+              '34122','3418','3419','34500','34501','34510','34511',
+              '34540','34541','34550','34551','34580','34581','34590',
+              '34591','3481','34830','34831','34839','78031','78032',
+              '78033','78039','7843'), 'NULL')
+names(a23) <- c('ICD9', 'ATC') #Other neurological diseases
+
+a24 <- list(c('36500','36501','36502','36503','36504','36505','36506','36510',
+              '36511','36512','36513','36514','36515','36520','36521','36522','36523',
+              '36524','36531','36532','36541','36542','36543','36544','36551','36552',
+              '36559','36560','36561'), 'S01E')
+names(a24) <- c('ICD9', 'ATC') #Glaucoma
+
+a25 <- list(c('34500','34501','34510','34511','3452','3453','34540','34541','34550',
+              '34551','34560','34561','34570','34571','34580','34581','34590','34591'),
+            c('N03AA','N03AB02', 'N03AB05', 'N03AB52', 'N03AX'))
+names(a25) <- c('ICD9', 'ATC') #Epilepsy
+
+a26 <- list(icd9sub$code[icd9sub$major=="Parkinson's disease"], c('N04B', 'N04BD01'))
+names(a26) <- c('ICD9', 'ATC') #Parkinson
+
+a27 <- list(c('41000','41001','41002','41010','41011','41012','41020','41021','41022',
+              '41030','41031','41032','41040','41041','41042','41050','41051','41052',
+              '41060','41061','41062','41070','41071','41072','41080','41081','41082',
+              '41090','41091','41092','4110','4111','41181','41189','412'), 'NULL')
+names(a27) <- c('ICD9', 'ATC') #Acute myocardial infarction
+
+a28 <- list(c('39891','40211','40291','40411','40413','40491','40493','4280','4281',
+              '42820','42821','42822','42823','42830','42831','42832','42833','42840','42841',
+              '42842','42843','4289'),
+            c('C01BA93', 'C01DA','C01AA', 'C03C', 'C01BA02', 'C01BA01', 'C01BA51', 'C01BA71'))
+names(a28) <- c('ICD9', 'ATC') #Heart failure
+
+a29 <- list(c('42610','42611','42613','4262','4263','4264','42650','42651','42652',
+              '42653','4266','4267','42681','42682','42689','4270','4272','42731',
+              '42760','4279','7850','V4500','V4501','V4502','V4509','V5301',
+              'V5302','V5309','V531','V532','V5331','V5332','V5339'),
+            c('C01BA', 'C01BC', 'C01BD'))
+names(a29) <- c('ICD9', 'ATC') #Arrythmia
+
+a30 <- list(c('09320','09321','09322','09323','09324','3940','3941','3942',
+              '3949','3950','3951','3952','3959','3960','3961','3962','3963',
+              '3968','3969','3970','3971','4240','4241','4242','4243','42490',
+              '42491','7463','7464','7465','7466','V422','V433'), 'NULL')
+names(a30) <- c('ICD9', 'ATC') #Valvular diseases
+
+a31 <- list(c('4400','4401','44020','44021','44022','44023','44024','44029',
+              '44030','44031','44032','4404','4408','4409','4412','4414',
+              '4417','4419','4431','44321','44322','44323','44324',
+              '44329','44381','44382','44389','4439','4471',
+              '5571','5579','7854','V434'),c('B01AA', 'B01AB', 'B01AF', 'B01AE',
+              'B01AX01', 'B01AD10', 'B01AD12', 'C04AD03', 'B01AC05') #Cardiovascular
+)
+names(a31) <- c('ICD9', 'ATC') #Vascular diseases
+
+a32 <- list(c('430','431','4320','4321','4329','43300','43301',
+              '43310','43311','43320','43321','43330','43331',
+              '43380','43381','43390','43391','43400','43401',
+              '43410','43411','43490','43491','4350','4351',
+              '4352','4353','4358','4359','436','4370','4371',
+              '4372','4373','4374','4375','4376','4377',
+              '4378','4379','4380','43810','43811','43812',
+              '43813','43814','43819','43820','43821','43822',
+              '43830','43831','43832','43840','43841','43842','43850',
+              '43851','43852','43853','4386','4387','43881',
+              '43882','43883','43884','43885','43889','4389'), 'NULL')
+names(a32) <- c('ICD9', 'ATC') #Cerebrovascular diseases
+
+a33 <- list(c('4010','4011','4019','40200','40201','40210','40211',
+              '40290','40291','40300','40301','40310','40311',
+              '40390','40391','40400','40401','40402','40403',
+              '40410','40411','40412','40413','40490','40491',
+              '40492','40493','40501','40509','40511','40519',
+              '40591','40599'),
+            c('C09A','C09B', 'C04AB01', 'C04AB02', 'C02CA', 'C02LE', 'C04', 'C01D', 'C07E', 'C07', 'C08',
+              'C02AC01', 'C02LC01',
+              'C02LC51', 'C03A', 'C07B', 'C07D', 'C02B', 'C02CC02', 'C02LF01', 'C02AB', 'C02LB',
+              'C02AA', 'C02LA'))
+names(a33) <- c('ICD9', 'ATC') #Hypertension
+
+a34 <- list('NULL', c('B01AA','B01AB','B01AF','B01AE',
+            'B01AX01', 'B01AD10', 'B01AD12','C04AD03','B01AC05'))
+names(a34) <- c('ICD9', 'ATC') #Coronary
+
+a35 <- list(c('2722', '2724'), 'C10')
+names(a35) <- c('ICD9', 'ATC') #Hyperlypidemia
+
+a36 <- list(c('490','4910','4911','49120','49121','49122',
+              '4918','4919','4920','4928','49300','49301','49302',
+              '49310','49311','49312','49320','49321','49322',
+              '49381','49382','49390','49391','4940','4941',
+              '4950','4951','4952','4953','4954','4955',
+              '4956','4957','4958','4959','496','500',
+              '501','502','503','504','505','5064'),
+            c('R03AA', 'R03AB', 'R03AC', 'R03DA', 'R03DB', 'R03DA20', 'R01AC01', 'R03BC01', 'R01AC51',
+              'S01GX01', 'S01GX51', 'R03BA'))
+names(a36) <- c('ICD9', 'ATC') #Chronic pulmonary diseases
+
+a37 <- list(c('27700','27701','27702','27703','27709'),
+            c('R05CB', 'R05FB01', 'R05FA01', 'A09AA02'))
+names(a37) <- c('ICD9', 'ATC') #Cystic fibrosis
+
+a38 <- list(c('53100','53101','53110','53111','53120','53121','53130','53131',
+              '53140','53141','53150','53151','53160','53161','53170','53171','53190',
+              '53191','53200','53201','53210','53211','53220','53221','53230','53231',
+              '53240','53241','53250','53251','53260','53261','53270','53271','53290',
+              '53291','53300','53301','53310','53311','53320','53321','53330','53331',
+              '53340','53341','53350','53351','53360','53361','53370','53371','53390',
+              '53391','53400','53401','53410','53411','53420','53421','53430','53431',
+              '53440','53441','53450','53451','53460','53461','53470','53471','53490','53491'),
+            c('A02BA', 'A02BB', 'A02BC01', 'A02BD05', 'A02BD01'))
+names(a38) <- c('ICD9', 'ATC') #Peptic ulcer
+
+a39 <- list(c('07032','07033','07054','4560','4561','45620','45621',
+              '5710','5712','5713','57140','57141','57142',
+              '57149','5715','5716','5718','5719','5723','5728','V427'), 'NULL')
+names(a39) <- c('ICD9', 'ATC') #Liver disease
+
+a40 <- list(c('5550','5551','5552','5559','5560',
+              '5561','5562','5563','5564','5565',
+              '5566','5568','5569'),
+            c('A07EC01', 'A07EC03', 'A07EC02'))
+names(a40) <- c('ICD9', 'ATC') #Crohn
+
+a41 <- list(c('5820','5821','5822','5824','58281',
+              '58289','5829','5830','5831','5834',
+              '5837','58381','58389','5846','5851',
+              '5852','5853','5854','5855','5856',
+              '5859','586','5880','5881','58881',
+              '58889','5889'), 'V01AE01')
+names(a41) <- c('ICD9', 'ATC') #Kidney diseases
+
+a42 <- list('V560', 'NULL')
+names(a42) <- c('ICD9', 'ATC') #Kidney dialysis
+
+a43 <- list(c('99681', 'V420'), 'NULL')
+names(a43) <- c('ICD9', 'ATC') #Kidney transplant
+
+a44 <- list(c('390','3910','3911','3912','3918','3919',
+              '7140','7141','71430','71431','71432',
+              '71433','7149','7200','7201','7202',
+              '72081','72089','7209','725'), c('M01BA', 'M01CB', 'P01BA02'))
+names(a44) <- c('ICD9', 'ATC') #Rheumatologic conditions
+
+a45 <- list('NULL', c('L04AA02','L04AA03', 'L04AA04', 'L04AA05','L04AA06', 'L04AA07', 'L04AA08',
+                    'L04AA09', 'L04AA10','L04AX01', 'L04AC01', 'L04AC02', 'L04AD01', 'L04AD02'))
+names(a45) <- c('ICD9', 'ATC') #Transplantation
+
+a46 <- list('NULL', c('N02', 'M01A'))
+names(a46) <- c('ICD9', 'ATC') #Pain and inflammation
+
+
+MCS <- list(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,
+            a16,a17,a18,a19,a20,a21,a22,a23,a24,a25,a26,a27,a28,
+            a29,a30,a31,a32,a33,a34,a35,a36,a37,a38,a39,a40,
+            a41,a42,a43,a44,a45,a46)
+names(MCS) <- c('HIV','Tubercolosis','Lymphoma','Metastatic','Cancer','Malignancy',
+                'Diabetes','Hypothyroidism','Obesity','Weightloss','Disorders',
+      'Gout','Coagulation','Anaemias','Dementia','Psychoses','Depression','Bipolar',
+      'Alcohol','Drug','Anxiety','Hemiplegia','Other_neurological','Glaucoma',
+      'Epilepsy','Parkinson','Acute_myocardial','Heart_failure','Arrhythmia','Valvular',
+      'Vascular','Cerebrovascular','Hypertension','Coronary', 'Hyperlypidemia','Chronic_pulmonary',
+      'Cystic_fibrosis','Peptic_ulcer','Liver_diseases','Crohn', 'Kidneydiseases','Kidneydialysis',
+      'Kidneytransplant','Rheumatologic','Transplant','Pain')
+
+
+##Tentativo sdo
+sdomulti <- sdo %>% group_by(id, diagp_id, diag1_id, diag2_id, diag3_id, diag4_id, diag5_id) %>% summarise((Freq=n()))
+sdomm <- split(sdomulti, sdomulti$id)
+sdounique <- sdo[!duplicated(sdo$id),] #unique id per sdo
+nid <- nrow(sdounique) #number of unique ids for sdo
+sdo1 <- list()
+sdonames <- NULL
+for(i in 1:nid){
+  sdo1[[i]] <- unlist(c(sdomm[[i]][,2:7])) #Metto insieme sdo di id multipli
+  sdonames[i] <- sdomm[[i]][1,1]
+}
+ndise <- length(MCS)
+nsdo <- nrow(sdo)
+sdo_df <- matrix(0, nrow = nid, ncol = ndise)
+for(i in 1:nid){
+  for(j in 1:ndise)
+  if(any(sdo1[[i]] %in% MCS[[j]]$ICD9)) sdo_df[i,j] <- 1 #1 malattia/0 no
+}
+sdonames <- as.character(unlist(sdonames))
+sdo_df <- cbind(sdonames, sdo_df)#unisco all'id
+colnames(sdo_df) <- c('id', names(MCS))
+sdop <- as.data.frame(sdo_df)
+
+#Tentativo prescription
+premulti1 <- prescr %>% group_by(id, atc) %>% summarise(Freq =n())
+premulti <- split(premulti1, premulti1$id)
+preunique <- prescr[!duplicated(prescr$id),] #unique id per prescription
+npre <- nrow(preunique)
+pre_df <- matrix(0, nrow = npre, ncol = ndise)
+for(k in 1:npre){
+  for(l in 1:ndise){
+    for(p in 1:length(MCS[[l]]$ATC)){
+      #if(any(grepl(MCS[[l]]$ATC[p], substr(premulti[[k]]$atc,start =1, stop = nchar(MCS[[l]]$ATC[p]))))) pre_df[k,l] <- 1
+      if(any(substr(premulti[[k]]$atc,start =1, stop = nchar(MCS[[l]]$ATC[p])) %in% MCS[[l]]$ATC)) pre_df[k,l] <- 1
+      }}
+}
+prena <- as.matrix(names(premulti))
+pre_df1 <- cbind(prena, pre_df)
+prep <- as.data.frame(pre_df1)
+colnames(prep) <- c('id', names(MCS))
+
+
+sdpre <- as.data.frame(rbind(sdop, prep))
+sdf <- as.data.frame(sdpre)
+#sdf$id <- as.character(sdf$id)
+
+for(r in 2:47){
+  sdf[,r] <- as.numeric(as.character(sdf[,r]))
+}
+sdf1 <- sdf %>% group_by(id) %>% summarise_each(funs(sum))
+
+
+#sdpre_df <- sdpre_df[sdpre_df$id %in% ana50a$id,] #Prendo solo quelli morti nel 2017
+
+df <- sdf1
+df[df==2] <- 1 #Sostituisco i 2 con 1
+
+morto <- ana50a[ana50a$id %in% df$id,]
+morto$id <- as.character(morto$id)
+morto <- morto[order(morto$id),]
+dead <- morto
+dead$data_decesso[is.na(dead$data_decesso)] <- '2017-12-31'
+dead$surv <- age_calc(as.Date('2017-01-01'),dead$data_decesso, units = 'days')
+dead$Morto[dead$Morto == 1] <- 2
+dead$Morto[dead$Morto == 0] <- 1
+
+df$id <- as.character(df$id)
+df <- df[df$id %in% morto$id,]
+df <- df[order(df$id),]
+
+#df$Morto <- morto$Morto #Creo variabile morto si/no
+df$Sesso <- morto$sesso
+df$status <- dead$Morto
+df$Age <- morto$age
+df$time <- dead$surv
+
+
+dialysis <- df[df$Kidneydiseases == 0 & df$Kidneydialysis == 1,]
+
+df <- df[!df$id %in% dialysis$id,]
+
+df1 <- df[,-1]
+df1 <- as.data.frame(df1)
+
+for(l in 1:48){
+df1[,l] <- factor(df1[,l])#Fattori
+}
+
+
+df2 <- df1
+df2$time <- NULL
+
+mod1 <- glm(status ~ ., data = df2, family = binomial(link = 'logit'))
+summary(mod1)
+
+
+df1$time <- as.numeric(df1$time)
+df1$status <- as.numeric(df1$status)
+
+nomi <- as.matrix(read.csv2('nomi.csv', stringsAsFactors = F))
+colnames(df1) <- nomi
+f <- as.formula(paste("Surv(time, status) ~", paste('df1$', nomi[!nomi %in% c('time', 'status')], collapse = " + ")))
+
+#survtime <- Surv(df1$time, df1$status)
+mod2 <- coxph(Surv(time, status) ~ ., data = df1)
+mod2a <- survreg(Surv(time, status) ~., data = df1, dist = 'w')
+
+nsample <- nrow(df1)
+ntrain <- nsample*2/3
+seed <- .Random.seed
+set.seed(seed)
+sam <- sample(1:nsample, ntrain)
+dftrain <- df1[sam,]
+dftest <- df1[-sam,]
+dftest$id <- df$id[-sam]
+mod2b <- bic.surv(Surv(time, status) ~., data = dftrain, factor.type = T, strict = F, maxCol = 60)
+
+coefficienti <- mod2b$condpostmean
+#coefficienti <- mod2b$postmean
+probabilita <- mod2b$probne0
+
+standarde <- mod2b$condpostsd
+#standarde <- mod2b$postsd
+
+modsurv <- as.data.frame(cbind(coefficienti[1:46], standarde[1:46], probabilita[1:46]))
+rownames(modsurv) <- colnames(df1[,1:46])
+colnames(modsurv) <- c('Coef', 'Sd', 'Prob')
+modsurv$score <- ceiling(round(modsurv$Coef*modsurv$Prob)/10)
+
+score <- as.data.frame(round(coefficienti*probabilita)/10)
+#score <- as.data.frame(round(coefficienti))*10
+rownames(score) <- c(colnames(df1[,1:47]), 'Age')
+MBCS <- ceiling(score[1:46,])
+names(MBCS) <- colnames(df1[,1:46])
+MBCS[MBCS <0] <- 0
+MCS <- c(0,10,5,18,10,5,2,1,1,6,4,2,5,3,6,8,0,0,16,0,6,5,3,0,2,5,1,4,1,1,2,3,0,1,0,2,0,2,8,0,4,4,0,3,0,0)
+
+df3 <- as.data.frame(dftest[,1:46])
+df3 <- unfactor(df3)
+scoreMBCS <- matrix(NA, ncol = ncol(df3), nrow = nrow(df3))
+scoreMCS <- matrix(NA, ncol = ncol(df3), nrow = nrow(df3))
+for(i in 1:nrow(df3)){
+  mb1 <- df3[i,]*MBCS
+  mb2 <- df3[i,]*MCS
+ scoreMBCS[i,] <- as.matrix(mb1)
+ scoreMCS[i,] <- as.matrix(mb2)
+}
+MBCS_df <- as.data.frame(scoreMBCS)
+colnames(MBCS_df) <- colnames(df1[,1:46])
+MBCS_df$MBCS <- rowSums(MBCS_df)
+MBCS_df$Age <- df1$Age[-sam]
+MBCS_df$Gender <- df1$Sesso[-sam]
+
+sdomulti1 <- sdomulti
+colnames(sdomulti1) <- c('id', 'cod1', 'cod2', 'cod3', 'cod4', 'cod5', 'cod6', 'freq')
+sdoind <- melt(sdomulti1, id.vars = 'id')
+sdoind <- sdoind[sdoind$variable != 'freq',]
+sdoind <- sdoind[!is.na(sdoind$value),]
+sdoind <- sdoind[order(sdoind$id),]
+sdoind <- sdoind[sdo$id %in% dftest$id,]
+sdoind <- sdoind[,c(1,3)]
+colnames(sdoind) <- c('id', 'code')
+charl <- comorbidity(sdoind, id = 'id', code = 'code', score = 'charlson', icd = 'icd9')
+elix <- comorbidity(sdoind, id = 'id', code = 'code', score = 'elixhauser', icd = 'icd9')
+
+#charl <- NULL
+#elix <- matrix(nrow = length(sdo1), ncol = 30)
+#for(k in 1:length(sdo1)){
+#  charl[k] <- charlson(as.data.frame(t(sdo1[[i]])))
+#  elix[k,] <- icd9_comorbid_quan_elix(t(sdo1[[i]]))
+#}
+MBCS_df$Severity[MBCS_df$MBCS < 5] <- '1.0-4'
+MBCS_df$Severity[MBCS_df$MBCS < 10 & MBCS_df$MBCS >=5] <- '2.5-9'
+MBCS_df$Severity[MBCS_df$MBCS < 15 & MBCS_df$MBCS >=10] <- '3.10-14'
+MBCS_df$Severity[MBCS_df$MBCS < 20 & MBCS_df$MBCS >=15] <- '4.15-19'
+MBCS_df$Severity[MBCS_df$MBCS >=20] <- '5.>= 20'
+
+MCS_df <- as.data.frame(scoreMCS)
+colnames(MCS_df) <- colnames(df1[,1:46])
+MCS_df$MCS <- rowSums(MCS_df)
+
+MBCS1 <- MBCS_df
+MBCS1$Age <- MBCS1$Age/12
+
+MBCS5059 <- MBCS1[MBCS1$Age < 60,]
+tabella5059 <- round(100*prop.table(table(MBCS5059$Gender, MBCS5059$Severity), margin = 1),2)
+barplot(tabella5059, xlab = 'MBCS', ylab = '%', beside =T, ylim = c(0,100), main = '50-59 years',
+        names.arg = c('0-4', '5-9', '10-14','15-19','>=20'), col = c('gray30', 'white'))
+grid(nx=NA, ny=NULL)
+legend(x = "right", legend = c('F', 'M'), bty = "n", y.intersp = 2, fill = c('gray30', 'white'))
+box()
+
+MBCS6069 <- MBCS1[MBCS1$Age < 70 & MBCS1$Age >= 60,]
+tabella6069 <- round(100*prop.table(table(MBCS6069$Gender, MBCS6069$Severity), margin = 1),2)
+barplot(tabella6069, xlab = 'MBCS', ylab = '%', beside =T, ylim = c(0,100), main = '60-69 years',
+        names.arg = c('0-4', '5-9', '10-14','15-19','>=20'), col = c('gray30', 'white'))
+grid(nx=NA, ny=NULL)
+legend(x = "right", legend = c('F', 'M'), bty = "n", y.intersp = 2, fill = c('gray30', 'white'))
+box()
+
+MBCS7079 <- MBCS1[MBCS1$Age < 80 & MBCS1$Age >= 70,]
+tabella7079 <- round(100*prop.table(table(MBCS7079$Gender, MBCS7079$Severity), margin = 1),2)
+barplot(tabella7079, xlab = 'MBCS', ylab = '%', beside =T, ylim = c(0,100), main = '70-79 years',
+        names.arg = c('0-4', '5-9', '10-14','15-19','>=20'), col = c('gray30', 'white'))
+grid(nx=NA, ny=NULL)
+legend(x = "right", legend = c('F', 'M'), bty = "n", y.intersp = 2, fill = c('gray30', 'white'))
+box()
+
+MBCS80 <- MBCS1[MBCS1$Age >= 80,]
+tabella80 <- round(100*prop.table(table(MBCS80$Gender, MBCS80$Severity), margin = 1),2)
+barplot(tabella80, xlab = 'MBCS', ylab = '%', beside =T, ylim = c(0,100), main = expression(" ">="80 years"),
+        names.arg = c('0-4', '5-9', '10-14','15-19','>=20'), col = c('gray30', 'white'))
+grid(nx=NA, ny=NULL)
+legend(x = "right", legend = c('F', 'M'), bty = "n", y.intersp = 2, fill = c('gray30', 'white'))
+box()
+
+
+
+##Curva ROC e AUC
+test <- MBCS_df
+test$id <- df$id[-sam]
+test <- test[test$id %in% charl$id,]
+
+test1 <- MCS_df
+test1$id <- df$id[-sam]
+test1 <- test1[test1$id %in% charl$id,]
+
+
+#dftest <- df2[((ntrain+1):nsample),]
+#dftest$id <- df$id[((ntrain+1):nsample)]
+dftest <- dftest[dftest$id %in% charl$id, ]
+charl <- charl[charl$id %in% dftest$id,]
+elix <- elix[elix$id %in% dftest$id,]
+charl <- charl[order(charl$id),]
+elix <- elix[order(elix$id),]
+allscores <- as.data.frame(cbind(test$MBCS, test1$MCS, charl$score, elix$score, dftest$status))
+colnames(allscores) <- c('MBCS', 'MCS', 'Charlson', 'Elixhauser', 'Status')
+
+roc1 <- roc(allscores$Status, allscores$MBCS)
+roc2 <- roc(allscores$Status, allscores$MCS)
+roc3 <- roc(allscores$Status, allscores$Charlson)
+roc4 <- roc(allscores$Status, allscores$Elixhauser)
+
+roc.test(roc1, roc2)
+roc.test(roc1, roc3)
+roc.test(roc1, roc4)
+
+ggroc(list(roc1, roc2, roc3, roc4))
+
+colori <- gray.colors(4, start = 0.1, end = 0.8)
+
+plot(roc1, col = colori[1], lty = 2, main = "ROC", xlab = '1-Specificity')
+plot(roc2, col = colori[2], lty = 3, add = TRUE)
+plot(roc3, col = colori[3], lty = 4, add = TRUE)
+plot(roc4, col = colori[4], lty = 6, add = TRUE)
+legend(0.35,0.7, legend = c('MBCS', 'MCS', 'CCI', 'EI'), col = colori, lty = c(2,3,4,6),
+       cex = 0.8, box.lty = 1.2, bg = 'transparent', y.intersp=0.5, bty = "n", lwd = 1.5)
+
+allsco <- allscores
+allsco$Status[allsco$Status == 1] <- 0
+allsco$Status[allsco$Status == 2] <- 1
+allsco$Time <- dftest$time
+
+log1 <- glm(Status ~ MBCS, data = allsco, family = binomial(link = 'logit'))
+log2 <- glm(Status ~ MCS, data = allsco, family = binomial(link = 'logit'))
+log3 <- glm(Status ~ Charlson, data = allsco, family = binomial(link = 'logit'))
+log4 <- glm(Status ~ Elixhauser, data = allsco, family = binomial(link = 'logit'))
+
+reclassification(data = allsco, cOutcome = 5, predrisk1 = predRisk(log2), predrisk2 = predRisk(log1), cutoff <- c(0,.2,.4,.6,.8,1))
+reclassification(data = allsco, cOutcome = 5, predrisk1 = predRisk(log3), predrisk2 = predRisk(log1), cutoff <- c(0,.2,.4,.6,.8,1))
+reclassification(data = allsco, cOutcome = 5, predrisk1 = predRisk(log4), predrisk2 = predRisk(log1), cutoff <- c(0,.2,.4,.6,.8,1))
+
+
+reclassification(data = allsco, cOutcome = 5, predrisk1 = predRisk(log2), predrisk2 = predRisk(log1), cutoff <- c(0,.25,.5,.75,1))
+reclassification(data = allsco, cOutcome = 5, predrisk1 = predRisk(log3), predrisk2 = predRisk(log1), cutoff <- c(0,.25,.5,.75,1))
+reclassification(data = allsco, cOutcome = 5, predrisk1 = predRisk(log4), predrisk2 = predRisk(log1), cutoff <- c(0,.25,.5,.75,1))
+
+
+##Kaplan-Meier
+data1 <- MBCS_df
+data1$Time <- df1$time[-sam]
+data1$Status <- df1$status[-sam]
+data1$Severity[data1$MBCS < 5] <- '1.0-4'
+data1$Severity[data1$MBCS < 10 & data1$MBCS >=5] <- '2.5-9'
+data1$Severity[data1$MBCS < 15 & data1$MBCS >=10] <- '3.10-14'
+data1$Severity[data1$MBCS < 20 & data1$MBCS >=15] <- '4.15-19'
+data1$Severity[data1$MBCS >=20] <- '5.>= 20'
+data1$Time <- data1$Time/30.3
+surv1 <- survfit(Surv(Time, Status) ~ Severity, data = data1)
+ggsurvplot(surv1, ylim = c(0.70,1), legend.labs = c('0-4','5-9','10-14','15-19','Over 20'), pval = T,
+           ggtheme = theme_bw(), conf.int = T, xlab = 'Time in days', xlim = c(0,12), ylab = 'Cumulative probability of surviving')

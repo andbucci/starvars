@@ -1,0 +1,531 @@
+#Legend
+#_s sta per sdo
+#_p sta per prescrizione
+library(icd.data)
+library(eeptools)
+library(QPXflight)
+library(data.table)
+library(dplyr)
+library(plyr)
+library(BAS)
+library(MASS)
+library(BMA)
+library(tidyverse)
+library(broom)
+
+rm(list=ls(all=TRUE))
+
+
+icd9sub <- icd9cm_hierarchy
+icd9sub <- unfactorize(icd9sub)
+
+icd9major <- split(icd9sub, icd9sub$major)
+icd9subcha <- split(icd9sub, icd9sub$sub_chapter)
+
+load('sdo.RData')
+load('ana_prescr.RData')
+load('pres_sdo14_15.RData')
+
+
+ana$cod_fisc <- NULL
+
+##Matcha Data decesso con data dimissioni per vedere morti in ospedale
+anasi <- ana[ana$data_decesso >=  as.Date('2016-01-01') | is.na(ana$data_decesso),] #morti prima del 2016
+anasi <- anasi[anasi$data_nascita <= as.Date('1970-01-01'),]
+anasi <- anasi[anasi$data_decesso < as.Date('2017-12-31') | is.na(anasi$data_decesso),] #Tolgo morti dopo 2017
+anasi$age <- age_calc(anasi$data_nascita, as.Date('2017-01-01'))
+ana50 <- anasi[anasi$age > 600, ]
+ana50$Morto[ana50$data_decesso>as.Date('2015-12-31')] <- 1 
+ana50$Morto[is.na(ana50$data_decesso)] <- 0
+
+
+sdo <- rbind(sdo_15, sdo_2016)
+sdo <- sdo[sdo$id %in% ana50$id,] #id in over 50
+
+prescr <- rbind(presc_15, prescr2016)
+prescr <- prescr[prescr$id %in% ana50$id,] #id in over 50
+
+#List of diseases and conditions candidate to be tested as predictors of one-year mortality
+a1 <- list(icd9sub$code[icd9sub$sub_chapter == 'Appendicitis'], 'NULL')
+names(a1) <- c('ICD9', 'ATC')#Appendicitis
+
+a2 <- list(icd9sub$code[icd9sub$sub_chapter=='Acute Respiratory Infections'], 'NULL')
+names(a2) <- c('ICD9', 'ATC')#Acute respiratory Infections
+
+a3 <- list(icd9sub$code[icd9sub$sub_chapter=='Acute Rheumatic Fever'], 'NULL')
+names(a3) <- c('ICD9', 'ATC')#Acute Rheumatic Fever
+
+a4 <- list(icd9sub$code[icd9sub$sub_chapter=='Arthropathies And Related Disorders'], 'NULL')
+names(a4) <- c('ICD9', 'ATC')#Arthropathies And Related Disorders
+
+a5 <- list(icd9sub$code[icd9sub$sub_chapter=='Arthropod-Borne Viral Diseases'], 'NULL')
+names(a5) <- c('ICD9', 'ATC')#Arthropod-Borne Viral Diseases
+
+a6 <- list(icd9sub$code[icd9sub$sub_chapter=='Benign neoplasm'], 'NULL')
+names(a6) <- c('ICD9', 'ATC')#Benign neoplasm
+
+a7 <- list(icd9sub$code[icd9sub$sub_chapter=='Burns'], 'NULL')
+names(a7) <- c('ICD9', 'ATC')#Burns
+
+a8 <- list(icd9sub$code[icd9sub$major =='Carcinoma in situ of breast and genitourinary system'], 'NULL')
+names(a8) <- c('ICD9', 'ATC')#Carcinoma in situ of breast
+
+a9 <- list(icd9sub$code[icd9sub$major =='Carcinoma in situ of digestive organs'], 'NULL')
+names(a9) <- c('ICD9', 'ATC')#Carcinoma in situ of digestive organs
+
+a10 <- list(icd9sub$code[icd9sub$major =='Carcinoma in situ of respiratory system'], 'NULL')
+names(a10) <- c('ICD9', 'ATC')#Carcinoma in situ of respiratory system
+
+a11 <- list(icd9sub$code[icd9sub$major =='Carcinoma in situ of other and unspecified sites'], 'NULL')
+names(a11) <- c('ICD9', 'ATC')#Carcinoma in situ of other and unspecified sites
+
+a12 <- list(icd9sub$code[icd9sub$sub_chapter =='Certain Traumatic Complications And Unspecified Injuries'], 'NULL')
+names(a12) <- c('ICD9', 'ATC')#Certain Traumatic Complications And Unspecified Injuries
+
+a13 <- list(icd9sub$code[icd9sub$sub_chapter =='Chronic Obstructive Pulmonary Disease And Allied Conditions'], 'NULL')
+names(a13) <- c('ICD9', 'ATC')#Chronic Obstructive Pulmonary Disease And Allied Conditions
+
+a14 <- list(icd9sub$code[icd9sub$sub_chapter =='Chronic Rheumatic Heart Disease'], 'NULL')
+names(a14) <- c('ICD9', 'ATC')#Chronic Rheumatic Heart Disease
+
+a15 <- list(icd9sub$code[icd9sub$sub_chapter =='Complications Of Surgical And Medical Care, Not Elsewhere Classified'],
+            'NULL')
+names(a15) <- c('ICD9', 'ATC')#Complications Of Surgical And Medical Care, Not Elsewhere Classified
+
+a16 <- list(icd9sub$code[icd9sub$sub_chapter =='Congenital Anomalies'],'NULL')
+names(a16) <- c('ICD9', 'ATC')#Congenital Anomalies
+
+a17 <- list(icd9sub$code[icd9sub$sub_chapter =='Diseases Of Arteries, Arterioles, And Capillaries'],'NULL')
+names(a17) <- c('ICD9', 'ATC')#Diseases Of Arteries, Arterioles, And Capillaries
+
+a18 <- list(icd9sub$code[icd9sub$sub_chapter =='Diseases Of Esophagus, Stomach, And Duodenum'],'NULL')
+names(a18) <- c('ICD9', 'ATC')#Diseases Of Esophagus, Stomach, And Duodenum
+
+a19 <- list(icd9sub$code[icd9sub$sub_chapter =='Diseases Of Male Genital Organs'],'NULL')
+names(a19) <- c('ICD9', 'ATC')#Disease of Male Genital Organs
+
+a20 <- list(icd9sub$code[icd9sub$sub_chapter =='Diseases Of Oral Cavity, Salivary Glands, And Jaws'],'NULL')
+names(a20) <- c('ICD9', 'ATC')#Diseases Of Oral Cavity, Salivary Glands, And Jaws
+
+a21 <- list(c(icd9sub$code[icd9sub$major =='Diabetes mellitus'],'3572','362'),'NULL')
+names(a21) <- c('ICD9', 'ATC')#Diabetes mellitus
+
+a22 <- list(icd9sub$code[icd9sub$major =='Disorders of adrenal glands'],'NULL')
+names(a22) <- c('ICD9', 'ATC')#Disorders of adrenal glands
+
+a23 <- list(icd9sub$code[icd9sub$major =='Diseases of thymus gland'],'NULL')
+names(a23) <- c('ICD9', 'ATC')#Diseases of thymus gland
+
+a24 <- list(icd9sub$code[icd9sub$major =='Disorders of parathyroid gland'],'NULL')
+names(a24) <- c('ICD9', 'ATC')#Disorders of parathyroid gland
+
+a25 <- list(icd9sub$code[icd9sub$major =='Disorders of the pituitary gland and its hypothalamic control'],'NULL')
+names(a25) <- c('ICD9', 'ATC')#Disorders of the pituitary gland and its hypothalamic control
+
+a26 <- list(icd9sub$code[icd9sub$major =='Ovarian dysfunction'],'NULL')
+names(a26) <- c('ICD9', 'ATC')#Ovarian dysfunction
+
+a27 <- list(icd9sub$code[icd9sub$major =='Polyglandular dysfunction and related disorders'],'NULL')
+names(a27) <- c('ICD9', 'ATC')#Polyglandular dysfunction and related disorders
+
+a28 <- list(icd9sub$code[icd9sub$major =='Secondary diabetes mellitus'],'NULL')
+names(a28) <- c('ICD9', 'ATC')#Secondary diabetes mellitus
+
+a29 <- list(icd9sub$code[icd9sub$major =='Testicular dysfunction'],'NULL')
+names(a29) <- c('ICD9', 'ATC')#Testicular dysfunction
+
+a30 <- list(icd9sub$code[icd9sub$sub_chapter =='Diseases Of Pulmonary Circulation'],'NULL')
+names(a30) <- c('ICD9', 'ATC')#Diseases Of Pulmonary Circulation
+
+a31 <- list(c('2800','2801','2808','2809','2810','2811','2812','2813','2814','2818','2819','2859'),'NULL')
+names(a30) <- c('ICD9', 'ATC')#Anaemias
+
+a32 <- list(icd9sub$code[icd9sub$sub_chapter =='Diseases Of The Ear And Mastoid Process'],'NULL')
+names(a32) <- c('ICD9', 'ATC')#Diseases Of The Ear And Mastoid Process
+
+a33 <- list(c('243','2440','2441','2442','2448','2449'),'NULL')
+names(a33) <- c('ICD9', 'ATC')#Hypothyroidism
+
+a34 <- list(icd9sub$code[icd9sub$major =='Hemorrhoids'],'NULL')
+names(a34) <- c('ICD9', 'ATC')#Hemorrhoids
+
+a35 <- list(icd9sub$code[icd9sub$major =='Hypotension'],'NULL')
+names(a35) <- c('ICD9', 'ATC')#Hypotension
+
+a36 <- list(icd9sub$code[icd9sub$major =='Portal vein thrombosis'],'NULL')
+names(a36) <- c('ICD9', 'ATC')#Portal vein thrombosis
+
+a37 <- list(icd9sub$code[icd9sub$major =='Phlebitis and thrombophlebitis'],'NULL')
+names(a37) <- c('ICD9', 'ATC')#Phlebitis and thrombophlebitis
+
+a38 <- list(icd9sub$code[icd9sub$major =='Varicose veins'],'NULL')
+names(a38) <- c('ICD9', 'ATC')#Varicose veins
+
+a39 <- list(icd9sub$code[icd9sub$major =='Glaucoma'],'NULL')
+names(a39) <- c('ICD9', 'ATC')#Glaucoma
+
+a40 <- list(icd9sub$code[icd9sub$sub_chapter =='Disorders Of The Peripheral Nervous System'],'NULL')
+names(a40) <- c('ICD9', 'ATC')#Disorders Of The Peripheral Nervous System
+
+a41 <- list(icd9sub$code[icd9sub$sub_chapter =='Disorders Of Thyroid Gland'],'NULL')
+names(a41) <- c('ICD9', 'ATC')#Disorders Of Thyroid Gland
+
+a42 <- list(icd9sub$code[icd9sub$sub_chapter =='Dorsopathies'],'NULL')
+names(a42) <- c('ICD9', 'ATC')#Dorsopathies
+
+a43 <- list(icd9sub$code[icd9sub$sub_chapter =='Fractures'],'NULL')
+names(a43) <- c('ICD9', 'ATC')#Fractures
+
+a44 <- list(icd9sub$code[icd9sub$major =="Parkinson's disease"],'NULL')
+names(a44) <- c('ICD9', 'ATC')#Parkinson's disease
+
+a45 <- list(icd9sub$code[icd9sub$sub_chapter =="Hernia of Abdominal Cavity"],'NULL')
+names(a45) <- c('ICD9', 'ATC')#Hernia of Abdominal Cavity
+
+a46 <- list(icd9sub$code[icd9sub$sub_chapter =="Hypertensive Disease"],'NULL')
+names(a46) <- c('ICD9', 'ATC')#Hypertensive Disease
+
+a47 <- list(icd9sub$code[icd9sub$sub_chapter =="Inflammatory Disease Of Female Pelvic Organs"],'NULL')
+names(a47) <- c('ICD9', 'ATC')#Inflammatory Disease Of Female Pelvic Organs
+
+a48 <- list(icd9sub$code[icd9sub$sub_chapter =="Inflammatory Diseases Of The Central Nervous System"],'NULL')
+names(a48) <- c('ICD9', 'ATC')#Inflammatory Disease Of Female Pelvic Organs
+
+a49 <- list(icd9sub$code[icd9sub$sub_chapter =="Intestinal Infectious Diseases"],'NULL')
+names(a49) <- c('ICD9', 'ATC')#Intestinal Infectious Diseases
+
+a50 <- list(icd9sub$code[icd9sub$major =="Acute myocardial infarction"],'NULL')
+names(a50) <- c('ICD9', 'ATC')#Acute myocardial infarction
+
+a51 <- list(c('1960','1961','1962','1963','1965','1966','1968','1969',
+              '1970','1971','1972','1973','1974','1975','1976','1977',
+              '1978','1980','1981','1982','1983','1984','1985',
+              '1986','1987','19881','19882','19889',
+              '1990','1991','1992'),'NULL')
+names(a51) <- c('ICD9', 'ATC')#Metastatic
+
+a52 <- list(icd9sub$code[icd9sub$sub_chapter =="Malignant Neoplasm Of Bone, Connective Tissue, Skin, And Breast"],'NULL')
+names(a52) <- c('ICD9', 'ATC')#Malignant Neoplasm Of Bone, Connective Tissue, Skin, And Breast
+
+a53 <- list(icd9sub$code[icd9sub$sub_chapter =="Malignant Neoplasm Of Digestive Organs And Peritoneum"],'NULL')
+names(a53) <- c('ICD9', 'ATC')#Malignant Neoplasm Of Digestive Organs And Peritoneum
+
+a54 <- list(icd9sub$code[icd9sub$sub_chapter =="Malignant Neoplasm Of Genitourinary Organs"],'NULL')
+names(a54) <- c('ICD9', 'ATC')#Malignant Neoplasm Of Genitourinary Organs
+
+a55 <- list(icd9sub$code[icd9sub$sub_chapter =="Malignant Neoplasm Of Lip, Oral Cavity, And Pharynx"],'NULL')
+names(a55) <- c('ICD9', 'ATC')#Malignant Neoplasm Of Lip, Oral Cavity, And Pharynx
+
+a56 <- list(icd9sub$code[icd9sub$sub_chapter =="Malignant Neoplasm Of Lymphatic And Hematopoietic Tissue"],'NULL')
+names(a56) <- c('ICD9', 'ATC')#Malignant Neoplasm Of Lymphatic And Hematopoietic Tissue
+
+a57 <- list(icd9sub$code[icd9sub$sub_chapter =="Malignant Neoplasm Of Other And Unspecified Sites"],'NULL')
+names(a57) <- c('ICD9', 'ATC')#Malignant Neoplasm Of Other And Unspecified Sites
+
+a58 <- list(icd9sub$code[icd9sub$sub_chapter =="Malignant Neoplasm Of Respiratory And Intrathoracic Organs"],'NULL')
+names(a58) <- c('ICD9', 'ATC')#Malignant Neoplasm Of Respiratory And Intrathoracic Organs
+
+a59 <- list(icd9sub$code[icd9sub$sub_chapter =="Mycoses"],'NULL')
+names(a59) <- c('ICD9', 'ATC')#Mycoses
+
+a60 <- list(icd9sub$code[icd9sub$sub_chapter =="Nephritis, Nephrotic Syndrome, And Nephrosis"],'NULL')
+names(a60) <- c('ICD9', 'ATC')#Nephritis, Nephrotic Syndrome, And Nephrosis
+
+a61 <- list(icd9sub$code[icd9sub$sub_chapter =="Neuroendocrine Tumors"],'NULL')
+names(a61) <- c('ICD9', 'ATC')#Neuroendocrine Tumors
+
+a62 <- list(c('2910','2911','2912','2913','2914','2915',
+              '29181','29182','29189','2919','30300',
+              '30301','30302','30303','30390','30391',
+              '30392','30393','30500','30501','30502',
+              '30503','V113'),'NULL')
+names(a62) <- c('ICD9', 'ATC')#Alcohol dependence syndrome
+
+a63 <- list(c('29620','29621','29622','29623','29624',
+              '29625','29626','29630','29631','29632',
+              '29633','29634','29635','29636','29690',
+              '30928','3004','30112','3090','3091','311'),'NULL')
+names(a63) <- c('ICD9', 'ATC')#Depressive disorder
+
+a64 <- list(c('29384','30000','30001','30002','30009','30010',
+              '30011','30012','30013','30014','30015','30016',
+              '30019','30020','30021','30022','30023','30029',
+              '3003','3004','3005','3006','3007','3008','30081',
+              '30082','30089','3009','30921','30924','30928'),'NULL')
+names(a64) <- c('ICD9', 'ATC')#Anxiety
+
+a65 <- list(c('2920','29211','29212','2922','29281',
+              '29282','29283','29284','29285','29289',
+              '2929','30400','30401','30402','30403',
+              '30410','30411','30412','30413','30420',
+              '30421','30422','30423','30430','30431',
+              '30432','30433','30440','30441','30442',
+              '30443','30450','30451','30452','30453',
+              '30460','30461','30462','30463','30470',
+              '30471','30472','30473','30480','30481',
+              '30482','30483','30490','30491','30492',
+              '30493','30520','30521','30522','30523',
+              '30530','30531','30532','30533','30540',
+              '30541','30542','30543','30550','30551',
+              '30552','30553','30560','30561','30562',
+              '30563','30570','30571','30572','30573',
+              '30580','30581','30582','30583','30590',
+              '30591','30592','30593'),'NULL')
+names(a65) <- c('ICD9', 'ATC')#Drug dependence
+
+a66 <- list(icd9sub$code[icd9sub$sub_chapter =="Nutritional Deficiencies"],'NULL')
+names(a66) <- c('ICD9', 'ATC')#Nutritional Deficiencies
+
+a67 <- list(icd9sub$code[icd9sub$sub_chapter =="Other Bacterial Diseases"],'NULL')
+names(a67) <- c('ICD9', 'ATC')#Other Bacterial Diseases
+
+a68 <- list(icd9sub$code[icd9sub$sub_chapter =="Other Diseases Due To Viruses And Chlamydiae"],'NULL')
+names(a68) <- c('ICD9', 'ATC')#Other Diseases Due To Viruses And Chlamydiae
+
+a69 <- list(icd9sub$code[icd9sub$major =="Gout"],'NULL')
+names(a69) <- c('ICD9', 'ATC')#Gout
+
+a70 <- list(icd9sub$code[icd9sub$major =="Overweight, obesity and other hyperalimentation"],'NULL')
+names(a70) <- c('ICD9', 'ATC')#Overweight, obesity and other hyperalimentation
+
+a71 <- list(icd9sub$code[icd9sub$major =="Disorders of fluid, electrolyte, and acid-base balance"],'NULL')
+names(a71) <- c('ICD9', 'ATC')#Disorders of fluid, electrolyte, and acid-base balance
+
+a72 <- list(icd9sub$code[icd9sub$major =="Multiple sclerosis"],'NULL')
+names(a72) <- c('ICD9', 'ATC')#Multiple sclerosis
+
+a73 <- list(c('39891','40201','40211','40291','40401',
+              '40403','40411','40413','40491','40493',
+              '4280','4281','4282','42820','42821',
+              '42822','42823','42830','42831',
+              '42832','42833','42840','42841',
+              '42842','42843','4289'),'NULL')
+names(a73) <- c('ICD9', 'ATC')#Hearth failure
+
+a74 <- list(c('42610','42611','42613','4262','4263','4264','42650','42651','42652',
+              '42653','4266','4267','42681','42682','42689','4270','4272','42731',
+              '42760','4279','7850','V4500','V4501','V4502','V4509','V5301',
+              'V5302','V5309','V531','V532','V5331','V5332','V5339'),
+            c('C01BA', 'C01BC', 'C01BD'))
+names(a74) <- c('ICD9', 'ATC') #Arrythmia
+
+a75 <- list(c('09320','09321','09322','09323','09324','3940','3941','3942',
+              '3949','3950','3951','3952','3959','3960','3961','3962','3963',
+              '3968','3969','3970','3971','4240','4241','4242','4243','42490',
+              '42491','7463','7464','7465','7466','V422','V433'), 'NULL')
+names(a75) <- c('ICD9', 'ATC') #Valvular diseases
+
+a76 <- list(c('4400','4401','44020','44021','44022','44023','44024','44029',
+              '44030','44031','44032','4404','4408','4409','4412','4414',
+              '4417','4419','4431','44321','44322','44323','44324',
+              '44329','44381','44382','44389','4439','4471',
+              '5571','5579','7854','V434'),c('B01AA', 'B01AB', 'B01AF', 'B01AE', 
+                                             'B01AX01', 'B01AD10', 'B01AD12', 'C04AD03', 'B01AC05') #Cardiovascular
+)
+names(a76) <- c('ICD9', 'ATC') #Vascular diseases
+
+a77 <- list(c(icd9sub$code[icd9sub$sub_chapter =="Other Forms Of Heart Disease" & !icd9sub$code %in% a73$ICD9
+                           & !icd9sub$code %in% a74$ICD9
+                           & !icd9sub$code %in% a75$ICD9
+                           & !icd9sub$code %in% a76$ICD9],
+              '7850', 'V450', 'V533'),'NULL')
+names(a77) <- c('ICD9', 'ATC')#Other heart disease
+
+a78 <- list(c('00322','0116','01160','01161','01162',
+              '01163','01164','01165','01166','0382',
+              '0413','0551','0730','11505','11515',
+              '11595','4800','4801','4803','4808',
+              '4809','481','4820','4821','4823',
+              '48230','48231','48232','48239',
+              '48240','48241','48242','48249',
+              '48281','48282','48283','48284',
+              '48289','4829','4830','4831',
+              '4838','4841','4843','4845','4846',
+              '4847','4848','485','486','4871',
+              '4878','48801','48802','48809',
+              '48811','48812','48819','48881',
+              '48882','48889','51630','51635',
+              '51636','51637','5171','7700',
+              '99731','99732','V0382','V066','V1261'),'NULL')
+names(a78) <- c('ICD9', 'ATC')#Pneumonia
+
+a79 <- list(c('03841','0415','4802','4822','4870',
+              '4871','4878','4880','48801','48802',
+              '48809','48811','48812','48819',
+              '48881','48882','48889','V0381',
+              'V0481','V066'),'NULL')
+names(a79) <- c('ICD9', 'ATC')#Influenza
+
+a80 <- list(icd9sub$code[icd9sub$major =="Dementias"],'NULL')
+names(a80) <- c('ICD9', 'ATC')#Dementias
+
+a81 <- list(c('29600','29601','29602','29603',
+              '29604','29605','29606',
+              '29640','29641','29642','29643','29644',
+            '29645','29646','29650','29651','29652',
+            '29653','29654','29655','29656',
+            '29660','29661','29662','29663',
+            '29664','29665','29666','2967',
+            '29680','29689'),'NULL')
+names(a81) <- c('ICD9', 'ATC')#Bipolar
+
+a82 <- list(icd9sub$code[icd9sub$sub_chapter =="Psychoses" & !icd9sub$code %in% a81$ICD9
+                         & !icd9sub$code %in% a80$ICD9
+                         & !icd9sub$code %in% a62$ICD9
+                         & !icd9sub$code %in% a65$ICD9],'NULL')
+names(a82) <- c('ICD9', 'ATC')#Psychoses
+
+a83 <- list(icd9sub$code[icd9sub$sub_chapter =="Tuberculosis"],'NULL')
+names(a83) <- c('ICD9', 'ATC')#Tubercolosis
+
+a84 <- list(c('345','3450','34500','34501','3451',
+              '34510','34511','3452','3453','3454',
+              '34540','34541','3455','34550',
+              '34551','3456','34560','34561',
+              '3457','34570','34571','3458',
+              '34580','34581','3459','34590',
+              '34591'),'NULL')
+names(a84) <- c('ICD9', 'ATC')#Epilepsy
+
+a85 <- list(c('2722','2724'),'NULL')
+names(a85) <- c('ICD9', 'ATC')#Hyperlypidemia
+
+a86 <- list(c('27700','27701','27702','27703','27709'),
+            c('R05CB', 'R05FB01', 'R05FA01', 'A09AA02'))
+names(a86) <- c('ICD9', 'ATC') #Cystic fibrosis
+
+a87 <- list(c('53100','53101','53110','53111','53120','53121','53130','53131',
+              '53140','53141','53150','53151','53160','53161','53170','53171','53190',
+              '53191','53200','53201','53210','53211','53220','53221','53230','53231',
+              '53240','53241','53250','53251','53260','53261','53270','53271','53290',
+              '53291','53300','53301','53310','53311','53320','53321','53330','53331',
+              '53340','53341','53350','53351','53360','53361','53370','53371','53390',
+              '53391','53400','53401','53410','53411','53420','53421','53430','53431',
+              '53440','53441','53450','53451','53460','53461','53470','53471','53490','53491'),
+            c('A02BA', 'A02BB', 'A02BC01', 'A02BD05', 'A02BD01'))
+names(a87) <- c('ICD9', 'ATC') #Peptic ulcer
+
+a88 <- list(c('07032','07033','07054','4560','4561','45620','45621',
+              '5710','5712','5713','57140','57141','57142',
+              '57149','5715','5716','5718','5719','5723','5728','V427'), 'NULL')
+names(a88) <- c('ICD9', 'ATC') #Liver disease
+
+a89 <- list(c(icd9sub$code[icd9sub$major =="Regional enteritis"], icd9sub$code[icd9sub$major =="Ulcerative colitis"]),
+            'NULL')
+names(a89) <- c('ICD9', 'ATC')#Crohn's disease
+
+a90 <- list('V560', 'NULL')
+names(a90) <- c('ICD9', 'ATC') #Kidney dialysis
+
+a91 <- list(c('99681', 'V420'), 'NULL')
+names(a91) <- c('ICD9', 'ATC') #Kidney transplant
+
+a92 <- list(c('390','3910','3911','3912','3918','3919',
+              '7140','7141','71430','71431','71432',
+              '71433','7149','7200','7201','7202',
+              '72081','72089','7209','725'), c('M01BA', 'M01CB', 'P01BA02'))
+names(a92) <- c('ICD9', 'ATC') #Rheumatologic conditions
+
+a93 <- list(NULL, c('L04AA02','L04AA03', 'L04AA04', 'L04AA05','L04AA06', 'L04AA07', 'L04AA08',
+                    'L04AA09', 'L04AA10','L04AX01', 'L04AC01', 'L04AC02', 'L04AD01', 'L04AD02'))
+names(a93) <- c('ICD9', 'ATC') #Transplantation
+
+a94 <- list(NULL, c('N02', 'M01A'))
+names(a94) <- c('ICD9', 'ATC') #Pain and inflammation
+
+a95 <- list(icd9sub$code[icd9sub$sub_chapter =='Cerebrovascular Disease'], 'NULL')
+names(a95) <- c('ICD9', 'ATC')#Cerebrovascular Disease
+
+a96 <- list(icd9sub$code[icd9sub$major =='Carcinoma in situ of skin'], 'NULL')
+names(a96) <- c('ICD9', 'ATC')#Carcinoma in situ of skin
+
+a97 <- list(c('2860','2861','2862','2863','2864','28652','28653','28659','2866',
+              '2867','2869','2871','28730','28731','28732','28733',
+              '28739','28741','28749','2875'), 'NULL')
+names(a97) <- c('ICD9', 'ATC') #Coagulation
+
+a98 <- list(c('042'), c('J05AF01', 'J05AR01', 'J05AR04', 'J05AR05', 'J05AF02', 
+                       'J05AF03', 'P01CX01', 'J01FA09', 'J04AB04', 'P01AX06'))
+names(a98) <- c('ICD9', 'ATC')#HIV
+
+
+MCS <- list(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,
+            a16,a17,a18,a19,a20,a21,a22,a23,a24,a25,a26,a27,a28,
+            a29,a30,a31,a32,a33,a34,a35,a36,a37,a38,a39,a40,
+            a41,a42,a43,a44,a45,a46,a47,a48,a49,a50,a51,a52,
+            a53,a54,a55,a56,a57,a58,a59,a60,a61,a62,a63,
+            a64,a65,a66,a67,a68,a69,a70,a71,a72,a73,a74,
+            a75,a76,a77,a78,a79,a80,a81,a82,a83,a84,a85,
+            a86,a87,a88,a89,a90,a91,a92,a93,a94,a95,a96,
+            a97,a98,a98)
+
+##Tentativo sdo
+sdomulti <- sdo %>% group_by(id, diagp_id, diag1_id, diag2_id, diag3_id, diag4_id, diag5_id) %>% summarise((Freq=n()))
+sdomm <- split(sdomulti, sdomulti$id)
+sdounique <- sdo[!duplicated(sdo$id),] #unique id per sdo
+nid <- nrow(sdounique) #number of unique ids for sdo
+sdo1 <- list()
+for(i in 1:nid){
+  sdo1[[i]] <- unlist(c(sdomm[[i]][,1:7])) #Metto insieme sdo di id multipli
+}
+ndise <- length(MCS)
+nsdo <- nrow(sdo)
+sdo_df <- matrix(0, nrow = nid, ncol = ndise)
+for(i in 1:nid){
+  for(j in 1:ndise)
+    if(any(sdo1[[i]] %in% MCS[[j]]$ICD9)) sdo_df[i,j] <- 1 #1 malattia/0 no
+}
+sdo_df <- cbind(sdounique$id, sdo_df)#unisco all'id
+colnames(sdo_df) <- c('id', names(MCS))
+
+#Tentativo prescription
+premulti1 <- prescr %>% group_by(id, atc) %>% summarise(Freq =n())
+premulti <- split(premulti1, premulti1$id)
+preunique <- prescr[!duplicated(prescr$id),] #unique id per prescription
+npre <- nrow(preunique)
+pre_df <- matrix(0, nrow = npre, ncol = ndise) 
+for(k in 1:npre){
+  for(l in 1:ndise){
+    for(p in 1:length(MCS[[l]]$ATC)){
+      if(any(grepl(MCS[[l]]$ATC[p], substr(premulti[[k]]$atc,start =1, stop = nchar(MCS[[l]]$ATC[p]))))) pre_df[k,l] <- 1
+    }}
+}
+pre_df <- cbind(preunique$id, pre_df)
+colnames(pre_df) <- c('id', names(MCS))
+
+ana50a <- ana50[ana50$data_decesso > as.Date('2017-01-01') | is.na(ana50$data_decesso),] #Tolgo morti prima del 2017
+
+ana50a <- ana50a[ana50a$data_nascita > as.Date('1905-01-01'),]
+
+ana50a <- ana50a[ana50a$data_fine_assistenza > as.Date('2017-01-01') | is.na(ana50a$data_fine_assistenza),]#Tolgo i trasferiti
+
+ana50a <- ana50a[ana50a$data_inizio_assistenza < as.Date('2015-01-01') | is.na(ana50a$data_fine_assistenza),]#Tolgo
+#i non residenti prima del 2015
+
+sdpre <- as.data.frame(rbind(sdo_df, pre_df))
+
+sdpre_df <- aggregate(. ~id, data = sdpre, sum, na.rm = T)
+
+sdpre_df <- sdpre_df[sdpre_df$id %in% ana50a$id,] #Prendo solo quelli morti nel 2017
+
+df <- sdpre_df
+df[df==2] <- 1 #Sostituisco i 2 con 1
+
+morto <- ana50a[ana50a$id %in% df$id,]
+
+df$Morto <- morto$Morto #Creo variabile morto si/no
+df$Sesso <- morto$sesso
+df$Age <- morto$age
+
+df1 <- df[,-1]
+
+#df1[,1:47] <- as.factor(df1[,1:47])#Fattori
+
+mod1 <- glm(Morto ~ ., data = df1, family = binomial(link = 'logit'))
+summary(mod1)
+model.data <- augment(mod1) %>% 
+  mutate(index = 1:n()) 
+model.data %>% top_n(3, .cooksd)
+
+mod2 <- bic.glm(Morto ~ ., data = df1, glm.family=binomial(link = 'logit'), strict = T, maxCol = 20) #1 Scompaiono alcune
+#variabili (come Cancer)

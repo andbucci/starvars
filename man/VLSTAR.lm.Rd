@@ -7,7 +7,7 @@ VLSTAR-ML Estimation
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-This function allows the user to estimate the coefficients of a VLSTAR model with 2 regimes through maximum log-likelihood. The set of starting values of Gamma and C for the convergence algorithm can be either passed or obtained via searching grid.
+This function allows the user to estimate the coefficients of a VLSTAR model with \emph{m} regimes through maximum log-likelihood. The set of starting values of Gamma and C for the convergence algorithm can be either passed or obtained via searching grid.
 }
 \usage{
 VLSTAR.lm(y1, x1 = NULL, p = NULL,
