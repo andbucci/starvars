@@ -101,6 +101,7 @@ VLSTAR.lm <- function(y1, x1 = NULL, p = NULL,
       kro <- list()
       ggxx <- matrix(ncol = (q+ncoly)*m*ncoly, nrow = (q+ncoly)*m*ncoly)
       for (i in 1:nrowx){
+        for(t in 1:(m-1)){
         for (j in 1 : ncoly){
           glog[i,j] <- (1+exp(-COMBI[[t]][[j]][l,2]*(st[i]-COMBI[[t]][[j]][l,1])))^(-1)
         }
