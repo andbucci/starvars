@@ -15,7 +15,6 @@ ncoly <- ncol(data)
 nrowy <- nrow(data)
 start_date <- index(data)[1]
 end_date <- index(data)[nrowy]
-freq <- match.arg(freq)
 if(freq == 'daily'){
   days <- as.Date(index(data), format = "%m/%d/%Y %I:%M:%S %p")
   days <- unique(days)
@@ -28,11 +27,11 @@ elapsed_months <- function(end_date, start_date){
 }
 elapsed_quarters <- function(end_date, start_date){
   (as.yearqtr(end_date)-
-     as.yearqtr(start_date))*4
+     as.yearqtr(start_date))*4+1
 }
 elapsed_years <- function(end_date, start_date){
   year(end_date)-
-    year(start_date)
+    year(start_date)+1
 }
 nday <- length(days)
 nmonth <- elapsed_months(end_date, start_date)
@@ -41,7 +40,7 @@ nyear <- elapsed_years(end_date, start_date)
 
 
 retu <- matrix(ncol = ncoly, nrow = nrowy)
-  if(ret == TRUE){
+if(ret == TRUE){
     if(freq == 'daily'){
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (k in 1:nday){
@@ -111,14 +110,16 @@ retu <- matrix(ncol = ncoly, nrow = nrowy)
 
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nyear)
       for (k in 1:(ncoly*(ncoly+1)/2)){
-        realized[, k] <- apply.quarterly(cross1[,k], sum)
+        realized[, k] <- apply.yearly(cross1[,k], sum)
       }
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nyear)
       for (j in 1:nyear){
         rcovmat <- invvech(as.matrix(realized[j,]))
         chol1 <- t(chol(rcovmat))
         chol2[j,] <- vech(chol1)
-      }}}else{
+      }
+    }
+}else{
     retu <- data
     if(freq == 'daily'){
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
@@ -180,7 +181,7 @@ retu <- matrix(ncol = ncoly, nrow = nrowy)
 
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nyear)
       for (k in 1:(ncoly*(ncoly+1)/2)){
-        realized[, k] <- apply.quarterly(cross1[,k], sum)
+        realized[, k] <- apply.yearly(cross1[,k], sum)
       }
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nyear)
       for (j in 1:nyear){
