@@ -4,8 +4,8 @@ lrvarbart <- function(x){
     K = N^(1/3)
     ac <- acf(x, plot = F, lag.max = floor(2 * N^(2/3)))$acf
     vc <- cc * sqrt(log(N, base = 10)/N)
-    for (i in 1:floor(N^(2/3))) {
-      if (max(abs(ac[i + (1:K)])) < vc) {
+    for (i in 1:floor(N^(2/3))){
+      if(max(abs(ac[i + (1:K)])) < vc){
         break
       }
     }
