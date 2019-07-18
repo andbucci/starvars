@@ -38,7 +38,7 @@ makeDT <- function(tau){
     nupper <- ncol(tau)
     DT <- matrix(0L, ncol = nupper, nrow = nupper)
     for(i in 1:nupper){
-      DT[i, i] <- lrvarbart(tau[,i])$lrv
+      DT[i, i] <- starvars::lrvarbart(tau[,i])$lrv
       }
   return(DT)
 }
