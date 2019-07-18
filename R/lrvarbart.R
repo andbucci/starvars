@@ -15,6 +15,5 @@ lrvarbart <- function(x){
     asy <- ac[1] + 2 * sum(ac[2:(2 * i + 1)] * w)
     erg <- list(lrv = asy, bandwidth = i)
     return(erg)
-  }
 }
 
