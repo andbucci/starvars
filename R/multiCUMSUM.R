@@ -1,4 +1,4 @@
-multiCUMSUM <- function(data){
+multiCUMSUM <- function(data, alpha){
   require(ks)
   require(MASS)
   require(sandwich)
