@@ -15,13 +15,13 @@ dummyfilter <- function(y, date1, date2){
   dummy1 <- zoo(dummy1, index(y))
   if(!is.null(date1) & !is.null(date2)){
   for(i in 1:ndate1){
-   dummy1[index(dummy1)==date1[i], i] <- 1 
+   dummy1[index(dummy1)==date1[i], i] <- 1
   }
   for(j in 1:ndate2){
     dummy1[index(dummy1)==date1[i], (ndate2+j)] <- 1
-  } else if(!is.null(date1) & is.null(date2)){
+  }} else if(!is.null(date1) & is.null(date2)){
     for(i in 1:ndate1){
-      dummy1[index(dummy1)==date1[i], i] <- 1 
+      dummy1[index(dummy1)==date1[i], i] <- 1
     }
   } else if(is.null(date1) & !is.null(date2)){
   lm1 <- lm(dato ~ dummy1)
