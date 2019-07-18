@@ -118,9 +118,7 @@ retu <- matrix(ncol = ncoly, nrow = nrowy)
         rcovmat <- invvech(as.matrix(realized[j,]))
         chol1 <- t(chol(rcovmat))
         chol2[j,] <- vech(chol1)
-      }
-      }
-  }else{
+      }}else{
     retu <- data
     if(freq == 'daily'){
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
@@ -201,7 +199,7 @@ colnames(chol2) <- names1
 if(cholesky == T){
   results <- list(realized, chol2)
   names(results) <- c('Realized Covariances', 'Cholesky Factors')
-} else{
+}else{
   results <- list(realized)
   names(results) <- 'Realized Covariances'
 }
