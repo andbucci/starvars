@@ -20,8 +20,8 @@ multiCUMSUM(data)
 }
 }
 \value{
-\item{Lambda Test statistics}{a \emph{test statistics on the presence of a co-break in the conditional mean}
-\item{Omega Test statistics}{a \emph{test statistics on the presence of a co-break in the conditional variance}
+\item{Lambda Test statistics}{a \emph{test statistics on the presence of a co-break in the conditional mean}}
+\item{Omega Test statistics}{a \emph{test statistics on the presence of a co-break in the conditional variance}}
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
