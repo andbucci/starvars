@@ -15,6 +15,7 @@ ncoly <- ncol(data)
 nrowy <- nrow(data)
 start_date <- index(data)[1]
 end_date <- index(data)[nrowy]
+freq <- match.arg(freq)
 if(freq == 'daily'){
   days <- as.Date(index(data), format = "%m/%d/%Y %I:%M:%S %p")
   days <- unique(days)
