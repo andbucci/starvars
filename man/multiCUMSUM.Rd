@@ -54,7 +54,7 @@ The code was written by Andrea Bucci and Giulio Palomba.
 \examples{
 data(Realized)
 
-testCS <- multiCUMSUM(Realized)
+testCS <- multiCUMSUM(Realized, alpha = 0.95)
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
