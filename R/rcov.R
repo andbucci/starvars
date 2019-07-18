@@ -21,7 +21,7 @@ if(freq == 'daily'){
   days <- unique(days)
 }
 
-elapsed_months <- function(end_date, start_date) {
+elapsed_months <- function(end_date, start_date){
   ed <- as.POSIXlt(end_date)
   sd <- as.POSIXlt(start_date)
   12 * (ed$year - sd$year) + (ed$mon - sd$mon)+1
@@ -118,7 +118,7 @@ retu <- matrix(ncol = ncoly, nrow = nrowy)
         rcovmat <- invvech(as.matrix(realized[j,]))
         chol1 <- t(chol(rcovmat))
         chol2[j,] <- vech(chol1)
-      }}else{
+      }}}else{
     retu <- data
     if(freq == 'daily'){
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
@@ -131,7 +131,6 @@ retu <- matrix(ncol = ncoly, nrow = nrowy)
         chol1 <- t(chol(rcovmat))
         chol2[j,] <- vech(chol1)
       }
-    }
     }
     if(freq == 'monthly'){
       crosspro <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nrowy)
@@ -189,7 +188,7 @@ retu <- matrix(ncol = ncoly, nrow = nrowy)
         chol1 <- t(chol(rcovmat))
         chol2[j,] <- vech(chol1)
       }
-    }
+    }}
 
 names1 <- to('y', (ncoly*(ncoly+1)/2), same.size = F)
 
