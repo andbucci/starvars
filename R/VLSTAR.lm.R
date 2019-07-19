@@ -444,7 +444,7 @@ VLSTAR.lm <- function(y1, x1 = NULL, p = NULL,
     AIC1[l] <- 2*k - 2*ll2[l]
     BIC1[l] <- -2*ll2[l] + k*log(nrowy)
   }
-  names <- list()
+  names1 <- list()
   for(j in 1:m){
     names1[[j]] <- as.data.frame(paste(colnames(x), 'm_', j))
   }
