@@ -432,7 +432,7 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
   for(j in 1:m){
     names1[[j]] <- as.data.frame(paste(colnames(x), 'm_', j))
   }
-  names1 <- as.matrix(rbindlist(tmp))
+  names1 <- as.matrix(rbindlist(names1))
   rownames(BBhat) <- names1
   colnames(BBhat) <- colnames(y)
   rownames(bhat1) <- names1
