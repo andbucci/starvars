@@ -10,7 +10,7 @@ Multivariate CUMSUM test
 Function returns the test statistics for the presence of co-breaks in a set of multivariate time series.
 }
 \usage{
-multiCUMSUM(data)
+multiCUMSUM(data, alpha = 0.95)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
