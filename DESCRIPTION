@@ -8,4 +8,11 @@ Description: This package allows the user to estimate a VLSTAR model via maximum
 License: GNU GPL
 Encoding: UTF-8
 LazyData: true
-Imports: vars, nloptr, matrixcalc, MASS, ks, maxLik, stats4
+Imports: 
+vars, 
+nloptr, 
+matrixcalc, 
+MASS, 
+ks, 
+maxLik, 
+stats4
