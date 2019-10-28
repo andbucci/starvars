@@ -1,4 +1,4 @@
-VLSTAR.jointest <- function(y1, x1, st, alpha = 0.05){
+VLSTAR.joint <- function(y1, x1, st, alpha = 0.05){
   require(matrixcalc)
   y <- as.matrix(y1)
   x <- as.matrix(x1)
