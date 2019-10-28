@@ -9,10 +9,10 @@ License: GNU GPL
 Encoding: UTF-8
 LazyData: true
 Imports: 
-vars, 
-nloptr, 
-matrixcalc, 
-MASS, 
-ks, 
-maxLik, 
-stats4
+  vars, 
+  nloptr, 
+  matrixcalc, 
+  MASS, 
+  ks, 
+  maxLik, 
+  stats4
