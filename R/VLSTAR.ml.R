@@ -3,14 +3,14 @@
 #' @description This package  allows to estimate the coefficient in a VLSTAR model.
 #'
 #'
-#' @examples  VLSTAR.lm(data, p = 1, st = yy)
+#' @examples  VLSTAR.ml(data, p = 1, st = yy)
 #'
 
-VLSTAR.lm <- function(y1, x1 = NULL, p = NULL,
+VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
                       m = 2, st = NULL, constant = T,
                       n.combi = 50, n.iter = 500,
                       starting = NULL, epsilon = 10^(-3),
-                      exo = T){
+                      exo = F){
   y <- as.matrix(y1)
   if (any(is.na(y)))
     stop("\nNAs in y.\n")
@@ -18,8 +18,14 @@ VLSTAR.lm <- function(y1, x1 = NULL, p = NULL,
     stop('The number of regimes should be greater than one.')
   if(is.null(st))
     stop('The transition variable must be supplied.')
-  if(length(y[,1]) != length(as.matrix(x1[,1])) | length(st) != length(as.matrix(x1[,1])) | length(y[,1]) != length(st))
+  if(is.null(x1)){
+    if(length(y[,1]) != length(st))
+      stop('The length of the variables does not match!')
+  }else{
+   if(length(y[,1]) != length(as.matrix(x1[,1])) | length(st) != length(as.matrix(x1[,1])) | length(y[,1]) != length(st))
     stop('The length of the variables does not match!')
+  }
+
   if(is.null(p) | p < 1){
     stop('Please, specify a valid lag order.')
   }
@@ -171,7 +177,7 @@ VLSTAR.lm <- function(y1, x1 = NULL, p = NULL,
   for (i in 1:nrowx){
     for(t in 1:(m-1)){
     for (j in 1 : ncoly){
-      (1L+exp(-PARAM[[t]][j,1]*(st[i]-PARAM[[t]][j,2])))^(-1)
+    glog[i,j] <- (1L+exp(-PARAM[[t]][j,1]*(st[i]-PARAM[[t]][j,2])))^(-1)
     }
     Gt <- diag(glog[i,])
     GT[[t]] <- Gt

@@ -123,7 +123,7 @@ The code was written by Andrea Bucci
 }
 \examples{
 data(Realized)
-VLSTAR.nls(Realized, p = 1, n.combi = 10,
+VLSTAR.nls(Realized[-1,], p = 1, n.combi = 10,
 n.iter = 50, st = lag(Realized[,1]))
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

@@ -1,7 +1,7 @@
 Package: starvars
 Type: Package
 Title: A package for estimating Vector Logistic Smooth Transition Models
-Version: 0.1.3
+Version: 0.1.4
 Author: Andrea Bucci
 Maintainer: The package maintainer <a.bucci@univpm.it>
 Description: This package allows the user to estimate a VLSTAR model via maximum log-likelihood or nonlinear least squares. It further permits to test for linearity in the multivariate framework against a VLSTAR model with a single transition variable.
@@ -14,5 +14,7 @@ Imports:
   matrixcalc, 
   MASS, 
   ks, 
-  maxLik, 
-  stats4
+  maxLik,
+  rlist,
+  stats4,
+  zoo

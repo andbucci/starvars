@@ -7,7 +7,7 @@
 #'
 
 VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = T, n.combi = 50, n.iter = 500,
-                       starting = NULL, epsilon = 10^(-3), exo = T){
+                       starting = NULL, epsilon = 10^(-3), exo = F){
   require(vars)
   require(data.table)
   require(nloptr)
@@ -26,8 +26,13 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
     stop('The transition variable must be supplied.')
   if(!is.null(starting) & !is.list(starting))
   stop('Provide the initial parameters as a list of dimension m-1.')
-  if(length(y[,1]) != length(as.matrix(x1[,1])) | length(st) != length(as.matrix(x1[,1])) | length(y[,1]) != length(st))
-    stop('The length of the variables does not match!')
+  if(is.null(x1)){
+    if(length(y[,1]) != length(st))
+      stop('The length of the variables does not match!')
+  }else{
+    if(length(y[,1]) != length(as.matrix(x1[,1])) | length(st) != length(as.matrix(x1[,1])) | length(y[,1]) != length(st))
+      stop('The length of the variables does not match!')
+  }
   if(is.null(p) | p < 1){
     stop('Please, specify a valid lag order.')
   }
