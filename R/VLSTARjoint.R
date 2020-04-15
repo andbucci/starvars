@@ -1,4 +1,4 @@
-VLSTAR.joint <- function(y1, x1, st, alpha = 0.05){
+VLSTARjoint <- function(y1, x1, st, alpha = 0.05){
   require(matrixcalc)
   y <- as.matrix(y1)
   x <- as.matrix(x1)
@@ -35,7 +35,7 @@ return(results)
 
 
 
-#' @S3method print summary.VLSTAR.joint
+#' @S3method print print.VLSTAR.joint
 print.VLSTAR.joint <- function(x, digits=max(3, getOption("digits") - 2), ...)
 {
   cat("\nJoint linearity test (Third-order Taylor expansion)\n")

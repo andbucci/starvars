@@ -1,5 +1,5 @@
-\name{VLSTAR.nls}
-\alias{VLSTAR.nls}
+\name{VLSTARnls}
+\alias{VLSTARnls}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 VLSTAR-NLS Estimation
@@ -10,8 +10,8 @@ VLSTAR-NLS Estimation
 This function allows the user to estimate the coefficients of a VLSTAR model with \emph{m} regimes through nonlinear least squares. The set of starting values of Gamma and C for the convergence algorithm can be either passed or obtained via searching grid.
 }
 \usage{
-VLSTAR.nls(y1, x1 = NULL, p = NULL,
-m = NULL, st = NULL, constant = T,
+VLSTARnls(y1, x1 = NULL, p = NULL,
+m = 2, st = NULL, constant = T,
 n.combi = 50, n.iter = 500,
 starting = NULL,
 epsilon = 10^(-3), exo = T)
@@ -119,11 +119,11 @@ The code was written by Andrea Bucci
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{VLSTAR.lm}} for log-likehood estimation of the same model and \code{\link{VLSTAR.joint}} to test the presence of a unique transition variable among equations.
+\code{\link{VLSTARlm}} for log-likehood estimation of the same model and \code{\link{VLSTARjoint}} to test the presence of a unique transition variable among equations.
 }
 \examples{
 data(Realized)
-VLSTAR.nls(Realized[-1,1:10], p = 1, n.combi = 10,
+VLSTARnls(Realized[-1,1:10], p = 1, n.combi = 10,
 n.iter = 50, st = Realized[-nrow(Realized),1])
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

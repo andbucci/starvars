@@ -1,5 +1,5 @@
-\name{VLSTAR.ml}
-\alias{VLSTAR.ml}
+\name{VLSTARml}
+\alias{VLSTARml}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 VLSTAR-ML Estimation
@@ -10,7 +10,7 @@ VLSTAR-ML Estimation
 This function allows the user to estimate the coefficients of a VLSTAR model with \emph{m} regimes through maximum log-likelihood. The set of starting values of Gamma and C for the convergence algorithm can be either passed or obtained via searching grid.
 }
 \usage{
-VLSTAR.ml(y1, x1 = NULL, p = NULL,
+VLSTARml(y1, x1 = NULL, p = NULL,
 m = NULL, st = NULL, constant = T,
 n.combi = 50, n.iter = 500,
 starting = NULL,
@@ -121,11 +121,11 @@ The code was written by Andrea Bucci
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{VLSTAR.nls}} for nonlinear least squares estimation of the same model and \code{\link{VLSTAR.joint}} to test the presence of a unique transition variable among equations.
+\code{\link{VLSTARnls}} for nonlinear least squares estimation of the same model and \code{\link{VLSTARjoint}} to test the presence of a unique transition variable among equations.
 }
 \examples{
 data(Realized)
-VLSTAR.ml(Realized[-1,1:10], p = 1, n.combi = 10,
+VLSTARml(Realized[-1,1:10], p = 1, n.combi = 10,
 n.iter = 50, st = Realized[-nrow(Realized),1])
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

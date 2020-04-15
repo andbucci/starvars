@@ -1,5 +1,5 @@
-\name{VLSTAR.joint}
-\alias{VLSTAR.joint}
+\name{VLSTARjoint}
+\alias{VLSTARjoint}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Joint linearity test
@@ -10,7 +10,7 @@ Joint linearity test
 This function allows the user to test linearity against a Vector Smooth Transition Autoregressive Model with a single transition variable.
 }
 \usage{
-VLSTAR.joint(y1, x1, st, alpha = 0.05)
+VLSTARjoint(y1, x1, st, alpha = 0.05)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -94,9 +94,9 @@ The code was written by Andrea Bucci
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{VLSTAR.lm}} for log-likehood estimation of the VLSTAR model and \code{\link{VLSTAR.nls}} for NLS estimation of the same model.
+\code{\link{VLSTARlm}} for log-likehood estimation of the VLSTAR model and \code{\link{VLSTARnls}} for NLS estimation of the same model.
 }
 \examples{
 data(Realized)
-VLSTAR.joint(Realized[-1,1:10], Realized[-1,11:19], st=Realized[1:(nrow(Realized)-1),1])
+VLSTARjoint(Realized[-1,1:10], Realized[-1,11:19], st=Realized[1:(nrow(Realized)-1),1])
 }
