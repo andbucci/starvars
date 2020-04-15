@@ -415,12 +415,13 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
                   st, y1)
   names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'Fitted', 'Residuals', 'MultiLL', 'LL', 'AIC',
                       'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal')
+  class(results) = 'VLSTAR'
   return(results)
   }
 
 
 #' @S3method print VLSTARml
-print.VLSTARml <- function(x, ...) {
+print.VLSTAR <- function(x, ...) {
   NextMethod(...)
   cat("\nVLSTAR model Estimation through Maximum Likelihood\n")
   order.L <- (x$m-1)
@@ -443,7 +444,7 @@ print.VLSTARml <- function(x, ...) {
 
 
 #' @S3method summary VLSTAR
-summary.VLSTARml<-function(object,...){
+summary.VLSTAR<-function(object,...){
   NextMethod(...)
   x<-object
   k<-ncol(x$Data[[2]])
@@ -478,7 +479,7 @@ summary.VLSTARml<-function(object,...){
 }
 
 #' @S3method print summary.VLSTAR
-print.summary.VLSTARml<-function(x,digits = max(3, getOption("digits") - 3), signif.stars = getOption("show.signif.stars"),...){
+print.summaryVLSTAR<-function(x,digits = max(3, getOption("digits") - 3), signif.stars = getOption("show.signif.stars"),...){
   coeftoprint<-list()
   for(i in 1:length(x$bigcoefficients)){
     a<-myformat(x$coefficients[[i]], digits)

@@ -29,13 +29,14 @@ chi <- qchisq(conflev, df)
 pvalue <- pchisq(LM3, df, lower.tail=FALSE)
 results <- list(LM3, pvalue, chi)
 names(results) <- c('LM', 'pval', 'critical')
+class(results) = 'VLSTARjoint'
 #cat('Joint linearity test (Third-order Taylor expansion)\n')
 return(results)
 }
 
 
 
-#' @S3method print print.VLSTARjoint
+#' @S3method print.VLSTARjoint
 print.VLSTARjoint <- function(x, digits=max(3, getOption("digits") - 2), ...)
 {
   cat("\nJoint linearity test (Third-order Taylor expansion)\n")

@@ -451,12 +451,13 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
                   st, y1)
   names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'Fitted', 'Residuals', 'MultiLL', 'LL', 'AIC',
                       'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal')
+  class(results) <- 'VLSTAR'
   return(results)
 }
 
 
 #' @S3method print VLSTARnls
-print.VLSTARnls <- function(x, ...) {
+print.VLSTAR <- function(x, ...) {
   #NextMethod(...)
   cat("\nVLSTAR model Estimation through Nonlinear Least Squares\n")
   order.L <- (x$m-1)
@@ -479,7 +480,7 @@ print.VLSTARnls <- function(x, ...) {
 
 
 #' @S3method summary VLSTAR
-summary.VLSTARnls<-function(object,...){
+summary.VLSTAR<-function(object,...){
   #NextMethod(...)
   x<-object
   k<-ncol(x$Data[[2]])
@@ -514,7 +515,7 @@ summary.VLSTARnls<-function(object,...){
 }
 
 #' @S3method print summary.VLSTAR
-print.summary.VLSTARnls<-function(x,digits = max(3, getOption("digits") - 3), signif.stars = getOption("show.signif.stars"),...){
+print.summaryVLSTARnls<-function(x,digits = max(3, getOption("digits") - 3), signif.stars = getOption("show.signif.stars"),...){
   coeftoprint<-list()
   for(i in 1:length(x$bigcoefficients)){
     a<-myformat(x$coefficients[[i]], digits)
