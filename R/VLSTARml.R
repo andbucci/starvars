@@ -420,3 +420,102 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
   }
 
 
+#' @S3method print VLSTARnls
+print.VLSTAR <- function(x, ...) {
+  #NextMethod(...)
+  cat("\nVLSTAR model Estimation through Nonlinear Least Squares\n")
+  order.L <- (x$m-1)
+  order.H <- x$m
+  lowCoef <- x$Bhat[grep(paste("m_ ", order.L, sep=''), rownames(x$Bhat))]
+  highCoef <- x$Bhat[grep(paste("m_ ", order.H, sep=''), rownames(x$Bhat))]
+  gammaCoef <- x$Cgamma[,1]
+  cCoef <- x$Cgamma[,2]
+
+  cat("Coefficients:\n")
+  cat("Low regime:\n")
+  print(lowCoef, ...)
+  cat("\nHigh regime:\n")
+  print(highCoef, ...)
+  cat("\nSmoothing parameter: gamma =", format(gammaCoef, digits=4),"\n")
+  cat("\nThreshold")
+  cat("\nValue:", format(cCoef, digits=4), "\n")
+  invisible(x)
+}
+
+#' @S3method summary VLSTAR
+summary.VLSTAR<-function(object,...){
+  #NextMethod(...)
+  x<-object
+  k<-ncol(x$Data[[2]])
+  t<-nrow(x$Data[[1]])
+  p<-x$p
+  x$T <- nrow(x$yoriginal)
+  Z<-t(as.matrix(tail.matrix(x$Data[[1]])))
+  x$npar <- k*ncol(x$Data[[1]])*x$m + 2*(x$m-1)*ncol(x$Data[[1]])
+
+  ## export results
+  x$coefficients<-as.list(as.data.frame(x$Bhat))
+  x$StDev<-as.list(as.data.frame(x$StDev))
+  x$Pvalues<-as.list(as.data.frame(x$pval))
+  x$Tvalues<-as.list(as.data.frame(x$ttest))
+  ab<-list()
+  symp<-list()
+  stars<-list()
+  for(i in 1:length(x$Pvalues)){
+    symp[[i]] <- symnum(x$Pvalues[[i]], corr=FALSE,cutpoints = c(0,  .001,.01,.05, .1, 1), symbols = c("***","**","*","."," "))
+    stars[[i]]<-matrix(symp[[i]], nrow=length(x$Pvalues[[i]]))
+    ab[[i]]<-matrix(paste(x$coefficients[[i]],"(", x$StDev[[i]],")",stars[[i]], sep=""), nrow=length(x$StDev[[i]]))
+    dimnames(ab[[i]])<-dimnames(x$coefficients[[1]])
+  }
+  attributes(ab)<-attributes(x$coefficients)
+  x$stars<-stars
+  x$starslegend<-symp[[1]]
+  x$bigcoefficients<-ab
+  x$aic<-x$AIC
+  x$bic<-x$BIC
+  x$t <- t
+  x$k <- k
+  class(x) <- 'summary.VLSTAR'
+  return(x)
+}
+
+#' @S3method print summary.VLSTAR
+print.summary.VLSTAR<-function(x,digits = max(3, getOption("digits") - 3), signif.stars = getOption("show.signif.stars"),...){
+  coeftoprint<-list()
+  myformat<-function(x,digits, toLatex=FALSE){
+    r<-x
+    littlex<-abs(x)<10^-(digits)
+    r[!littlex]<-formatC(x[!littlex],digits=digits, format="f")
+    r[littlex]<-format(x[littlex],digits=min(digits,2), scientific=TRUE)
+    if(toLatex)
+      r<-gsub("(e.*)","slashtext{\\1}",r)
+    if(class(x)=="numeric")
+      return(noquote(r))
+    if(class(x)=="matrix")
+      return(matrix(noquote(r), ncol=ncol(x), nrow=nrow(x)))
+  }
+  for(i in 1:length(x$bigcoefficients)){
+    a<-myformat(x$coefficients[[i]], digits)
+    b<-myformat(x$StDev[[i]], digits)
+    aic1 <- round(x$AIC,2)
+    bic1 <- round(x$BIC,2)
+    if(getOption("show.signif.stars"))
+      stars<-x$stars[[i]]
+    else
+      stars<-NULL
+    coeftoprint[[i]]<-matrix(c(paste(a,"(", b,")",stars, sep=""), '', round(x$Cgamma[i,1],4), round(x$Cgamma[i,2],4),'',
+                               aic1[i], bic1[i]), nrow=(length(x$StDev[[1]])+6))
+    rownames(coeftoprint[[i]])<- c(rownames(x$Bhat),"---",'gamma', 'c',"---", 'AIC', 'BIC')
+  }
+  names(coeftoprint) <- colnames(x$Bhat)
+  cat("Model VLSTAR with ", x$m, " regimes\n", sep ='')
+  cat("\nFull sample size:",x$T, "\tEnd sample size:", x$t)
+  cat("\nNumber of variables:", x$k,"\tNumber of estimated parameters:", x$npar)
+  #cat("\nAIC",x$aic)
+  #cat("\nBIC", x$bic)
+  cat("\nMultivariate log-likelihood:", x$MultiLL,"\n\n")
+  print(noquote(coeftoprint))
+  if (signif.stars)
+    cat("---\nSignif. codes: ", attr(x$starslegend, "legend"), "\n")
+  #cat("\nThreshold values:",x$Cgamma[,2])
+}
