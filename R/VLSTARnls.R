@@ -447,7 +447,7 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
   rownames(bhat1) <- names1
   colnames(bhat1) <- colnames(y)
   modeldata <- list(y, x)
-  results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, bhat1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB, m, p,
+  results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB, m, p,
                   st, y1)
   names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'Fitted', 'Residuals', 'MultiLL', 'LL', 'AIC',
                       'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal')
