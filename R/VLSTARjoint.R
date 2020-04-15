@@ -21,7 +21,7 @@ for (i in 1:nrowx){
 ausvar <- lm(ee ~ ZZ)
 ll <- residuals(ausvar)
 RSS1 <- t(ll)%*%ll
-trac1 <- matrix.trace(ginv(RSS0)%*%RSS1)
+trac1 <- matrixcalc::matrix.trace(MASS::ginv(RSS0)%*%RSS1)
 LM3 <- nrowx*(ncoly - trac1)
 df <- 3*ncoly*(q+ncoly)
 conflev <- 1-alpha/2
