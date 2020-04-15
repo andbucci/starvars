@@ -6,8 +6,11 @@
 #' @examples  VLSTAR.nls(data, p = 1, st = yy)
 #'
 
-VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = T, n.combi = 50, n.iter = 500,
-                       starting = NULL, epsilon = 10^(-3), exo = F){
+VLSTAR.nls <- function(y1, x1 = NULL, p = NULL,
+                       m = 2, st = NULL, constant = T,
+                       n.combi = 50, n.iter = 500,
+                       starting = NULL, epsilon = 10^(-3),
+                       exo = F){
   require(vars)
   require(data.table)
   require(nloptr)
