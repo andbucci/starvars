@@ -45,7 +45,7 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
   }
   colnames(y) <- make.names(colnames(y))
   ##Definition of dimensions, creating variable x with constant
-  yt <- zoo(y)
+  yt <- zoo::zoo(y)
   ylag <- stats::lag(yt, -c(1:p))
   ylag <- as.matrix(ylag)
   y <- y[-p, ]
@@ -124,7 +124,7 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
           Gt <- diag(glog[i,])
           GT[[t]] <- Gt
           }
-          Gtilde[[i]] <- t(cbind(In, list.cbind(GT)))
+          Gtilde[[i]] <- t(cbind(In, rlist::list.cbind(GT)))
           GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
           XX[[i]] <- x[i,] %*%t(x[i,])
           GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
@@ -135,8 +135,8 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
         ggxx <- Reduce(`+`, GGXX)/nrowx
         M <- t(do.call("cbind", kro))
         Y <- vec(t(y))
-        Bhat <- ginv(t(M)%*%M)%*%t(M)%*%Y
-        BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
+        Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
+        BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
         resi <- list()
         Ehat <- matrix(NA, ncol = ncoly, nrow = nrowy)
         for (o in 1:nrowx){
@@ -192,7 +192,7 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
     Gt <- diag(glog[i,])
     GT[[t]] <- Gt
   }
-    Gtilde[[i]] <- t(cbind(In, list.cbind(GT)))
+    Gtilde[[i]] <- t(cbind(In, rlist::list.cbind(GT)))
     GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
     XX[[i]] <- x[i,] %*%t(x[i,])
     GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
@@ -203,8 +203,8 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
   ggxx <- Reduce(`+`, GGXX)/nrowx
   M <- t(do.call("cbind", kro))
   Y <- vec(t(y))
-  Bhat <- ginv(t(M)%*%M)%*%t(M)%*%Y
-  BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
+  Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
+  BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
 
   #Sum of squared error to be optimized
   ssq1 <- function(param){
@@ -227,7 +227,7 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
       Gt <- diag(glog[z,])
       GT[[t]] <- Gt
       }
-      Gtilde[[z]] <- t(cbind(In, list.cbind(GT)))
+      Gtilde[[z]] <- t(cbind(In, rlist::list.cbind(GT)))
       dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
     }
     sumdif <- sum(dify)
@@ -255,8 +255,8 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
       Gt <- diag(glog[z,])
       GT[[t]] <- Gt
     }
-      Gtilde[[z]] <- t(cbind(In, list.cbind(GT)))
-      dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
+      Gtilde[[z]] <- t(cbind(In, rlist::list.cbind(GT)))
+      dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%MASS::ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
     }
     sumdif <- sum(dify)
     logll <- -(nrowy*log(det(Omegahat))/2L) - sumdif/2L  - (nrowy*ncoly/2L)*log(2L*pi)
@@ -276,7 +276,7 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
   for(t in 1:(m-1)){
     PARAM1[[t]] <- as.data.frame(PARAM[[t]])
   }
-  param <- rbindlist(PARAM1)
+  param <- data.table::rbindlist(PARAM1)
   param <- vec(param)
 
   cat('NLS estimation\n')
@@ -316,7 +316,7 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
       Gt <- diag(glog[i,])
       GT[[t]] <- Gt
       }
-      Gtilde[[i]] <- t(cbind(In, list.cbind(GT)))
+      Gtilde[[i]] <- t(cbind(In, rlist::list.cbind(GT)))
       GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
       XX[[i]] <- x[i,] %*%t(x[i,])
       GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
@@ -327,8 +327,8 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
     ggxx <- Reduce(`+`, GGXX)/nrowx
     M <- t(do.call("cbind", kro))
     Y <- vec(t(y))
-    Bhat <- ginv(t(M)%*%M)%*%t(M)%*%Y
-    BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
+    Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
+    BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
     resi <- list()
     resiresi <- list()
     fitte <- matrix(nrow = nrowy, ncol = ncoly)
@@ -384,7 +384,7 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
    bb2[[t]] <- as.data.frame(bbhat[[iter]][,(ncoly*(t-1)+1):(ncoly*t)] +
                                bbhat[[iter]][,(ncoly*(t)+1):(ncoly*(t+1))])
   }
-  bb4 <- as.matrix(rbindlist(bb2))
+  bb4 <- as.matrix(data.table::rbindlist(bb2))
   BBhat <- rbind(bb1, bb4)
   colnames(cgam1) <- c('gamma', 'c')
   covbb <- matrix(nrow = m*ncolx, ncol = ncoly)
@@ -392,8 +392,8 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
   pval <- matrix(nrow = m*ncolx, ncol = ncoly)
   ee <- matrix(nrow = m*ncolx, ncol = ncoly)
   for (j in 1 : ncoly){
-    #covbb[,j] <- diag(ginv(t(x[[j]])%*%XX[[j]])*sqrt(varhat[j]))
-    covbb[,j] <- sqrt(diag(ginv(t(x) %*%x))*varhat[j])
+    #covbb[,j] <- diag(MASS::ginv(t(x[[j]])%*%XX[[j]])*sqrt(varhat[j]))
+    covbb[,j] <- sqrt(diag(MASS::ginv(t(x) %*%x))*varhat[j])
     ttest[,j] <- BBhat[,j]/covbb[,j]
     pval[,j] <- 2*pt(abs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower = F)
   }
@@ -438,7 +438,7 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
   for(j in 1:m){
     names1[[j]] <- as.data.frame(paste(colnames(x), 'm_', j))
   }
-  names1 <- as.matrix(rbindlist(names1))
+  names1 <- as.matrix(data.table::rbindlist(names1))
   rownames(BBhat) <- names1
   colnames(BBhat) <- colnames(y)
   rownames(bhat1) <- names1
