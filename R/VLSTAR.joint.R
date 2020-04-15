@@ -28,7 +28,18 @@ conflev <- 1-alpha/2
 chi <- qchisq(conflev, df)
 pvalue <- pchisq(LM3, df, lower.tail=FALSE)
 results <- list(LM3, pvalue, chi)
-names(results) <- c('LM', 'p-value', 'Critical value for alpha')
-cat('Joint linearity test (Third-order Taylor expansion)\n')
+names(results) <- c('LM', 'pval', 'critical')
+#cat('Joint linearity test (Third-order Taylor expansion)\n')
 return(results)
+}
+
+
+
+#' @S3method print summary.VLSTAR.joint
+print.VLSTAR.joint <- function(x, digits=max(3, getOption("digits") - 2), ...)
+{
+  cat("\nJoint linearity test (Third-order Taylor expansion)\n")
+  cat(" LM =", format(x$LM, digits=digits),"; p-value =", format(x$pval, digits=digits),"\n")
+  cat(" Critical value for alpha =", format(x$critical, digits=digits), "\n")
+  invisible(x)
 }

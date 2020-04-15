@@ -98,5 +98,5 @@ The code was written by Andrea Bucci
 }
 \examples{
 data(Realized)
-VLSTAR.joint(y1, x2, st=x_a)
+VLSTAR.joint(Realized[-1,1:10], Realized[-1,11:19], st=Realized[1:(nrow(Realized)-1),1])
 }

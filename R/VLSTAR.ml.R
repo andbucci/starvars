@@ -38,7 +38,7 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
   }
   colnames(y) <- make.names(colnames(y))
   ##Definition of dimensions, creating variable x with constant
-  yt <- zoo(y)
+  yt <- zoo::zoo(y)
   ylag <- stats::lag(yt, -c(1:p))
   ylag <- as.matrix(ylag)
   y <- y[-p, ]
@@ -49,9 +49,10 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
   const <- rep(1, (nrowy-p))
   if (constant == T){
     if(exo == T){
-      x <- as.matrix(cbind(ylag, constant, x1[-p,]))
+      x1a <- as.matrix(x1[-p,])
+      x <- as.matrix(cbind(ylag, const, x1a))
     }else{
-      x <- as.matrix(cbind(ylag, constant))
+      x <- as.matrix(cbind(ylag, const))
     }
     ncolx <- ncol(x)
   }  else{
@@ -114,7 +115,7 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
         Gt <- diag(glog[i,])
         GT[[t]] <- Gt
       }
-      Gtilde[[i]] <- t(cbind(In, list.cbind(GT)))
+      Gtilde[[i]] <- t(cbind(In, rlist::list.cbind(GT)))
         GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
         XX[[i]] <- x[i,] %*%t(x[i,])
         GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
@@ -125,8 +126,8 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
       ggxx <- Reduce(`+`, GGXX)/nrowx
       M <- t(do.call("cbind", kro))
       Y <- vec(t(y))
-      Bhat <- ginv(t(M)%*%M)%*%t(M)%*%Y
-      BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
+      Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
+      BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
       resi <- list()
       Ehat <- matrix(NA, ncol = ncoly, nrow = nrowy)
       for (o in 1:nrowx){
@@ -164,6 +165,7 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
 }
 
   #NLS Estimation of Bhat and Omegahat to be used in the first iteration of maximum likelihood
+  In <- diag(ncoly)
   glog <- matrix(ncol=ncoly, nrow = nrowy)
   GT <- list()
   Gtilde <- list()
@@ -182,7 +184,7 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
     Gt <- diag(glog[i,])
     GT[[t]] <- Gt
   }
-  Gtilde[[i]] <- t(cbind(In, list.cbind(GT)))
+  Gtilde[[i]] <- t(cbind(In, rlist::list.cbind(GT)))
     GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
     XX[[i]] <- x[i,] %*%t(x[i,])
     GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
@@ -194,8 +196,8 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
   M <- t(do.call("cbind", kro))
   Y <- vec(t(y))
   #Estimated coefficients
-  Bhat <- ginv(t(M)%*%M)%*%t(M)%*%Y
-  BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
+  Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
+  BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
   resi <- list()
   Ehat1 <- matrix(NA, ncol = ncoly, nrow = nrowy)
   for (i in 1:nrowx){
@@ -204,37 +206,6 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
   Ehat1 <- t(do.call("cbind", resi))
   #Estimated covariance matrix
   Omegahat <- (t(Ehat1)%*%Ehat1)/(nrowy)
-
-  glog <- matrix(ncol=ncoly, nrow = nrowy)
-  GT <- list()
-  Gtilde <- list()
-  GG <- list()
-  XX <- list()
-  XY <- list()
-  XYOG <- list()
-  kro <- list()
-  PsiOmegaPsi <- list()
-  ggxx <- matrix(ncol = (q+ncoly)*m*ncoly, nrow = (q+ncoly)*m*ncoly)
-  for (i in 1:nrowx){
-    for(t in 1:(m-1)){
-    for (j in 1 : ncoly){
-      glog[i,j] <- (1+exp(-cgam[j,1]*(st[i]-cgam[j,2])))^(-1)
-    }
-    Gt <- diag(glog[i,])
-    GT[[t]] <- Gt
-  }
-  Gtilde[[i]] <- t(cbind(In, list.cbind(GT)))
-    GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
-    XX[[i]] <- x[i,] %*%t(x[i,])
-    XY[[i]] <- x[i, ]%*%t(y[i,])
-    XYOG[[i]] <- vec(XY[[i]]%*%ginv(Omegahat)%*%t(Gtilde[[i]]))
-    PsiOmegaPsi[[i]] <- Gtilde[[i]]%*%ginv(Omegahat)%*%t(Gtilde[[i]])
-    kro[[i]] <- kronecker(PsiOmegaPsi[[i]], XX[[i]])
-  }
-  xyog <- Reduce(`+`, XYOG)/nrowy
-  kroxx <- Reduce(`+`, kro)/nrowy
-  Bhat <- t(xyog%*%t(kroxx))
-  BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
 
   #BB0 <- BB
   #Omega0 <- Omegahat
@@ -260,8 +231,8 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
         Gt <- diag(glog[z,])
         GT[[t]] <- Gt
       }
-      Gtilde[[z]] <- t(cbind(In, list.cbind(GT)))
-      dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
+      Gtilde[[z]] <- t(cbind(In, rlist::list.cbind(GT)))
+      dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%MASS::ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
     }
     sumdif <- sum(dify)
     logll <- -(nrowy*log(det(Omegahat))/2L) - sumdif/2L  - (nrowy*ncoly/2L)*log(2L*pi)
@@ -289,8 +260,8 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
         Gt <- diag(glog[z,])
         GT[[t]] <- Gt
       }
-      Gtilde[[z]] <- t(cbind(In, list.cbind(GT)))
-      dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
+      Gtilde[[z]] <- t(cbind(In, rlist::list.cbind(GT)))
+      dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%MASS::ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
     }
     sumdif <- sum(dify)
     logll <- -(nrowy*log(det(Omegahat))/2L) - sumdif/2L  - (nrowy*ncoly/2L)*log(2L*pi)
@@ -310,8 +281,8 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
   for(t in 1:(m-1)){
     PARAM1[[t]] <- as.data.frame(PARAM[[t]])
   }
-  param <- rbindlist(PARAM1)
-  param <- vec(param)
+  param <- data.table::rbindlist(PARAM1)
+  param <- vec(as.matrix(param))
 
   cat('Maximum likelihood estimation\n')
 
@@ -350,22 +321,24 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
         Gt <- diag(glog[i,])
         GT[[t]] <- Gt
       }
-      Gtilde[[i]] <- t(cbind(In, list.cbind(GT)))
+      Gtilde[[i]] <- t(cbind(In, rlist::list.cbind(GT)))
       GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
       XX[[i]] <- x[i,] %*%t(x[i,])
       XY[[i]] <- x[i, ]%*%t(y[i,])
-      XYOG[[i]] <- vec(XY[[i]]%*%ginv(Omegahat)%*%t(Gtilde[[i]]))
-      PsiOmegaPsi[[i]] <- Gtilde[[i]]%*%ginv(Omegahat)%*%t(Gtilde[[i]])
+      XYOG[[i]] <- vec(XY[[i]]%*%MASS::ginv(Omegahat)%*%t(Gtilde[[i]]))
+      PsiOmegaPsi[[i]] <- Gtilde[[i]]%*%MASS::ginv(Omegahat)%*%t(Gtilde[[i]])
       kro[[i]] <- kronecker(PsiOmegaPsi[[i]], XX[[i]])
     }
     xyog <- Reduce(`+`, XYOG)/nrowy
     kroxx <- Reduce(`+`, kro)/nrowy
-    Bhat <- t(xyog%*%t(kroxx))
-    BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
+    Bhat <- t(t(xyog)%*%kroxx)
+    BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
     resi <- list()
+    fitte <- matrix(nrow = nrowy, ncol = ncoly)
     Ehat1 <- matrix(NA, ncol = ncoly, nrow = nrowy)
     for (i in 1:nrowx){
       resi[[i]] <- y[i, ] - t(Gtilde[[i]])%*%t(BB)%*%x[i,]
+      fitte[i,] <- t(t(Gtilde[[i]])%*%t(BB)%*%x[i,])
     }
     Ehat1 <- t(do.call("cbind", resi))
     Omegahat <- (t(Ehat1)%*%Ehat1)/(nrowy)
@@ -400,7 +373,7 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
     bb2[[t]] <- as.data.frame(bbhat[[iter]][,(ncoly*(t-1)+1):(ncoly*t)] +
                                 bbhat[[iter]][,(ncoly*(t)+1):(ncoly*(t+1))])
   }
-  bb4 <- as.matrix(rbindlist(bb2))
+  bb4 <- as.matrix(data.table::rbindlist(bb2))
   BBhat <- rbind(bb1, bb4)
   colnames(cgam1) <- c('gamma', 'c')
   covbb <- matrix(nrow = m*ncolx, ncol = ncoly)
@@ -409,31 +382,11 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
   ee <- matrix(nrow = m*ncolx, ncol = ncoly)
   for (j in 1 : ncoly){
     #covbb[,j] <- diag(ginv(t(x[[j]])%*%XX[[j]])*sqrt(varhat[j]))
-    covbb[,j] <- sqrt(diag(ginv(t(x) %*%x))*varhat[j])
+    covbb[,j] <- sqrt(diag(MASS::ginv(t(x) %*%x))*varhat[j])
     ttest[,j] <- BBhat[,j]/covbb[,j]
     pval[,j] <- 2*pt(abs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower = F)
   }
-  signifi <- matrix('',nrow = nrow(pval), ncol = ncol(pval))
-  for(i in 1:nrow(pval)){
-    for(j in 1:ncol(pval)){
-      if(pval[i,j] < 0.01)
-      {signifi[i,j] <- '***'}
-      else if(pval[i,j] <=0.05 & pval[i,j]>0.01){
-        signifi[i,j] <- '**'
-      }
-      else if(pval[i,j] <= 0.1 & pval[i,j]>0.05){
-        signifi[i,j] <- '*'
-      }
-    }
-  }
 
-  bhat1 <- matrix(nrow = nrow(pval), ncol = ncol(pval))
-  for(i in 1:nrow(pval)){
-    for(j in 1:ncol(pval)){
-      bhat1[i,j] <- paste(round(BBhat[i,j],4), signifi[i,j], "&", "(", round(covbb[i,j],4),
-                          ")", sep = '')
-    }
-  }
   loglike2 <- function(y, resid1, omega){
     nrowy <- nrow(as.matrix(y))
     logll <- -(nrowy/2)*log(2*pi) -(nrowy/2)*log(omega) - (t(resid1)%*%resid1)/(2*omega)
@@ -454,13 +407,99 @@ VLSTAR.ml <- function(y1, x1 = NULL, p = NULL,
   for(j in 1:m){
     names1[[j]] <- as.data.frame(paste(colnames(x), 'm_', j))
   }
-  names1 <- as.matrix(rbindlist(names1))
+  names1 <- as.matrix(data.table::rbindlist(names1))
   rownames(BBhat) <- names1
   colnames(BBhat) <- colnames(y)
-  rownames(bhat1) <- names1
-  colnames(bhat1) <- colnames(y)
   modeldata <- list(y, x)
-  results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, bhat1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB)
-  names(results) <- c('Bhat','St.Dev.', 't-test', 'pval', 'C-gamma', 'Omega', 'Fitted', 'Residuals', 'Output', 'Multivariate Log-Likelihood', 'Log-Likelihood', 'AIC', 'BIC', 'Gtilde', 'Data', 'B')
+  results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB, m, p,
+                  st, y1)
+  names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'Fitted', 'Residuals', 'MultiLL', 'LL', 'AIC',
+                      'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal')
   return(results)
   }
+
+
+#' @S3method print VLSTAR.ml
+print.VLSTAR.ml <- function(x, ...) {
+  NextMethod(...)
+  cat("\nVLSTAR model Estimation through Maximum Likelihood\n")
+  order.L <- (x$m-1)
+  order.H <- x$m
+  lowCoef <- x$Bhat[grep(paste("m_ ", order.L, sep=''), rownames(x$Bhat))]
+  highCoef <- x$Bhat[grep(paste("m_ ", order.H, sep=''), rownames(x$Bhat))]
+  gammaCoef <- x$Cgamma[,1]
+  cCoef <- x$Cgamma[,2]
+
+  cat("Coefficients:\n")
+  cat("Low regime:\n")
+  print(lowCoef, ...)
+  cat("\nHigh regime:\n")
+  print(highCoef, ...)
+  cat("\nSmoothing parameter: gamma =", format(gammaCoef, digits=4),"\n")
+  cat("\nThreshold")
+  cat("\nValue:", format(cCoef, digits=4), "\n")
+  invisible(x)
+}
+
+
+#' @S3method summary VLSTAR
+summary.VLSTAR.ml<-function(object,...){
+  NextMethod(...)
+  x<-object
+  k<-ncol(x$Data[[2]])
+  t<-nrow(x$Data[[1]])
+  p<-x$p
+  x$T <- nrow(x$yoriginal)
+  Z<-t(as.matrix(tail.matrix(x$Data[[1]])))
+  x$npar <- k*ncol(x$Data[[1]])*m + 2*(m-1)*ncol(x$Data[[1]])
+
+  ## export results
+  x$coefficients<-as.list(as.data.frame(x$Bhat))
+  x$StDev<-as.list(as.data.frame(x$StDev))
+  x$Pvalues<-as.list(as.data.frame(x$pval))
+  x$Tvalues<-as.list(as.data.frame(x$ttest))
+  ab<-list()
+  symp<-list()
+  stars<-list()
+  for(i in 1:length(x$Pvalues)){
+    symp[[i]] <- symnum(x$Pvalues[[i]], corr=FALSE,cutpoints = c(0,  .001,.01,.05, .1, 1), symbols = c("***","**","*","."," "))
+    stars[[i]]<-matrix(symp[[i]], nrow=length(x$Pvalues[[i]]))
+    ab[[i]]<-matrix(paste(x$coefficients[[i]],"(", x$StDev[[i]],")",stars[[i]], sep=""), nrow=length(x$StDev[[i]]))
+    dimnames(ab[[i]])<-dimnames(x$coefficients[[1]])
+  }
+  attributes(ab)<-attributes(x$coefficients)
+  x$stars<-stars
+  x$starslegend<-symp[[1]]
+  x$bigcoefficients<-ab
+  x$aic<-x$AIC
+  x$bic<-x$BIC
+  class(x)<-c("summary.VLSTAR", "VLSTAR")
+  return(x)
+}
+
+#' @S3method print summary.VLSTAR
+print.summary.VLSTAR.ml<-function(x,digits = max(3, getOption("digits") - 3), signif.stars = getOption("show.signif.stars"),...){
+  coeftoprint<-list()
+  for(i in 1:length(x$bigcoefficients)){
+    a<-myformat(x$coefficients[[i]], digits)
+    b<-myformat(x$StDev[[i]], digits)
+    if(getOption("show.signif.stars"))
+      stars<-x$stars[[i]]
+    else
+      stars<-NULL
+    coeftoprint[[i]]<-matrix(paste(a,"(", b,")",stars, sep=""), nrow=length(x$StDev[[1]]))
+    dimnames(coeftoprint[[i]])<-dimnames(x$coefficients[[1]])
+  }
+  cat("Model VLSTAR with ", x$m, " regimes\n", sep ='')
+  cat("\nFull sample size:",x$T, "\tEnd sample size:", x$t)
+  cat("\nNumber of variables:", x$k,"\tNumber of estimated parameters:", x$npar)
+  cat("\nAIC",x$aic , "\tBIC", x$bic, "\t Multivariate log-likelihood", x$MultiLL,"\n\n")
+  print(noquote(coeftoprint))
+  if (signif.stars)
+    cat("---\nSignif. codes: ", attr(x$starslegend, "legend"), "\n")
+  cat("\nThreshold value:",x$model.specific$Thresh)
+  if(!x$model.specific$threshEstim)
+    cat(" (user specified)")
+  cat("\nPercentage of Observations in each regime:", percent(x$model.specific$nobs,3,TRUE), "\n")
+}
+

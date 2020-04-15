@@ -54,11 +54,12 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
   nrowy <- nrow(y1)
   ncolx1 <- ncol(x1)
   const <- rep(1, (nrowy-p))
+  x1a <- as.matrix(x1[-p,])
   if (constant == T){
     if(exo == T){
-      x <- as.matrix(cbind(ylag, constant, x1[-p,]))
+      x <- as.matrix(cbind(ylag, const, x1a))
     }else{
-      x <- as.matrix(cbind(ylag, constant))
+      x <- as.matrix(cbind(ylag, const))
     }
     ncolx <- ncol(x)
   }  else{
@@ -443,7 +444,94 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL, m = NULL, st = NULL, constant = 
   rownames(bhat1) <- names1
   colnames(bhat1) <- colnames(y)
   modeldata <- list(y, x)
-  results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, bhat1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB)
-  names(results) <- c('Bhat','St.Dev.', 't-test', 'pval', 'C-gamma', 'Omega', 'Fitted', 'Residuals', 'Output', 'Multivariate Log-Likelihood', 'Log-Likelihood', 'AIC', 'BIC', 'Gtilde', 'Data', 'B')
+  results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, bhat1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB, m, p,
+                  st, y1)
+  names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'Fitted', 'Residuals', 'MultiLL', 'LL', 'AIC',
+                      'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal')
   return(results)
+}
+
+
+#' @S3method print VLSTAR.nls
+print.VLSTAR.nls <- function(x, ...) {
+  NextMethod(...)
+  cat("\nVLSTAR model Estimation through Nonlinear Least Squares\n")
+  order.L <- (x$m-1)
+  order.H <- x$m
+  lowCoef <- x$Bhat[grep(paste("m_ ", order.L, sep=''), rownames(x$Bhat))]
+  highCoef <- x$Bhat[grep(paste("m_ ", order.H, sep=''), rownames(x$Bhat))]
+  gammaCoef <- x$Cgamma[,1]
+  cCoef <- x$Cgamma[,2]
+
+  cat("Coefficients:\n")
+  cat("Low regime:\n")
+  print(lowCoef, ...)
+  cat("\nHigh regime:\n")
+  print(highCoef, ...)
+  cat("\nSmoothing parameter: gamma =", format(gammaCoef, digits=4),"\n")
+  cat("\nThreshold")
+  cat("\nValue:", format(cCoef, digits=4), "\n")
+  invisible(x)
+}
+
+
+#' @S3method summary VLSTAR
+summary.VLSTAR.nls<-function(object,...){
+  NextMethod(...)
+  x<-object
+  k<-ncol(x$Data[[2]])
+  t<-nrow(x$Data[[1]])
+  p<-x$p
+  x$T <- nrow(x$yoriginal)
+  Z<-t(as.matrix(tail.matrix(x$Data[[1]])))
+  x$npar <- k*ncol(x$Data[[1]])*m + 2*(m-1)*ncol(x$Data[[1]])
+
+  ## export results
+  x$coefficients<-as.list(as.data.frame(x$Bhat))
+  x$StDev<-as.list(as.data.frame(x$StDev))
+  x$Pvalues<-as.list(as.data.frame(x$pval))
+  x$Tvalues<-as.list(as.data.frame(x$ttest))
+  ab<-list()
+  symp<-list()
+  stars<-list()
+  for(i in 1:length(x$Pvalues)){
+    symp[[i]] <- symnum(x$Pvalues[[i]], corr=FALSE,cutpoints = c(0,  .001,.01,.05, .1, 1), symbols = c("***","**","*","."," "))
+    stars[[i]]<-matrix(symp[[i]], nrow=length(x$Pvalues[[i]]))
+    ab[[i]]<-matrix(paste(x$coefficients[[i]],"(", x$StDev[[i]],")",stars[[i]], sep=""), nrow=length(x$StDev[[i]]))
+    dimnames(ab[[i]])<-dimnames(x$coefficients[[1]])
+  }
+  attributes(ab)<-attributes(x$coefficients)
+  x$stars<-stars
+  x$starslegend<-symp[[1]]
+  x$bigcoefficients<-ab
+  x$aic<-x$AIC
+  x$bic<-x$BIC
+  class(x)<-c("summary.VLSTAR", "VLSTAR")
+  return(x)
+}
+
+#' @S3method print summary.VLSTAR
+print.summary.VLSTAR.nls<-function(x,digits = max(3, getOption("digits") - 3), signif.stars = getOption("show.signif.stars"),...){
+  coeftoprint<-list()
+  for(i in 1:length(x$bigcoefficients)){
+    a<-myformat(x$coefficients[[i]], digits)
+    b<-myformat(x$StDev[[i]], digits)
+    if(getOption("show.signif.stars"))
+      stars<-x$stars[[i]]
+    else
+      stars<-NULL
+    coeftoprint[[i]]<-matrix(paste(a,"(", b,")",stars, sep=""), nrow=length(x$StDev[[1]]))
+    dimnames(coeftoprint[[i]])<-dimnames(x$coefficients[[1]])
+  }
+  cat("Model VLSTAR with ", x$m, " regimes\n", sep ='')
+  cat("\nFull sample size:",x$T, "\tEnd sample size:", x$t)
+  cat("\nNumber of variables:", x$k,"\tNumber of estimated parameters:", x$npar)
+  cat("\nAIC",x$aic , "\tBIC", x$bic, "\t Multivariate log-likelihood", x$MultiLL,"\n\n")
+  print(noquote(coeftoprint))
+  if (signif.stars)
+    cat("---\nSignif. codes: ", attr(x$starslegend, "legend"), "\n")
+  cat("\nThreshold value:",x$model.specific$Thresh)
+  if(!x$model.specific$threshEstim)
+    cat(" (user specified)")
+  cat("\nPercentage of Observations in each regime:", percent(x$model.specific$nobs,3,TRUE), "\n")
 }
