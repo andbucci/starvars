@@ -35,8 +35,8 @@ return(results)
 
 
 
-#' @S3method print print.VLSTAR.joint
-print.VLSTAR.joint <- function(x, digits=max(3, getOption("digits") - 2), ...)
+#' @S3method print print.VLSTARjoint
+print.VLSTARjoint <- function(x, digits=max(3, getOption("digits") - 2), ...)
 {
   cat("\nJoint linearity test (Third-order Taylor expansion)\n")
   cat(" LM =", format(x$LM, digits=digits),"; p-value =", format(x$pval, digits=digits),"\n")
