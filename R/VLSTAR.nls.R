@@ -57,9 +57,9 @@ VLSTAR.nls <- function(y1, x1 = NULL, p = NULL,
   nrowy <- nrow(y1)
   ncolx1 <- ncol(x1)
   const <- rep(1, (nrowy-p))
-  x1a <- as.matrix(x1[-p,])
   if (constant == T){
     if(exo == T){
+      x1a <- as.matrix(x1[-p,])
       x <- as.matrix(cbind(ylag, const, x1a))
     }else{
       x <- as.matrix(cbind(ylag, const))
