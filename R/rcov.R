@@ -118,7 +118,7 @@ if(ret == TRUE){
     if(freq == 'daily'){
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (k in 1:nday){
-        realized[k,] <- matrixcalc::vech(rCov(rdata = data[as.character(days[k])], makeReturns = F))
+        realized[k,] <- matrixcalc::vech(highfrequency::rCov(rdata = data[as.character(days[k])], makeReturns = F))
       }
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (j in 1:nday){

@@ -11,7 +11,7 @@ Function returns the vectorization of the lowest triangular of the Realized Cova
 }
 \usage{
 rcov(data, freq, ret = FALSE,
-cholesky = FALSE)
+    cholesky = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -33,8 +33,8 @@ cholesky = FALSE)
 }
 }
 \value{
-\item{Realized Covariances}{a \emph{M x N(N+1)/2} matrix of realized covariances, where \emph{M} is the number of lower frequency data}
-\item{Cholesky Factors (optional)}{a \emph{M x N(N+1)/2} matrix of Cholesky factors of the realized covariance matrices, where \emph{M} is the number of lower frequency data}
+\item{Realized Covariances}{a \eqn{M \times N(N+1)/2} matrix of realized covariances, where \emph{M} is the number of lower frequency data}
+\item{Cholesky Factors (optional)}{a \eqn{M \times N(N+1)/2} matrix of Cholesky factors of the realized covariance matrices, where \emph{M} is the number of lower frequency data}
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}

@@ -1,10 +1,3 @@
-#' @title Estimation of Coefficients in a Vector Smooth Transition Autoregressive Model with m regimes
-#' @description This package  allows to estimate the coefficient in a VLSTAR model.
-#'
-#'
-#' @examples  VLSTAR(data, p = 1, st = yy)
-#'
-
 VLSTAR <- function(y1, x1 = NULL, p = NULL,
                      m = 2, st = NULL, constant = T,
                      n.combi = 50, n.iter = 500,
@@ -26,7 +19,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
     if(length(y[,1]) != length(as.matrix(x1[,1])) | length(st) != length(as.matrix(x1[,1])) | length(y[,1]) != length(st))
       stop('The length of the variables does not match!')
   }
-  
+
   if(is.null(p) | p < 1){
     stop('Please, specify a valid lag order.')
   }
@@ -44,7 +37,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
   ylag <- as.matrix(ylag)
   if(p>1){
    lagg <- p-1
-  ylag <- ylag[-(1:lagg),] 
+  ylag <- ylag[-(1:lagg),]
   }
   y <- y[-c(1:p), ]
   ncoly <- ncol(y1)
@@ -64,13 +57,13 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
     x <- as.matrix(x1)
   }
   nrowx <- nrow(x)
-  st <- st[(1+p):nrow(st)]
+  st <- st[(1+p):length(st)]
   ncolx <- ncol(x)
   param.init <- list()
   param.init$gamma <- rep(1L, ncoly)
   param.init$cg <- colMeans(y)
   q <- ncol(x)-ncolylag
-  
+
   if (is.null(starting)){
     COMBI <- list()
     GAMMA <- list()
@@ -95,11 +88,11 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
       }
       COMBI[[t]] <- combi
     }
-    
+
     #NLS for each combination of c and gamma
     ssq <- matrix(ncol =  ncoly, nrow = n.combi*n.combi)
     coeff <- matrix(ncol = (ncolx*m*ncoly), nrow = n.combi*n.combi)
-    
+
     for (l in 1:(n.combi*n.combi)){
       tryCatch({
         In <- diag(ncoly)
@@ -145,9 +138,9 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
         coeff[l, ] <- Bhat
         print(l)}, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
     }
-    
+
     #c and gamma minimazing the sum of squared residuals for each equation
-    
+
     cgamma <- matrix(nrow = ncoly, ncol = 2)
     CGAMMA <- list()
     for (t in 1:(m-1)){
@@ -156,8 +149,8 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
       }
       CGAMMA[[t]] <- cgamma
     }
-    
-    
+
+
     #Definition of c0 gamma0 for maximum likelihood
     PARAM <- list()
     for (t in 1:(m-1)){
@@ -165,11 +158,11 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
       gamma <- as.matrix(CGAMMA[[t]][,2])
       PARAM[[t]] <- cbind(gamma, cj)
     }
-    
+
   }else{
     PARAM <- starting
   }
-  
+
   if(method == 'ML'){
   #NLS Estimation of Bhat and Omegahat to be used in the first iteration of maximum likelihood
   In <- diag(ncoly)
@@ -213,10 +206,10 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
   Ehat1 <- t(do.call("cbind", resi))
   #Estimated covariance matrix
   Omegahat <- (t(Ehat1)%*%Ehat1)/(nrowy)
-  
+
   #BB0 <- BB
   #Omega0 <- Omegahat
-  
+
   #Log-likelihood to be optimized
   loglike <- function(param){
     gamma <- param[1:((m-1)*ncoly)]
@@ -245,7 +238,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
     logll <- -(nrowy*log(det(Omegahat))/2L) - sumdif/2L  - (nrowy*ncoly/2L)*log(2L*pi)
     return(-logll)
   }
-  
+
   #Maximum likelihood calculation
   loglike1 <- function(BB, param, Omega){
     gamma <- param[1:((m-1)*ncoly)]
@@ -274,7 +267,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
     logll <- -(nrowy*log(det(Omegahat))/2L) - sumdif/2L  - (nrowy*ncoly/2L)*log(2L*pi)
     return(-logll)
   }
-  
+
   #Inizialization of iter
   iter <- 0
   ll0 <- 10^(4)
@@ -290,9 +283,9 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
   }
   param <- data.table::rbindlist(PARAM1)
   param <- matrixcalc::vec(as.matrix(param))
-  
+
   cat('Maximum likelihood estimation\n')
-  
+
   #Convergence algorithm
   #1. Maximum likelihood estimation of gamma and c with NLS estimates of Bhat and Omegahat
   #2. Maximum likelihood estimation of Bhat with new values of gamma and c
@@ -306,9 +299,9 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
     #1.Maximum likelihood estimation of gamma and c
     param1 <- stats::optim(par = param, fn = loglike, lower = c(low1, apply(y, 2, min)),
                            method="L-BFGS-B")
-    
+
     cgam1 <- matrix(param1$par, ncol = 2, nrow = ncoly)
-    
+
     #2.Maximum likelihood estimation of Bhat with new values of gamma and c
     glog <- matrix(ncol=ncoly, nrow = nrowy)
     GT <- list()
@@ -349,7 +342,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
     }
     Ehat1 <- t(do.call("cbind", resi))
     Omegahat <- (t(Ehat1)%*%Ehat1)/(nrowy)
-    
+
     #3. Convergence check
     ll1 <- loglike1(BB, param1$par, Omega = Omegahat)
     if((ll1-ll0)>0){
@@ -358,19 +351,19 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
     err <- abs(ll1 - ll0)
     ll0 <- ll1
     if(iter ==1) {
-      plot(ll0~1, xlim = c(0, n.iter), ylim = c(0, (ll0+ll0*0.1)))
+      graphics::plot(ll0~1, xlim = c(0, n.iter), ylim = c(0, (ll0+ll0*0.1)))
     }
     graphics::points(ll0~iter)
     loglik1[iter] <- ll1
     bbhat[[iter]] <- BB
     omega[[iter]] <- Omegahat
-    
+
     cat(paste("iteration", iter, "complete\n"))
-    
+
     print(ll0)
-    
+
     if (err<epsi | iter == n.iter) cat('Converged\n')}
-  
+
   #Bhat1 <- bbhat[[which.min(loglik1)]]
   residuals1 <- t(do.call("cbind", resi))
   varhat <- diag(omega[[iter]])
@@ -393,7 +386,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
     ttest[,j] <- BBhat[,j]/covbb[,j]
     pval[,j] <- 2*stats::pt(abs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower = F)
   }
-  
+
   loglike2 <- function(y, resid1, omega){
     nrowy <- nrow(as.matrix(y))
     logll <- -(nrowy/2)*log(2*pi) -(nrowy/2)*log(omega) - (t(resid1)%*%resid1)/(2*omega)
@@ -456,7 +449,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
     Y <- matrixcalc::vec(t(y))
     Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
     BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
-    
+
     #Sum of squared error to be optimized
     ssq1 <- function(param){
       gamma <- param[1:((m-1)*ncoly)]
@@ -484,7 +477,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
       sumdif <- sum(dify)
       return(sumdif)
     }
-    
+
     #Maximum likelihood calculation
     loglike1 <- function(BB, param, Omega){
       gamma <- param[1:((m-1)*ncoly)]
@@ -513,7 +506,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
       logll <- -(nrowy*log(det(Omegahat))/2L) - sumdif/2L  - (nrowy*ncoly/2L)*log(2L*pi)
       return(-logll)
     }
-    
+
     #Inizialization of iter
     iter <- 0
     ll0 <- 10^(4)
@@ -529,9 +522,9 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
     }
     param <- as.matrix(data.table::rbindlist(PARAM1))
     param <- matrixcalc::vec(param)
-    
+
     cat('NLS estimation\n')
-    
+
     #Convergence algorithm
     #1. NLS estimation of gamma and c with NLS estimates of Bhat and Omegahat
     #2. NLS of Bhat with new values of gamma and c
@@ -545,9 +538,9 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
       #1.Maximum likelihood estimation of gamma and c
       param1 <- stats::optim(par = param, fn = ssq1, lower = c(low1, apply(y, 2, min)),
                              method="L-BFGS-B")
-      
+
       cgam1 <- matrix(param1$par, ncol = 2L, nrow = ncoly*(m-1))
-      
+
       #2.NLS estimation of Bhat with new values of gamma and c
       glog <- matrix(ncol=ncoly, nrow = nrowy)
       GT <- list()
@@ -594,7 +587,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
       Ehat1 <- Reduce("+", resiresi)
       #Omegahat <- Ehat1/(nrowy-m*(ncoly+q)*ncoly-1)
       Omegahat <- Ehat1/(nrowy-1L)
-      
+
       #3. Convergence check
       ll1 <- loglike1(BB, param1$par, Omega = Omegahat)
       if((ll1-ll0)>0){
@@ -603,24 +596,24 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
       err <- abs(ll1 - ll0)
       ll0 <- ll1
       if(iter ==1) {
-        plot(ll0~1, xlim = c(0, n.iter), ylim = c(0, (ll0+ll0*0.1)))
+        graphics::plot(ll0~1, xlim = c(0, n.iter), ylim = c(0, (ll0+ll0*0.1)))
       }
       graphics::points(ll0~iter)
       loglik1[iter] <- ll1
       bbhat[[iter]] <- BB
       omega[[iter]] <- Omegahat
-      
+
       cat(paste("iteration", iter, "complete\n"))
-      
+
       print(ll0)
-      
+
       if(iter > 50){
         if(loglik1[[iter]] == loglik1[[(iter-2)]]){
           iter <- n.iter
         }}
-      
+
       if (err<epsi | iter == n.iter) cat('Converged\n')}
-    
+
     #Minimum of minus log likelihood
     #Bhat1 <- bbhat[[which.min(loglik1)]]
     #Bhat1 <- bbhat[[iter]]
@@ -661,7 +654,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
         }
       }
     }
-    
+
     bhat1 <- matrix(nrow = nrow(pval), ncol = ncol(pval))
     for(i in 1:nrow(pval)){
       for(j in 1:ncol(pval)){
@@ -699,23 +692,23 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
                     st, y1, exo, constant)
     names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'fitted', 'residuals', 'MultiLL', 'LL', 'AIC',
                         'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal', 'exo', 'constant')
-    
+
   }
   class(results) = 'VLSTAR'
   return(results)
 }
 
 #' @S3method print VLSTARnls
-print.VLSTAR <- function(x, ...) {
+print.VLSTAR <- function(object, ...) {
   #NextMethod(...)
   cat("\nVLSTAR model Estimation through Nonlinear Least Squares\n")
-  order.L <- (x$m-1)
-  order.H <- x$m
-  lowCoef <- x$Bhat[grep(paste("m_ ", order.L, sep=''), rownames(x$Bhat)),]
-  highCoef <- x$Bhat[grep(paste("m_ ", order.H, sep=''), rownames(x$Bhat)),]
-  gammaCoef <- x$Cgamma[,1]
-  cCoef <- x$Cgamma[,2]
-  
+  order.L <- (object$m-1)
+  order.H <- object$m
+  lowCoef <- object$Bhat[grep(paste("m_ ", order.L, sep=''), rownames(object$Bhat)),]
+  highCoef <- object$Bhat[grep(paste("m_ ", order.H, sep=''), rownames(object$Bhat)),]
+  gammaCoef <- object$Cgamma[,1]
+  cCoef <- object$Cgamma[,2]
+
   cat("Coefficients:\n")
   cat("Low regime:\n")
   print(lowCoef, ...)
@@ -724,7 +717,7 @@ print.VLSTAR <- function(x, ...) {
   cat("\nSmoothing parameter: gamma =", format(gammaCoef, digits=4),"\n")
   cat("\nThreshold")
   cat("\nValue:", format(cCoef, digits=4), "\n")
-  invisible(x)
+  invisible(object)
 }
 
 #' @S3method summary VLSTAR
@@ -735,9 +728,9 @@ summary.VLSTAR<-function(object,...){
   t<-nrow(x$Data[[1]])
   p<-x$p
   x$T <- nrow(x$yoriginal)
-  Z<-t(as.matrix(tail.matrix(x$Data[[1]])))
+  Z<-t(as.matrix(utils::tail.matrix(x$Data[[1]])))
   x$npar <- k*ncol(x$Data[[1]])*x$m + 2*(x$m-1)*ncol(x$Data[[1]])
-  
+
   ## export results
   x$coefficients<-as.list(as.data.frame(x$Bhat))
   x$StDev<-as.list(as.data.frame(x$StDev))
@@ -747,7 +740,7 @@ summary.VLSTAR<-function(object,...){
   symp<-list()
   stars<-list()
   for(i in 1:length(x$Pvalues)){
-    symp[[i]] <- symnum(x$Pvalues[[i]], corr=FALSE,cutpoints = c(0,  .001,.01,.05, .1, 1), symbols = c("***","**","*","."," "))
+    symp[[i]] <- stats::symnum(x$Pvalues[[i]], corr=FALSE,cutpoints = c(0,  .001,.01,.05, .1, 1), symbols = c("***","**","*","."," "))
     stars[[i]]<-matrix(symp[[i]], nrow=length(x$Pvalues[[i]]))
     ab[[i]]<-matrix(paste(x$coefficients[[i]],"(", x$StDev[[i]],")",stars[[i]], sep=""), nrow=length(x$StDev[[i]]))
     dimnames(ab[[i]])<-dimnames(x$coefficients[[1]])
@@ -765,7 +758,8 @@ summary.VLSTAR<-function(object,...){
 }
 
 #' @S3method print summary.VLSTAR
-print.summary.VLSTAR<-function(x,digits = max(3, getOption("digits") - 3), signif.stars = getOption("show.signif.stars"),...){
+print.summary.VLSTAR<-function(object,digits = max(3, getOption("digits") - 3), signif.stars = getOption("show.signif.stars"),...){
+  x <- object
   coeftoprint<-list()
   myformat<-function(x,digits, toLatex=FALSE){
     r<-x

@@ -95,7 +95,8 @@ class(multiCS) <- 'multiCUMSUM'
 return(multiCS)
 }
 
-print.multiCUMSUM <- function(x, ...) {
+print.multiCUMSUM <- function(object, ...) {
+  x <- object
  cat("===============================================\n")
 cat("Break detection in the covariance structure:\n")
 cat('Lambda (d) test statistics: ',x$M[1], ' [', x$critLambda[x$r, x$c], ']\n', sep = '')

@@ -13,11 +13,12 @@ VLSTAR- Estimation
 This function allows the user to estimate the coefficients of a VLSTAR model with \emph{m} regimes through maximum likelihood or nonlinear least squares. The set of starting values of Gamma and C for the convergence algorithm can be either passed or obtained via searching grid.
 }
 \usage{
-VLSTAR(y1, x1 = NULL, p = NULL,
-m = 2, st = NULL, constant = T,
-n.combi = 50, n.iter = 500,
-starting = NULL,
-epsilon = 10^(-3), exo = F), method = c('ML', 'NLS'))
+VLSTAR(y1, x1 = NULL, p = NULL,m = 2, st = NULL, constant = T,n.combi = 50,
+        n.iter = 500,starting = NULL,epsilon = 10^(-3), exo = F),
+        method = c('ML', 'NLS'))
+\method{print}{VLSTAR}(object, \dots)
+\method{summary}{VLSTAR}(object, \dots)
+\method{print.summary}{VLSTAR}(object, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -75,11 +76,11 @@ The multivariate smooth transition model is an extension of the smooth transitio
 introduced by Bacon and Watts (1971)  (see also Anderson and Vahid, 1998). The general model is
 \deqn{y_{t} = \mu_0+\sum_{j=1}^{p}\Phi_{0,j}\,y_{t-j}+A_0 x_t \cdot G_t(s_t;\gamma,c)[\mu_{1}+\sum_{j=1}^{p}\Phi_{1,j}\,y_{t-j}+A_1x_t]+\varepsilon_t}
 where \eqn{\mu_{0}} and \eqn{\mu_{1}} are the \eqn{\tilde{n} \times 1} vectors of intercepts, \eqn{\Phi_{0,j}} and \eqn{\Phi_{1,j}} are square
-\eqn{\tilde{n}\times\tilde{n}} matrices of parameters for lags \eqn{j=1,2,\dots,p}, A_0 and A_1 are \eqn{\tilde{n}\times k} matrices of parameters,
-x_t is the \eqn{k \times 1} vector of exogenous variables and \eqn{\varepsilon_t} is the innovation. Finally, \eqn{G_t(s_t;\gamma,c)} is a \eqn{\tilde{n}
+\deqn{\tilde{n}\times\tilde{n}} matrices of parameters for lags \eqn{j=1,2,\dots,p}, A_0 and A_1 are \eqn{\tilde{n}\times k} matrices of parameters,
+x_t is the \eqn{k \times 1} vector of exogenous variables and \eqn{\varepsilon_t} is the innovation. Finally, \eqn{G_t(s_t;\gamma,c)} is a \deqn{\tilde{n}
 \times \tilde{n}} diagonal matrix of transition function at time \emph{t}, such that
-\deqn{G_t(s_t;\gamma,c)=\diag{G_{1,t}(s_{1,t};\gamma_{1},c_{1}),G_{2,t}(s_{2,t};\gamma_{2},c_{2}),
-    \dots,G_{\tilde{n},t}(s_{\tilde{n},t};\gamma_{\tilde{n}},c_{\tilde{n}})}.}
+\deqn{G_t(s_t;\gamma,c)=G_{1,t}(s_{1,t};\gamma_{1},c_{1}),G_{2,t}(s_{2,t};\gamma_{2},c_{2}),
+    \dots,G_{\tilde{n},t}(s_{\tilde{n},t};\gamma_{\tilde{n}},c_{\tilde{n}}).}
 
 Each diagonal element \eqn{G_{i,t}^r} is specified as a logistic cumulative density functions, i.e.
 \deqn{G_{i,t}^r(s_{i,t}^r; \gamma_i^r, c_i^r) = \left[1 + \exp\big\{-\gamma_i^r(s_{i,t}^r-c_i^r)\big\}\right]^{-1}}

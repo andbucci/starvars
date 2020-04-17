@@ -1,5 +1,6 @@
 \name{multiCUMSUM}
 \alias{multiCUMSUM}
+\alias{print.multiCUMSUM}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Multivariate CUMSUM test
@@ -11,6 +12,7 @@ Function returns the test statistics for the presence of co-breaks in a set of m
 }
 \usage{
 multiCUMSUM(data, alpha = 0.95)
+\method{print}{multiCUMSUM}(object, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -43,15 +45,6 @@ Barassi M., Horvath L. and Yuqian Z. (2018), Change-Point Detection in the Condi
 \author{
 The code was written by Andrea Bucci and Giulio Palomba.
 %%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
 data(Realized)

@@ -1,6 +1,5 @@
 \name{predict.VLSTAR}
 \alias{predict.VLSTAR}
-\alias{predict}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 VLSTAR Prediction
@@ -11,7 +10,7 @@ VLSTAR Prediction
 This function allows to obtain one-step ahead forecasts, with the prediction intervals, of a VLSTAR object.
 }
 \usage{
-predict(object, alpha = 0.05)
+\method{predict}{VLSTAR}(object, alpha = 0.05, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -29,7 +28,7 @@ predict(object, alpha = 0.05)
 %%  ~~ If necessary, more details than the description above ~~
 %}
 \value{
-A data frame of predictions for each dependent variable and the (1-\deqn{\alpha}) prediction intervals.
+A data frame of predictions for each dependent variable and the (1-\eqn{\alpha}) prediction intervals.
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
 %%  \item{comp2 }{Description of 'comp2'}
@@ -48,12 +47,12 @@ The code was written by Andrea Bucci
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{VLSTARml}} and \code{\link{VLSTARnls}} for log-likehood and nonlinear least squares estimation of the VLSTAR model.
+\code{\link{VLSTAR}} for log-likehood and nonlinear least squares estimation of the VLSTAR model.
 }
 \examples{
 data(Realized)
-fit <- VLSTARnls(Realized[-1,1:10], p = 1, n.combi = 10,
-n.iter = 50, st = Realized[-nrow(Realized),1])
+fit <- VLSTAR(Realized[-1,1:10], p = 1, n.combi = 10,
+n.iter = 50, st = Realized[-nrow(Realized),1], method ='NLS')
 predict(fit)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

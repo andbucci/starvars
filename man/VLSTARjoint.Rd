@@ -1,5 +1,6 @@
 \name{VLSTARjoint}
 \alias{VLSTARjoint}
+\alias{print.VLSTARjoint}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Joint linearity test
@@ -11,6 +12,7 @@ This function allows the user to test linearity against a Vector Smooth Transiti
 }
 \usage{
 VLSTARjoint(y1, x1, st, alpha = 0.05)
+\method{print}{VLSTARjoint}(object, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -42,7 +44,7 @@ previous Equation is linear. When the null cannot be rejected, an identification
 emerges, that can be solved through a first-order Taylor expansion around \eqn{\gamma_{j} = 0}.
 
 The approximation of the logistic function with a first-order Taylor expansion is given by
-\deqn{G(s_t; \gamma_{j},c_{j}) &= (1/2) + (1/4)\gamma_{j}(s_t-c_{j}) + r_{jt}}
+\deqn{G(s_t; \gamma_{j},c_{j}) = (1/2) + (1/4)\gamma_{j}(s_t-c_{j}) + r_{jt}}
 \deqn{= a_{j}s_t + b_{j} + r_{jt}}
 where \eqn{a_{j} = \gamma_{j}/4}, \eqn{b_{j} = 1/2 - a_{j}c_{j}} and \eqn{r_{j}} is the error of the approximation. If \eqn{G_t} is specified as follows
 \deqn{G_t = diag\big\{a_{1}s_t + b_{1} + r_{1t}, \dots, a_{\widetilde{n}}s_t+b_{\widetilde{n}} + r_{\widetilde{n}t}\big\}}
@@ -57,12 +59,7 @@ where \eqn{\Theta_{0} = B_{1} + B_{2}'B}, \eqn{\Theta_{1} = B_{2}'A} and \eqn{\v
 follows that the Lagrange multiplier test, under the null, is derived from the score
 \deqn{\frac{\partial \log L(\widetilde{\theta})}{\partial \Theta_{1}} = \sum_{t=1}^{T}z_ts_t(y_t - \widetilde{B}_{1}z_t)'\widetilde{\Omega}^{-1} = S(Y - Z\widetilde{B}_{1})\widetilde{\Omega}^{-1},}
 where
-\deqn{S =
-    \begin{bmatrix}
-    z_{1}'s_{1}\\
-    \vdots\\
-    z_t's_t
-  \end{bmatrix}}
+\deqn{S = z_{1}'s_{1}\\\vdots\\ z_t's_t}
 and where \eqn{\widetilde{B}_{1}} and \eqn{\widetilde{\Omega}} are estimated from the model in \eqn{H_{0}}. If \eqn{P_{Z} = Z(Z'Z)^{-1}Z'} is the
 projection matrix of Z, the LM test is specified as follows
 \deqn{LM = tr\big\{\widetilde{\Omega}^{-1}(Y - Z\widetilde{B}_{1})'S\big[S'(I_t - P_{Z})S\big]^{-1}S'(Y-Z\widetilde{B}_{1})\big\}.}
@@ -86,7 +83,7 @@ The code was written by Andrea Bucci
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{VLSTARml}} for log-likehood estimation of the VLSTAR model and \code{\link{VLSTARnls}} for NLS estimation of the same model.
+\code{\link{VLSTAR}} for log-likehood and for NLS estimation of the VLSTAR model.
 }
 \examples{
 data(Realized)
