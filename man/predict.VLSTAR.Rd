@@ -51,7 +51,7 @@ The code was written by Andrea Bucci
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{VLSTARlm}} and \code{\link{VLSTARnls}} for log-likehood and nonlinear least squares estimation of the VLSTAR model.
+\code{\link{VLSTARml}} and \code{\link{VLSTARnls}} for log-likehood and nonlinear least squares estimation of the VLSTAR model.
 }
 \examples{
 data(Realized)
