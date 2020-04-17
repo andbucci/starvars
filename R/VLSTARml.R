@@ -384,7 +384,7 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
     #covbb[,j] <- diag(ginv(t(x[[j]])%*%XX[[j]])*sqrt(varhat[j]))
     covbb[,j] <- sqrt(diag(MASS::ginv(t(x) %*%x))*varhat[j])
     ttest[,j] <- BBhat[,j]/covbb[,j]
-    pval[,j] <- 2*stats::ptabs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower = F)
+    pval[,j] <- 2*stats::pt(abs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower = F)
   }
 
   loglike2 <- function(y, resid1, omega){
