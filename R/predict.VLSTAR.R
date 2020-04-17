@@ -13,7 +13,7 @@ predict.VLSTAR <- function(object, newdata, alpha = 0.05, ...){
   newdata <- as.matrix(newdata)
 
   BB <- object$B
-  In <- diag(ncol(object$Data[[1]])
+  In <- diag(ncol(object$Data[[1]]))
   Gtilde <- t(cbind(In, object$Gtilde))
   pred <- as.data.frame((t(Gtilde)%*%t(BB)%*%newdata))
   rownames(pred) <- colnames(object$Bhat)
