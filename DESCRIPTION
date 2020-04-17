@@ -8,4 +8,5 @@ Description: This package allows the user to estimate a VLSTAR model via maximum
 License: GNU GPL
 Encoding: UTF-8
 LazyData: true
-Imports:   vars, nloptr, matrixcalc, MASS, ks, maxLik, rlist, stats4, zoo, data.table, fGarch, R.utils, lubridate, xts, lessR, highfrequency, quantmod
+Depends: R(>=3.1.0), MASS, ks, zoo, data.table, matrixcalc
+Imports: vars, nloptr, maxLik, rlist, stats4, fGarch, R.utils, lubridate, xts, lessR, highfrequency, quantmod
