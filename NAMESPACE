@@ -1,1 +1,13 @@
 exportPattern("^[[:alpha:]]+")
+
+S3method(print, VLSTAR)
+
+S3method(print, summary.VLSTAR)
+
+S3method(summary, VLSTAR)
+
+S3method(predict, VLSTAR)
+
+S3method(print, multiCUMSUM)
+
+S3method(print, VLSTARjoint)

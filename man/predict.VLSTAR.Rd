@@ -1,5 +1,6 @@
 \name{predict.VLSTAR}
 \alias{predict.VLSTAR}
+\alias{predict}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 VLSTAR Prediction
@@ -10,7 +11,7 @@ VLSTAR Prediction
 This function allows to obtain one-step ahead forecasts, with the prediction intervals, of a VLSTAR object.
 }
 \usage{
-predict.VLSTAR(object, alpha = 0.05)
+predict(object, alpha = 0.05)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

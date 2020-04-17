@@ -5,7 +5,8 @@ Version: 0.1.6
 Authors@R: c(
   person("Andrea", "Bucci", email = "andrea.bucci@unich.it", role = c("aut", "cre", "cph")),
   person("Giulio", "Palomba", role = "aut"),
-  person("Eduardo", "Rossi", role = "aut")
+  person("Eduardo", "Rossi", role = "aut"),
+  person("Andrea", "Faragalli", role = "ctb")
   )
 Maintainer: Andrea Bucci <andrea.bucci@unich.it>
 Description: This package allows the user to estimate a VLSTAR model via maximum log-likelihood or nonlinear least squares. It further permits to test for linearity in the multivariate framework against a VLSTAR model with a single transition variable.
