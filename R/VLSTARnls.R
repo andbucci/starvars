@@ -11,15 +11,6 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
                        n.combi = 50, n.iter = 500,
                        starting = NULL, epsilon = 10^(-3),
                        exo = F){
-  require(vars)
-  require(data.table)
-  require(nloptr)
-  require(matrixcalc)
-  require(MASS)
-  library(ks)
-  require(maxLik)
-  require(rlist)
-  library(stats4)
   y <- as.matrix(y1)
   if (any(is.na(y)))
     stop("\nNAs in y.\n")
@@ -50,19 +41,19 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
   ##Definition of dimensions, creating variable x with constant
   yt <- zoo::zoo(y)
   ylag <- stats::lag(yt, -c(1:p))
-  ylag <- as.matrix(ylag)
-  y <- y[-p, ]
+  ylag <- as.matrix(ylag[-c(p-1),])
+  y <- y[-c(1:p), ]
   ncoly <- ncol(y1)
-  ncolylag <- ncol(ylag)
+  ncolylag <- ncoly*p
   nrowy <- nrow(y1)
   ncolx1 <- ncol(x1)
   const <- rep(1, (nrowy-p))
   if (constant == T){
     if(exo == T){
-      x1a <- as.matrix(x1[-p,])
-      x <- as.matrix(cbind(ylag, const, x1a))
+      x1a <- as.matrix(x1[-c(1:p),])
+      x <- as.matrix(cbind(const, ylag, x1a))
     }else{
-      x <- as.matrix(cbind(ylag, const))
+      x <- as.matrix(cbind(const, ylag))
     }
     ncolx <- ncol(x)
   }  else{
@@ -129,7 +120,7 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
           }
           Gtilde[[i]] <- t(cbind(In, rlist::list.cbind(GT)))
           GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
-          XX[[i]] <- x[i,] %*%t(x[i,])
+          XX[[i]] <- x[i,]%*%t(x[i,])
           GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
           XY[[i]] <- x[i, ]%*%t(y[i,])
           XYG[[i]] <- vec(XY[[i]]%*%t(Gtilde[[i]]))
@@ -139,7 +130,7 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
         M <- t(do.call("cbind", kro))
         Y <- vec(t(y))
         Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
-        BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
+        BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
         resi <- list()
         Ehat <- matrix(NA, ncol = ncoly, nrow = nrowy)
         for (o in 1:nrowx){
@@ -207,7 +198,7 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
   M <- t(do.call("cbind", kro))
   Y <- vec(t(y))
   Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
-  BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
+  BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
 
   #Sum of squared error to be optimized
   ssq1 <- function(param){
@@ -279,7 +270,7 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
   for(t in 1:(m-1)){
     PARAM1[[t]] <- as.data.frame(PARAM[[t]])
   }
-  param <- data.table::rbindlist(PARAM1)
+  param <- as.matrix(data.table::rbindlist(PARAM1))
   param <- vec(param)
 
   cat('NLS estimation\n')
@@ -331,7 +322,7 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
     M <- t(do.call("cbind", kro))
     Y <- vec(t(y))
     Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
-    BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
+    BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
     resi <- list()
     resiresi <- list()
     fitte <- matrix(nrow = nrowy, ncol = ncoly)
@@ -448,11 +439,33 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
   colnames(bhat1) <- colnames(y)
   modeldata <- list(y, x)
   results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB, m, p,
-                  st, y1)
-  names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'Fitted', 'Residuals', 'MultiLL', 'LL', 'AIC',
-                      'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal')
-  class(results) <- 'VLSTAR'
+                  st, y1, exo, constant)
+  names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'fitted', 'residuals', 'MultiLL', 'LL', 'AIC',
+                      'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal', 'exo', 'constant')
+  class(results) = 'VLSTAR'
   return(results)
+}
+
+#' @S3method print VLSTARnls
+print.VLSTAR <- function(x, ...) {
+  #NextMethod(...)
+  cat("\nVLSTAR model Estimation through Nonlinear Least Squares\n")
+  order.L <- (x$m-1)
+  order.H <- x$m
+  lowCoef <- x$Bhat[grep(paste("m_ ", order.L, sep=''), rownames(x$Bhat)),]
+  highCoef <- x$Bhat[grep(paste("m_ ", order.H, sep=''), rownames(x$Bhat)),]
+  gammaCoef <- x$Cgamma[,1]
+  cCoef <- x$Cgamma[,2]
+
+  cat("Coefficients:\n")
+  cat("Low regime:\n")
+  print(lowCoef, ...)
+  cat("\nHigh regime:\n")
+  print(highCoef, ...)
+  cat("\nSmoothing parameter: gamma =", format(gammaCoef, digits=4),"\n")
+  cat("\nThreshold")
+  cat("\nValue:", format(cCoef, digits=4), "\n")
+  invisible(x)
 }
 
 #' @S3method summary VLSTAR
@@ -510,14 +523,20 @@ print.summary.VLSTAR<-function(x,digits = max(3, getOption("digits") - 3), signi
   for(i in 1:length(x$bigcoefficients)){
     a<-myformat(x$coefficients[[i]], digits)
     b<-myformat(x$StDev[[i]], digits)
+    c<-myformat(x$Pvalues[[i]], digits)
     aic1 <- round(x$AIC,2)
     bic1 <- round(x$BIC,2)
-    if(getOption("show.signif.stars"))
-      stars<-x$stars[[i]]
-    else
-      stars<-NULL
-    coeftoprint[[i]]<-matrix(c(paste(a,"(", b,")",stars, sep=""), '', round(x$Cgamma[i,1],4), round(x$Cgamma[i,2],4),'',
-                               aic1[i], bic1[i]), nrow=(length(x$StDev[[1]])+6))
+    if(signif.stars == getOption("show.signif.stars")){
+      stars1<-x$stars[[i]]
+    }else{
+     stars1<-NULL
+    }
+    #coeftoprint[[i]]<-matrix(c(paste(a,"(", b,")",stars, sep=""), '', round(x$Cgamma[i,1],4), round(x$Cgamma[i,2],4),'',
+    #                          aic1[i], bic1[i]), nrow=(length(x$StDev[[1]])+6))
+    coeftop <- cbind(a, b, c, stars1)
+    colnames(coeftop) <- c('Estimate', 'Std. Error', 'p-value', '')
+    coeftoprint[[i]] <- rbind(coeftop, rep('', 4), c(round(x$Cgamma[i,1],4),'','',''), c(round(x$Cgamma[i,2],4),'','',''),
+                              rep('', 4), c(aic1[i],'','',''), c(bic1[i], '','',''))
     rownames(coeftoprint[[i]])<- c(rownames(x$Bhat),"---",'gamma', 'c',"---", 'AIC', 'BIC')
   }
   names(coeftoprint) <- colnames(x$Bhat)
@@ -527,6 +546,7 @@ print.summary.VLSTAR<-function(x,digits = max(3, getOption("digits") - 3), signi
   #cat("\nAIC",x$aic)
   #cat("\nBIC", x$bic)
   cat("\nMultivariate log-likelihood:", x$MultiLL,"\n\n")
+  cat('\nCoefficients:')
   print(noquote(coeftoprint))
   if (signif.stars)
     cat("---\nSignif. codes: ", attr(x$starslegend, "legend"), "\n")

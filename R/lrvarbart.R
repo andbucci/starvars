@@ -1,4 +1,5 @@
 lrvarbart <- function(x){
+  x <- as.xts(x)
     N <- length(x)
     cc = 1.4
     K = N^(1/3)

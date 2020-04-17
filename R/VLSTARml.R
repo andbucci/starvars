@@ -40,19 +40,19 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
   ##Definition of dimensions, creating variable x with constant
   yt <- zoo::zoo(y)
   ylag <- stats::lag(yt, -c(1:p))
-  ylag <- as.matrix(ylag)
-  y <- y[-p, ]
+  ylag <- as.matrix(ylag[-c(p-1),])
+  y <- y[-c(1:p), ]
   ncoly <- ncol(y1)
-  ncolylag <- ncol(ylag)
+  ncolylag <- ncoly*p
   nrowy <- nrow(y1)
   ncolx1 <- ncol(x1)
   const <- rep(1, (nrowy-p))
   if (constant == T){
     if(exo == T){
-      x1a <- as.matrix(x1[-p,])
-      x <- as.matrix(cbind(ylag, const, x1a))
+      x1a <- as.matrix(x1[-c(1:p),])
+      x <- as.matrix(cbind(const,ylag,x1a))
     }else{
-      x <- as.matrix(cbind(ylag, const))
+      x <- as.matrix(cbind(const,ylag))
     }
     ncolx <- ncol(x)
   }  else{
@@ -127,7 +127,7 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
       M <- t(do.call("cbind", kro))
       Y <- vec(t(y))
       Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
-      BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
+      BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
       resi <- list()
       Ehat <- matrix(NA, ncol = ncoly, nrow = nrowy)
       for (o in 1:nrowx){
@@ -197,7 +197,7 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
   Y <- vec(t(y))
   #Estimated coefficients
   Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
-  BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
+  BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
   resi <- list()
   Ehat1 <- matrix(NA, ncol = ncoly, nrow = nrowy)
   for (i in 1:nrowx){
@@ -332,7 +332,7 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
     xyog <- Reduce(`+`, XYOG)/nrowy
     kroxx <- Reduce(`+`, kro)/nrowy
     Bhat <- t(t(xyog)%*%kroxx)
-    BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncoly + q))
+    BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
     resi <- list()
     fitte <- matrix(nrow = nrowy, ncol = ncoly)
     Ehat1 <- matrix(NA, ncol = ncoly, nrow = nrowy)
@@ -412,9 +412,9 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
   colnames(BBhat) <- colnames(y)
   modeldata <- list(y, x)
   results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB, m, p,
-                  st, y1)
-  names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'Fitted', 'Residuals', 'MultiLL', 'LL', 'AIC',
-                      'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal')
+                  st, y1, exo, constant)
+  names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'fitted', 'residuals', 'MultiLL', 'LL', 'AIC',
+                      'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal', 'exo', 'constant')
   class(results) = 'VLSTAR'
   return(results)
   }
@@ -426,8 +426,8 @@ print.VLSTAR <- function(x, ...) {
   cat("\nVLSTAR model Estimation through Nonlinear Least Squares\n")
   order.L <- (x$m-1)
   order.H <- x$m
-  lowCoef <- x$Bhat[grep(paste("m_ ", order.L, sep=''), rownames(x$Bhat))]
-  highCoef <- x$Bhat[grep(paste("m_ ", order.H, sep=''), rownames(x$Bhat))]
+  lowCoef <- x$Bhat[grep(paste("m_ ", order.L, sep=''), rownames(x$Bhat)),]
+  highCoef <- x$Bhat[grep(paste("m_ ", order.H, sep=''), rownames(x$Bhat)),]
   gammaCoef <- x$Cgamma[,1]
   cCoef <- x$Cgamma[,2]
 
@@ -497,14 +497,20 @@ print.summary.VLSTAR<-function(x,digits = max(3, getOption("digits") - 3), signi
   for(i in 1:length(x$bigcoefficients)){
     a<-myformat(x$coefficients[[i]], digits)
     b<-myformat(x$StDev[[i]], digits)
+    c<-myformat(x$Pvalues[[i]], digits)
     aic1 <- round(x$AIC,2)
     bic1 <- round(x$BIC,2)
-    if(getOption("show.signif.stars"))
-      stars<-x$stars[[i]]
-    else
-      stars<-NULL
-    coeftoprint[[i]]<-matrix(c(paste(a,"(", b,")",stars, sep=""), '', round(x$Cgamma[i,1],4), round(x$Cgamma[i,2],4),'',
-                               aic1[i], bic1[i]), nrow=(length(x$StDev[[1]])+6))
+    if(signif.stars == getOption("show.signif.stars")){
+      stars1<-x$stars[[i]]
+    }else{
+      stars1<-NULL
+    }
+    #coeftoprint[[i]]<-matrix(c(paste(a,"(", b,")",stars, sep=""), '', round(x$Cgamma[i,1],4), round(x$Cgamma[i,2],4),'',
+    #                          aic1[i], bic1[i]), nrow=(length(x$StDev[[1]])+6))
+    coeftop <- cbind(a, b, c, stars1)
+    colnames(coeftop) <- c('Estimate', 'Std. Error', 'p-value', '')
+    coeftoprint[[i]] <- rbind(coeftop, rep('', 4), c(round(x$Cgamma[i,1],4),'','',''), c(round(x$Cgamma[i,2],4),'','',''),
+                              rep('', 4), c(aic1[i],'','',''), c(bic1[i], '','',''))
     rownames(coeftoprint[[i]])<- c(rownames(x$Bhat),"---",'gamma', 'c',"---", 'AIC', 'BIC')
   }
   names(coeftoprint) <- colnames(x$Bhat)
@@ -514,8 +520,10 @@ print.summary.VLSTAR<-function(x,digits = max(3, getOption("digits") - 3), signi
   #cat("\nAIC",x$aic)
   #cat("\nBIC", x$bic)
   cat("\nMultivariate log-likelihood:", x$MultiLL,"\n\n")
+  cat('\nCoefficients:')
   print(noquote(coeftoprint))
   if (signif.stars)
     cat("---\nSignif. codes: ", attr(x$starslegend, "legend"), "\n")
   #cat("\nThreshold values:",x$Cgamma[,2])
 }
+

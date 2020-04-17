@@ -1,9 +1,4 @@
 multiCUMSUM <- function(data, alpha){
-  require(ks)
-  require(MASS)
-  require(sandwich)
-  require(fGarch)
-  require(R.utils)
 nrowy <- nrow(data)+1
 ncoly <- ncol(data)
 h1 <- matrix(ncol = ncoly, nrow = (nrowy-1))
@@ -14,7 +9,7 @@ quiet <- function(x){
   invisible(force(x))
 }
 for(i in 1:ncoly){
-  gspec <- quiet(garchFit(~garch(1,1), data = data[,i]))
+  gspec <- quiet(fGarch::garchFit(~garch(1,1), data = data[,i]))
   h1[,i] <- gspec@h.t
   for(j in 1:(nrowy-1)){
   data[j, i] <- (data[j,i] - means[i])/sqrt(h1[j,i])
@@ -38,7 +33,7 @@ makeDT <- function(tau){
     nupper <- ncol(tau)
     DT <- matrix(0L, ncol = nupper, nrow = nupper)
     for(i in 1:nupper){
-      DT[i, i] <- lrvarbart(tau[,i])$lrv
+      DT[i, i] <- starvars::lrvarbart(tau[,i])$lrv
       }
   return(DT)
 }
@@ -82,7 +77,7 @@ critOmega <- rbind(c(1.33,1.33,1.32,1.31,1.31,1.30,1.29,1.28),
   M1 = 0
   M2 = 0
   for(t in 1:T1){
-    tmp = t(tau[t,]-t*tauT)%*%ginv(D)%*%(tau[t,]-t*tauT)
+    tmp = t(tau[t,]-t*tauT)%*%MASS::ginv(D)%*%(tau[t,]-t*tauT)
     if(tmp > M1){
       M1 = tmp
     }
@@ -94,13 +89,16 @@ M2 = M2/T1^2
 M1 = (M1-d1/4)/sqrt(d1/8)
 M2 = (M2-d1/6)/sqrt(d1/45)
 M = cbind(M1, M2)
-
-cat("===============================================\n")
-cat("Break detection in the covariance structure:\n")
-cat('Lambda (d) test statistics: ', M1, ' [', critLambda[r, c1], ']\n', sep = '')
-cat('Omega (d) test statistics: ', M2, ' [', critOmega[r, c1], ']\n', sep = '')
-
-
-
-return(M)
+multiCS <- list(M, r, c1, critLambda, critOmega)
+names(multiCS) <- c('M', 'r', 'c', 'critLambda', 'critOmega')
+class(multiCS) <- 'multiCUMSUM'
+return(multiCS)
 }
+
+print.multiCUMSUM <- function(x, ...) {
+ cat("===============================================\n")
+cat("Break detection in the covariance structure:\n")
+cat('Lambda (d) test statistics: ',x$M[1], ' [', x$critLambda[x$r, x$c], ']\n', sep = '')
+cat('Omega (d) test statistics: ', x$M[2], ' [', x$critOmega[x$r, x$c], ']\n', sep = '')
+}
+
