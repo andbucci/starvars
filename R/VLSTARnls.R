@@ -77,8 +77,8 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
     cj <- matrix(ncol = ncoly, nrow = n.combi)
     gamma[1, ] <- param.init$gamma
     cj[1,] <- param.init$c
-    GAMMA[[t]] <- gamma*(1+rnorm(1, mean = 0, sd = 5))
-    CJ[[t]] <- cj*(1+rnorm(1, mean = 0, sd = 5))
+    GAMMA[[t]] <- gamma*(1+stats::rnorm(1, mean = 0, sd = 5))
+    CJ[[t]] <- cj*(1+stats::rnorm(1, mean = 0, sd = 5))
     #Grid for c and gamma
     rangey <- matrix(nrow = ncoly, ncol = 2L)
     combi <- list()
@@ -123,12 +123,12 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
           XX[[i]] <- x[i,]%*%t(x[i,])
           GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
           XY[[i]] <- x[i, ]%*%t(y[i,])
-          XYG[[i]] <- vec(XY[[i]]%*%t(Gtilde[[i]]))
+          XYG[[i]] <- matrixcalc::vec(XY[[i]]%*%t(Gtilde[[i]]))
           kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
         }
         ggxx <- Reduce(`+`, GGXX)/nrowx
         M <- t(do.call("cbind", kro))
-        Y <- vec(t(y))
+        Y <- matrixcalc::vec(t(y))
         Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
         BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
         resi <- list()
@@ -191,12 +191,12 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
     XX[[i]] <- x[i,] %*%t(x[i,])
     GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
     XY[[i]] <- x[i, ]%*%t(y[i,])
-    XYG[[i]] <- vec(XY[[i]]%*%t(Gtilde[[i]]))
+    XYG[[i]] <- matrixcalc::vec(XY[[i]]%*%t(Gtilde[[i]]))
     kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
   }
   ggxx <- Reduce(`+`, GGXX)/nrowx
   M <- t(do.call("cbind", kro))
-  Y <- vec(t(y))
+  Y <- matrixcalc::vec(t(y))
   Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
   BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
 
@@ -271,7 +271,7 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
     PARAM1[[t]] <- as.data.frame(PARAM[[t]])
   }
   param <- as.matrix(data.table::rbindlist(PARAM1))
-  param <- vec(param)
+  param <- matrixcalc::vec(param)
 
   cat('NLS estimation\n')
 
@@ -286,7 +286,7 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
     #Parameters
     low1 <- replicate(ncoly, 0)
     #1.Maximum likelihood estimation of gamma and c
-    param1 <- optim(par = param, fn = ssq1, lower = c(low1, apply(y, 2, min)),
+    param1 <- stats::optim(par = param, fn = ssq1, lower = c(low1, apply(y, 2, min)),
                     method="L-BFGS-B")
 
     cgam1 <- matrix(param1$par, ncol = 2L, nrow = ncoly*(m-1))
@@ -315,12 +315,12 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
       XX[[i]] <- x[i,] %*%t(x[i,])
       GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
       XY[[i]] <- x[i, ]%*%t(y[i,])
-      XYG[[i]] <- vec(XY[[i]]%*%t(Gtilde[[i]]))
+      XYG[[i]] <- matrixcalc::vec(XY[[i]]%*%t(Gtilde[[i]]))
       kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
     }
     ggxx <- Reduce(`+`, GGXX)/nrowx
     M <- t(do.call("cbind", kro))
-    Y <- vec(t(y))
+    Y <- matrixcalc::vec(t(y))
     Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
     BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
     resi <- list()
@@ -341,14 +341,14 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
     #3. Convergence check
     ll1 <- loglike1(BB, param1$par, Omega = Omegahat)
     if((ll1-ll0)>0){
-      param <- as.matrix(vec(cgam1))
+      param <- as.matrix(matrixcalc::vec(cgam1))
     }
     err <- abs(ll1 - ll0)
     ll0 <- ll1
     if(iter ==1) {
       plot(ll0~1, xlim = c(0, n.iter), ylim = c(0, (ll0+ll0*0.1)))
     }
-    points(ll0~iter)
+    graphics::points(ll0~iter)
     loglik1[iter] <- ll1
     bbhat[[iter]] <- BB
     omega[[iter]] <- Omegahat
@@ -389,7 +389,7 @@ VLSTARnls <- function(y1, x1 = NULL, p = NULL,
     #covbb[,j] <- diag(MASS::ginv(t(x[[j]])%*%XX[[j]])*sqrt(varhat[j]))
     covbb[,j] <- sqrt(diag(MASS::ginv(t(x) %*%x))*varhat[j])
     ttest[,j] <- BBhat[,j]/covbb[,j]
-    pval[,j] <- 2*pt(abs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower = F)
+    pval[,j] <- 2*stats::pt(abs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower = F)
   }
   signifi <- matrix('',nrow = nrow(pval), ncol = ncol(pval))
   for(i in 1:nrow(pval)){
@@ -476,7 +476,7 @@ summary.VLSTAR<-function(object,...){
   t<-nrow(x$Data[[1]])
   p<-x$p
   x$T <- nrow(x$yoriginal)
-  Z<-t(as.matrix(tail.matrix(x$Data[[1]])))
+  Z<-t(as.matrix(utils::tail.matrix(x$Data[[1]])))
   x$npar <- k*ncol(x$Data[[1]])*x$m + 2*(x$m-1)*ncol(x$Data[[1]])
 
   ## export results
@@ -488,7 +488,7 @@ summary.VLSTAR<-function(object,...){
   symp<-list()
   stars<-list()
   for(i in 1:length(x$Pvalues)){
-    symp[[i]] <- symnum(x$Pvalues[[i]], corr=FALSE,cutpoints = c(0,  .001,.01,.05, .1, 1), symbols = c("***","**","*","."," "))
+    symp[[i]] <- stats::symnum(x$Pvalues[[i]], corr=FALSE,cutpoints = c(0,  .001,.01,.05, .1, 1), symbols = c("***","**","*","."," "))
     stars[[i]]<-matrix(symp[[i]], nrow=length(x$Pvalues[[i]]))
     ab[[i]]<-matrix(paste(x$coefficients[[i]],"(", x$StDev[[i]],")",stars[[i]], sep=""), nrow=length(x$StDev[[i]]))
     dimnames(ab[[i]])<-dimnames(x$coefficients[[1]])

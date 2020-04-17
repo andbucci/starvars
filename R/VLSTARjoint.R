@@ -8,8 +8,8 @@ VLSTARjoint <- function(y1, x1, st, alpha = 0.05){
   q <- ncolx-ncoly
 
   ##VAR Estimation Y on X
-varest <- lm(y~x)
-ee <- residuals(varest)
+varest <- stats::lm(y~x)
+ee <- stats::residuals(varest)
 RSS0 <- t(ee)%*%ee
 ZZ <- matrix(nrow = nrowx, ncol = ncolx*3)
 for (i in 1:nrowx){
@@ -18,15 +18,15 @@ for (i in 1:nrowx){
   xst3 <- as.matrix(x[i,]*st[i]^3)
  ZZ[i,] <- cbind(xst1, xst2, xst3)
 }
-ausvar <- lm(ee ~ ZZ)
-ll <- residuals(ausvar)
+ausvar <- stats::lm(ee ~ ZZ)
+ll <- stats::residuals(ausvar)
 RSS1 <- t(ll)%*%ll
 trac1 <- matrixcalc::matrix.trace(MASS::ginv(RSS0)%*%RSS1)
 LM3 <- nrowx*(ncoly - trac1)
 df <- 3*ncoly*(q+ncoly)
 conflev <- 1-alpha/2
-chi <- qchisq(conflev, df)
-pvalue <- pchisq(LM3, df, lower.tail=FALSE)
+chi <- stats::qchisq(conflev, df)
+pvalue <- stats::pchisq(LM3, df, lower.tail=FALSE)
 results <- list(LM3, pvalue, chi)
 names(results) <- c('LM', 'pval', 'critical')
 class(results) = 'VLSTARjoint'

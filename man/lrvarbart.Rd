@@ -10,7 +10,7 @@ Long-run variance using Bartlett kernel
 Function returns the long-run variance of a time series, relying on the Bartlett kernel. The window size of the kernel is the cube root of the sample size.
 }
 \usage{
-lrvarbrt(x)
+lrvarbart(x)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -40,15 +40,8 @@ Tsay R.S. (2005), Analysis of Financial Time Series. \emph{John Wiley & SONS}
 The code was written by Andrea Bucci.
 %%  ~~who you are~~
 }
-\note{
-%%  ~~further notes~~
-}
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 data(Realized)
 

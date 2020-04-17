@@ -76,8 +76,8 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
   cj <- matrix(ncol = ncoly, nrow = n.combi)
   gamma[1, ] <- param.init$gamma
   cj[1,] <- param.init$c
-  GAMMA[[t]] <- gamma*(1+rnorm(1, mean = 0, sd = 5))
-  CJ[[t]] <- cj*(1+rnorm(1, mean = 0, sd = 5))
+  GAMMA[[t]] <- gamma*(1+stats::rnorm(1, mean = 0, sd = 5))
+  CJ[[t]] <- cj*(1+stats::rnorm(1, mean = 0, sd = 5))
   #Grid for c and gamma
   rangey <- matrix(nrow = ncoly, ncol = 2)
   combi <- list()
@@ -120,12 +120,12 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
         XX[[i]] <- x[i,] %*%t(x[i,])
         GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
         XY[[i]] <- x[i, ]%*%t(y[i,])
-        XYG[[i]] <- vec(XY[[i]]%*%t(Gtilde[[i]]))
+        XYG[[i]] <- matrixcalc::vec(XY[[i]]%*%t(Gtilde[[i]]))
         kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
       }
       ggxx <- Reduce(`+`, GGXX)/nrowx
       M <- t(do.call("cbind", kro))
-      Y <- vec(t(y))
+      Y <- matrixcalc::vec(t(y))
       Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
       BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
       resi <- list()
@@ -189,12 +189,12 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
     XX[[i]] <- x[i,] %*%t(x[i,])
     GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
     XY[[i]] <- x[i, ]%*%t(y[i,])
-    XYG[[i]] <- vec(XY[[i]]%*%t(Gtilde[[i]]))
+    XYG[[i]] <- matrixcalc::vec(XY[[i]]%*%t(Gtilde[[i]]))
     kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
   }
   ggxx <- Reduce(`+`, GGXX)/nrowx
   M <- t(do.call("cbind", kro))
-  Y <- vec(t(y))
+  Y <- matrixcalc::vec(t(y))
   #Estimated coefficients
   Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
   BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
@@ -282,7 +282,7 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
     PARAM1[[t]] <- as.data.frame(PARAM[[t]])
   }
   param <- data.table::rbindlist(PARAM1)
-  param <- vec(as.matrix(param))
+  param <- matrixcalc::vec(as.matrix(param))
 
   cat('Maximum likelihood estimation\n')
 
@@ -297,7 +297,7 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
     #Parameters
     low1 <- replicate(ncoly, 0)
     #1.Maximum likelihood estimation of gamma and c
-    param1 <- optim(par = param, fn = loglike, lower = c(low1, apply(y, 2, min)),
+    param1 <- stats::optim(par = param, fn = loglike, lower = c(low1, apply(y, 2, min)),
                     method="L-BFGS-B")
 
     cgam1 <- matrix(param1$par, ncol = 2, nrow = ncoly)
@@ -325,7 +325,7 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
       GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
       XX[[i]] <- x[i,] %*%t(x[i,])
       XY[[i]] <- x[i, ]%*%t(y[i,])
-      XYOG[[i]] <- vec(XY[[i]]%*%MASS::ginv(Omegahat)%*%t(Gtilde[[i]]))
+      XYOG[[i]] <- matrixcalc::vec(XY[[i]]%*%MASS::ginv(Omegahat)%*%t(Gtilde[[i]]))
       PsiOmegaPsi[[i]] <- Gtilde[[i]]%*%MASS::ginv(Omegahat)%*%t(Gtilde[[i]])
       kro[[i]] <- kronecker(PsiOmegaPsi[[i]], XX[[i]])
     }
@@ -346,14 +346,14 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
     #3. Convergence check
     ll1 <- loglike1(BB, param1$par, Omega = Omegahat)
     if((ll1-ll0)>0){
-      param <- as.matrix(vec(cgam1))
+      param <- as.matrix(matrixcalc::vec(cgam1))
     }
     err <- abs(ll1 - ll0)
     ll0 <- ll1
     if(iter ==1) {
       plot(ll0~1, xlim = c(0, n.iter), ylim = c(0, (ll0+ll0*0.1)))
     }
-    points(ll0~iter)
+    graphics::points(ll0~iter)
     loglik1[iter] <- ll1
     bbhat[[iter]] <- BB
     omega[[iter]] <- Omegahat
@@ -384,7 +384,7 @@ VLSTARml <- function(y1, x1 = NULL, p = NULL,
     #covbb[,j] <- diag(ginv(t(x[[j]])%*%XX[[j]])*sqrt(varhat[j]))
     covbb[,j] <- sqrt(diag(MASS::ginv(t(x) %*%x))*varhat[j])
     ttest[,j] <- BBhat[,j]/covbb[,j]
-    pval[,j] <- 2*pt(abs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower = F)
+    pval[,j] <- 2*stats::ptabs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower = F)
   }
 
   loglike2 <- function(y, resid1, omega){

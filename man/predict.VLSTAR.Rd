@@ -10,7 +10,7 @@ VLSTAR Prediction
 This function allows to obtain one-step ahead forecasts, with the prediction intervals, of a VLSTAR object.
 }
 \usage{
-predict(object, alpha = 0.05)
+predict.VLSTAR(object, alpha = 0.05)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -43,11 +43,7 @@ Terasvirta T. and Yang Y. (2014), Specification, Estimation and Evaluation of Ve
 The code was written by Andrea Bucci
 %%  ~~who you are~~
 }
-\note{
-%%  ~~further notes~~
-}
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~

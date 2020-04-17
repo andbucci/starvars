@@ -14,7 +14,7 @@ VLSTARnls(y1, x1 = NULL, p = NULL,
 m = 2, st = NULL, constant = T,
 n.combi = 50, n.iter = 500,
 starting = NULL,
-epsilon = 10^(-3), exo = T)
+epsilon = 10^(-3), exo = F)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -92,13 +92,6 @@ The algorithm is the following:
 }
 %%  ~~ If necessary, more details than the description above ~~
 }
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
 \references{
 Anderson H.M. and Vahid F. (1998), Testing multiple equation systems for common nonlinear components. \emph{Journal of Econometrics}. 84: 1-36
 
@@ -111,15 +104,11 @@ Terasvirta T. and Yang Y. (2014), Specification, Estimation and Evaluation of Ve
 The code was written by Andrea Bucci
 %%  ~~who you are~~
 }
-\note{
-%%  ~~further notes~~
-}
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{VLSTARlm}} for log-likehood estimation of the same model and \code{\link{VLSTARjoint}} to test the presence of a unique transition variable among equations.
+\code{\link{VLSTARml}} for log-likehood estimation of the same model and \code{\link{VLSTARjoint}} to test the presence of a unique transition variable among equations.
 }
 \examples{
 data(Realized)

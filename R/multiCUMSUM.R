@@ -1,4 +1,4 @@
-multiCUMSUM <- function(data, alpha){
+multiCUMSUM <- function(data, alpha = 0.95){
 nrowy <- nrow(data)+1
 ncoly <- ncol(data)
 h1 <- matrix(ncol = ncoly, nrow = (nrowy-1))
@@ -22,7 +22,7 @@ buildtau <- function(data){
     nupper <- 0.5*ncoly*(ncoly+1)
     tau <- matrix(0L, nrow = T1, ncol = nupper)
 for(t in 1:T1){
-  tau[t,] <- vech(V[t,]%*%t(V[t,]))
+  tau[t,] <- matrixcalc::vech(V[t,]%*%t(V[t,]))
 }
 zeros <- as.matrix(t(rep(0, nupper)))
 tau <- rbind(zeros, tau)

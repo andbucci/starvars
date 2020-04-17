@@ -16,7 +16,9 @@ multiCUMSUM(data, alpha = 0.95)
 \arguments{
   \item{data}{
   a (T x N) matrix/data.frame containing the N time series over period \emph{T}
-%%     ~~Describe \code{y1} here~~
+}
+\item{alpha}{
+Confidence level. By default set to 0.95
 }
 }
 \value{

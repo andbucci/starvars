@@ -51,15 +51,7 @@ Barndorff-Nielsen O.E. and Shephard  N. (2002), Econometric analysis of realised
 The code was written by Andrea Bucci
 %%  ~~who you are~~
 }
-\note{
-%%  ~~further notes~~
-}
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 data(sample_5minprices_jumps)
 

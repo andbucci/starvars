@@ -69,13 +69,7 @@ projection matrix of Z, the LM test is specified as follows
 Under the null, the test statistics is distributed as a \eqn{\chi^{2}} with \eqn{\widetilde{n}(p\cdot\widetilde{n} + k)} degrees of freedom.}
 %%  ~~ If necessary, more details than the description above ~~
 
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
+
 \references{
 Luukkonen R., Saikkonen P. and Terasvirta T. (1988), Testing Linearity Against Smooth Transition Autoregressive Models. \emph{Biometrika}, 75: 491-499
 
@@ -86,15 +80,13 @@ Terasvirta T. and Yang Y. (2015), Linearity and Misspecification Tests for Vecto
 The code was written by Andrea Bucci
 %%  ~~who you are~~
 }
-\note{
-%%  ~~further notes~~
-}
+
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{VLSTARlm}} for log-likehood estimation of the VLSTAR model and \code{\link{VLSTARnls}} for NLS estimation of the same model.
+\code{\link{VLSTARml}} for log-likehood estimation of the VLSTAR model and \code{\link{VLSTARnls}} for NLS estimation of the same model.
 }
 \examples{
 data(Realized)
