@@ -28,7 +28,7 @@ predict(object, alpha = 0.05)
 %%  ~~ If necessary, more details than the description above ~~
 %}
 \value{
-A data frame of predictions for each dependent variable and the (1-\alpha) prediction intervals.
+A data frame of predictions for each dependent variable and the (1-\deqn{\alpha}) prediction intervals.
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
 %%  \item{comp2 }{Description of 'comp2'}
