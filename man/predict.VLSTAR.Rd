@@ -10,7 +10,7 @@ VLSTAR Prediction
 This function allows to obtain one-step ahead forecasts, with the prediction intervals, of a VLSTAR object.
 }
 \usage{
-\method{predict}{VLSTAR}(object, alpha = 0.05, \dots)
+\method{predict}{VLSTAR}(object, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,10 +18,8 @@ This function allows to obtain one-step ahead forecasts, with the prediction int
   An object of class VLSTAR obtained through VLSTARnls or VLSTARml
 %%     ~~Describe \code{y1} here~~
 }
-  \item{alpha}{
-  (optional) Confidence level
-%%     ~~Describe \code{x1} here~~
-}
+
+\item{\dots}{further arguments to be passed to and from other methods}
 }
 %\details{
 
@@ -50,10 +48,9 @@ The code was written by Andrea Bucci
 \code{\link{VLSTAR}} for log-likehood and nonlinear least squares estimation of the VLSTAR model.
 }
 \examples{
-data(Realized)
-fit <- VLSTAR(Realized[-1,1:10], p = 1, n.combi = 10,
-n.iter = 50, st = Realized[-nrow(Realized),1], method ='NLS')
-predict(fit)
+##
+##See 'VLSTAR' examples
+##
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

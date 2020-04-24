@@ -12,7 +12,7 @@ This function allows the user to test linearity against a Vector Smooth Transiti
 }
 \usage{
 VLSTARjoint(y1, x1, st, alpha = 0.05)
-\method{print}{VLSTARjoint}(object, \dots)
+\method{print}{VLSTARjoint}(x, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -32,6 +32,12 @@ VLSTARjoint(y1, x1, st, alpha = 0.05)
   Confidence level
 %%     ~~Describe \code{constant} here~~
 }
+
+\item{x}{\sQuote{VLSTARjoint} object }
+\item{\dots}{ further arguments to be passed to and from other methods }
+}
+\value{
+An object of class VLSTARjoint.
 }
 \details{
 Given a VLSTAR model with a unique transition variable, \eqn{s_{1t} = s_{2t} = \dots = s_{\widetilde{n}t} = s_t}, a generalization of the
@@ -87,5 +93,5 @@ The code was written by Andrea Bucci
 }
 \examples{
 data(Realized)
-VLSTARjoint(Realized[-1,1:10], Realized[-1,11:19], st=Realized[1:(nrow(Realized)-1),1])
+VLSTARjoint(Realized[-1,1:10], Realized[-1,11:16], st=Realized[1:(nrow(Realized)-1),1])
 }

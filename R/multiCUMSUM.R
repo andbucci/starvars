@@ -26,6 +26,7 @@ for(t in 1:T1){
 }
 zeros <- as.matrix(t(rep(0, nupper)))
 tau <- rbind(zeros, tau)
+tau <- zoo::zoo(tau, order.by = zoo::index(data))
 return(tau)
 }
 
@@ -39,6 +40,7 @@ makeDT <- function(tau){
 }
 
 tau <- buildtau(data)
+tau <- zoo::zoo(tau, order.by = zoo::index(data))
 D <- makeDT(tau)
 
 T1 <- nrow(tau)
@@ -77,7 +79,7 @@ critOmega <- rbind(c(1.33,1.33,1.32,1.31,1.31,1.30,1.29,1.28),
   M1 = 0
   M2 = 0
   for(t in 1:T1){
-    tmp = t(tau[t,]-t*tauT)%*%MASS::ginv(D)%*%(tau[t,]-t*tauT)
+    tmp = (tau[t,]-t*tauT)%*%MASS::ginv(D)%*%t(tau[t,]-t*tauT)
     if(tmp > M1){
       M1 = tmp
     }
@@ -95,8 +97,7 @@ class(multiCS) <- 'multiCUMSUM'
 return(multiCS)
 }
 
-print.multiCUMSUM <- function(object, ...) {
-  x <- object
+print.multiCUMSUM <- function(x, ...) {
  cat("===============================================\n")
 cat("Break detection in the covariance structure:\n")
 cat('Lambda (d) test statistics: ',x$M[1], ' [', x$critLambda[x$r, x$c], ']\n', sep = '')

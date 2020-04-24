@@ -12,7 +12,7 @@ Function returns the test statistics for the presence of co-breaks in a set of m
 }
 \usage{
 multiCUMSUM(data, alpha = 0.95)
-\method{print}{multiCUMSUM}(object, \dots)
+\method{print}{multiCUMSUM}(x, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -22,6 +22,8 @@ multiCUMSUM(data, alpha = 0.95)
 \item{alpha}{
 Confidence level. By default set to 0.95
 }
+\item{x}{\sQuote{multiCUMSUM} object}
+\item{\dots}{further arguments to be passed to and from other methods}
 }
 \value{
 \item{Lambda Test statistics}{a \emph{test statistics on the presence of a co-break in the conditional mean}}

@@ -1,18 +1,17 @@
 Package: starvars
 Type: Package
-Title: A Package for Estimating Vector Logistic Smooth Transition Models
-Version: 0.1.6
+Title: Vector Logistic Smooth Transition Models / Realized Covariances Construction
+Version: 0.1.7
 Authors@R: c(
   person("Andrea", "Bucci", email = "andrea.bucci@unich.it", role = c("aut", "cre", "cph")),
   person("Giulio", "Palomba", role = "aut"),
   person("Eduardo", "Rossi", role = "aut"),
   person("Andrea", "Faragalli", role = "ctb")
   )
-Maintainer: Andrea Bucci <andrea.bucci@unich.it>
-Description: This package allows the user to estimate a VLSTAR model via maximum log-likelihood or nonlinear least squares. It further permits to test for linearity in the multivariate framework against a VLSTAR model with a single transition variable.
-License: GNU GPL
+Description: Allows the user to estimate a Vector Logistic Smooth Transition AuroRegressive model via maximum log-likelihood or nonlinear least squares. It further permits to test for linearity in the multivariate framework against a Vector Logistic Smooth Transition AuroRegressive model with a single transition variable. The estimation method is discussed in Terasvirta T. and Yang Y. (2014, <doi:10.1108/S0731-9053(2013)0000031008>). Also, realized covariances can be constructed from stock market prices or returns, as explained in Andersen et al. (2001, <10.1016/S0304-405X(01)00055-1>).
+License: GPL
 Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.5.0)
-Imports:  MASS, ks, zoo, data.table, matrixcalc, vars, nloptr, maxLik, rlist, stats4, fGarch, R.utils, lubridate, xts, lessR, highfrequency, quantmod
+Imports:  MASS, ks, zoo, data.table, methods, matrixcalc, vars, nloptr, maxLik, rlist, stats4, highfrequency, fGarch, R.utils, lubridate, xts, lessR, quantmod
 URL: https://github.com/andbucci/starvars

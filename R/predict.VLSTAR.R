@@ -1,18 +1,19 @@
 #'@S3method predict VLSTAR
 
-predict.VLSTAR <- function(object, newdata = NULL, alpha = 0.05, ...){
+predict.VLSTAR <- function(object, ...){
   k <- ncol(object$Data[[2]])
-  if(object$exo == F){
-    newdata <- as.matrix(object$Data[[1]][(nrow(object$Data[[1]])-object$p+1):(nrow(object$Data[[1]])-object$p),])
+  alpha = 0.05
+  if(object$exo == FALSE){
+    newdata <- as.matrix(object$Data[[1]][(nrow(object$Data[[1]])-(object$p-1)):(nrow(object$Data[[1]])),])
   }else{
-   newdata <- as.matrix(c(object$Data[[1]][(nrow(object$Data[[1]])-object$p+2):(nrow(object$Data[[1]])),], as.matrix(newdata)))
+   newdata <- as.matrix(c(object$Data[[1]][(nrow(object$Data[[1]])-(object$p-1)):(nrow(object$Data[[1]])),], as.matrix(newdata)))
   }
 
   if(!missing(newdata)) {
     if(!inherits(newdata, c("data.frame", "matrix","zoo", "ts"))) stop("Arg 'newdata' should be of class data.frame, matrix, zoo or ts")
     if(!dim(newdata)[1]== (k-1))stop("newdata should have the same dimension of the design matrix (p*n+k)")}
   ## extract parameters, coefs
-  if(object$constant == T){
+  if(object$constant == TRUE){
     newdata <- rbind(1, newdata)
   }
   newdata <- as.matrix(newdata)

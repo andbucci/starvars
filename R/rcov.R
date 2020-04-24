@@ -2,7 +2,7 @@ rcov <- function(data, freq, ret = FALSE, cholesky = FALSE){
   if(!freq %in% c('daily', 'monthly', 'quarterly', 'yearly')){
     stop('Please, provide a correct frequency for the realized covariance matrix!')
   }
-  if(methods::is(data, 'xts') == F){
+  if(methods::is(data, 'xts') == FALSE){
     stop('Data should be of class "xts".')
   }
 ncoly <- ncol(data)
@@ -38,7 +38,7 @@ if(ret == TRUE){
     if(freq == 'daily'){
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (k in 1:nday){
-        realized[k,] <- matrixcalc::vech(highfrequency::rCov(rdata = data[as.character(days[k])], makeReturns = T))
+        realized[k,] <- matrixcalc::vech(highfrequency::rCov(rdata = data[as.character(days[k])], makeReturns = TRUE))
       }
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (j in 1:nday){
@@ -118,7 +118,7 @@ if(ret == TRUE){
     if(freq == 'daily'){
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (k in 1:nday){
-        realized[k,] <- matrixcalc::vech(highfrequency::rCov(rdata = data[as.character(days[k])], makeReturns = F))
+        realized[k,] <- matrixcalc::vech(highfrequency::rCov(rdata = data[as.character(days[k])], makeReturns = FALSE))
       }
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (j in 1:nday){
@@ -185,12 +185,12 @@ if(ret == TRUE){
       }
     }}
 
-names1 <- xts::to('y', (ncoly*(ncoly+1)/2), same.size = F)
+names1 <- lessR::to('y', (ncoly*(ncoly+1)/2), same.size = FALSE)
 
 colnames(realized) <- names1
 colnames(chol2) <- names1
 
-if(cholesky == T){
+if(cholesky == TRUE){
   results <- list(realized, chol2)
   names(results) <- c('Realized Covariances', 'Cholesky Factors')
 }else{
