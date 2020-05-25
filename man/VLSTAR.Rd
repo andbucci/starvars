@@ -136,8 +136,10 @@ n.iter = 3, st = st, method ='NLS')
 
 # a few methods for VLSTAR
 summary(fit.VLSTAR)
+plot(fit.VLSTAR)
 predict(fit.VLSTAR, newdata = Realized[nrow(Realized),1:10])}
 logLik(fit.VLSTAR)
+coef(fit.VLSTAR)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
