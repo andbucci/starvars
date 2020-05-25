@@ -11,3 +11,46 @@ S3method(predict, VLSTAR)
 S3method(print, multiCUMSUM)
 
 S3method(print, VLSTARjoint)
+
+S3method(coef, VLSTAR)
+
+S3method(logLik, VLSTAR)
+
+S3method(plot, VLSTAR)
+
+importFrom("data.table", "rbindlist")
+
+importFrom("fGarch", "garchFit")
+
+importFrom("graphics", "abline", "axis", "box", "layout", "lines", "mtext", "par", "plot",
+           "points")
+
+importFrom("highfrequency", "rCov")
+
+importFrom("ks", "invvec", "invvech")
+
+importFrom("lessR", "to")
+
+importFrom("lubridate", "year")
+
+importFrom("MASS", "ginv")
+
+importFrom("matrixcalc", "matrix.trace", "vec", "vech")
+
+importFrom("methods", "is")
+
+importFrom("quantmod", "dailyReturn", "monthlyReturn")
+
+importFrom("rlist", "list.cbind")
+
+importFrom("stats", "acf", "fitted", "lag", "lm", "optim", "pacf", "pchisq",
+           "plot.ts", "pt", "qchisq", "qt", "resid", "residuals", "rnorm", "symnum")
+
+importFrom("utils", "tail.matrix")
+
+importFrom("vars", "VAR")
+
+importFrom("xts", "apply.monthly", "apply.quarterly", "apply.yearly", "as.xts")
+
+importFrom("zoo", "as.Date", "as.yearqtr", "index", "zoo")
+

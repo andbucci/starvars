@@ -1,9 +1,10 @@
-VLSTAR <- function(y, x = NULL, p = NULL,
+VLSTAR <- function(y, x1 = NULL, p = NULL,
                      m = 2, st = NULL, constant = TRUE,
                      n.combi = 50, n.iter = 500,
                      starting = NULL, epsilon = 10^(-3),
                      exo = FALSE, method = c('ML', 'NLS')){
   y <- as.matrix(y)
+  x <- x1
   if (any(is.na(y)))
     stop("\nNAs in y.\n")
   if(!method %in% c('ML', 'NLS'))
@@ -32,8 +33,8 @@ VLSTAR <- function(y, x = NULL, p = NULL,
   }
   colnames(y) <- make.names(colnames(y))
   ##Definition of dimensions, creating variable x with constant
-  yt <- zoo::zoo(y)
-  ylag <- stats::lag(yt, -(1:p))
+  yt <- zoo(y)
+  ylag <- lag(yt, -(1:p))
   ylag <- as.matrix(ylag)
   if(p>1){
    lagg <- p-1
@@ -75,8 +76,8 @@ VLSTAR <- function(y, x = NULL, p = NULL,
       cj <- matrix(ncol = ncoly, nrow = n.combi)
       gamma[1, ] <- param.init$gamma
       cj[1,] <- param.init$c
-      GAMMA[[t]] <- gamma*(1+stats::rnorm(1, mean = 0, sd = 5))
-      CJ[[t]] <- cj*(1+stats::rnorm(1, mean = 0, sd = 5))
+      GAMMA[[t]] <- gamma*(1+rnorm(1, mean = 0, sd = 5))
+      CJ[[t]] <- cj*(1+rnorm(1, mean = 0, sd = 5))
       #Grid for c and gamma
       rangey <- matrix(nrow = ncoly, ncol = 2)
       combi <- list()
@@ -114,19 +115,19 @@ VLSTAR <- function(y, x = NULL, p = NULL,
             Gt <- diag(glog[i,])
             GT[[t]] <- Gt
           }
-          Gtilde[[i]] <- t(cbind(In, rlist::list.cbind(GT)))
+          Gtilde[[i]] <- t(cbind(In, list.cbind(GT)))
           GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
           XX[[i]] <- x[i,] %*%t(x[i,])
           GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
           XY[[i]] <- x[i, ]%*%t(y[i,])
-          XYG[[i]] <- matrixcalc::vec(XY[[i]]%*%t(Gtilde[[i]]))
+          XYG[[i]] <- vec(XY[[i]]%*%t(Gtilde[[i]]))
           kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
         }
         ggxx <- Reduce(`+`, GGXX)/nrowx
         M <- t(do.call("cbind", kro))
-        Y <- matrixcalc::vec(t(y))
-        Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
-        BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
+        Y <- vec(t(y))
+        Bhat <- ginv(t(M)%*%M)%*%t(M)%*%Y
+        BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
         resi <- list()
         Ehat <- matrix(NA, ncol = ncoly, nrow = nrowy)
         for (o in 1:nrowx){
@@ -184,20 +185,20 @@ VLSTAR <- function(y, x = NULL, p = NULL,
       Gt <- diag(glog[i,])
       GT[[t]] <- Gt
     }
-    Gtilde[[i]] <- t(cbind(In, rlist::list.cbind(GT)))
+    Gtilde[[i]] <- t(cbind(In, list.cbind(GT)))
     GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
     XX[[i]] <- x[i,] %*%t(x[i,])
     GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
     XY[[i]] <- x[i, ]%*%t(y[i,])
-    XYG[[i]] <- matrixcalc::vec(XY[[i]]%*%t(Gtilde[[i]]))
+    XYG[[i]] <- vec(XY[[i]]%*%t(Gtilde[[i]]))
     kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
   }
   ggxx <- Reduce(`+`, GGXX)/nrowx
   M <- t(do.call("cbind", kro))
-  Y <- matrixcalc::vec(t(y))
+  Y <- vec(t(y))
   #Estimated coefficients
-  Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
-  BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
+  Bhat <- ginv(t(M)%*%M)%*%t(M)%*%Y
+  BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
   resi <- list()
   Ehat1 <- matrix(NA, ncol = ncoly, nrow = nrowy)
   for (i in 1:nrowx){
@@ -231,8 +232,8 @@ VLSTAR <- function(y, x = NULL, p = NULL,
         Gt <- diag(glog[z,])
         GT[[t]] <- Gt
       }
-      Gtilde[[z]] <- t(cbind(In, rlist::list.cbind(GT)))
-      dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%MASS::ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
+      Gtilde[[z]] <- t(cbind(In, list.cbind(GT)))
+      dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
     }
     sumdif <- sum(dify)
     logll <- -(nrowy*log(det(Omegahat))/2L) - sumdif/2L  - (nrowy*ncoly/2L)*log(2L*pi)
@@ -260,8 +261,8 @@ VLSTAR <- function(y, x = NULL, p = NULL,
         Gt <- diag(glog[z,])
         GT[[t]] <- Gt
       }
-      Gtilde[[z]] <- t(cbind(In, rlist::list.cbind(GT)))
-      dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%MASS::ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
+      Gtilde[[z]] <- t(cbind(In, list.cbind(GT)))
+      dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
     }
     sumdif <- sum(dify)
     logll <- -(nrowy*log(det(Omegahat))/2L) - sumdif/2L  - (nrowy*ncoly/2L)*log(2L*pi)
@@ -281,8 +282,8 @@ VLSTAR <- function(y, x = NULL, p = NULL,
   for(t in 1:(m-1)){
     PARAM1[[t]] <- as.data.frame(PARAM[[t]])
   }
-  param <- data.table::rbindlist(PARAM1)
-  param <- matrixcalc::vec(as.matrix(param))
+  param <- rbindlist(PARAM1)
+  param <- vec(as.matrix(param))
 
   message('Maximum likelihood estimation\n')
 
@@ -297,7 +298,7 @@ VLSTAR <- function(y, x = NULL, p = NULL,
     #Parameters
     low1 <- replicate(ncoly, 0)
     #1.Maximum likelihood estimation of gamma and c
-    param1 <- stats::optim(par = param, fn = loglike, lower = c(low1, apply(y, 2, min)),
+    param1 <- optim(par = param, fn = loglike, lower = c(low1, apply(y, 2, min)),
                            method="L-BFGS-B")
 
     cgam1 <- matrix(param1$par, ncol = 2, nrow = ncoly)
@@ -321,18 +322,18 @@ VLSTAR <- function(y, x = NULL, p = NULL,
         Gt <- diag(glog[i,])
         GT[[t]] <- Gt
       }
-      Gtilde[[i]] <- t(cbind(In, rlist::list.cbind(GT)))
+      Gtilde[[i]] <- t(cbind(In, list.cbind(GT)))
       GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
       XX[[i]] <- x[i,] %*%t(x[i,])
       XY[[i]] <- x[i, ]%*%t(y[i,])
-      XYOG[[i]] <- matrixcalc::vec(XY[[i]]%*%MASS::ginv(Omegahat)%*%t(Gtilde[[i]]))
-      PsiOmegaPsi[[i]] <- Gtilde[[i]]%*%MASS::ginv(Omegahat)%*%t(Gtilde[[i]])
+      XYOG[[i]] <- vec(XY[[i]]%*%ginv(Omegahat)%*%t(Gtilde[[i]]))
+      PsiOmegaPsi[[i]] <- Gtilde[[i]]%*%ginv(Omegahat)%*%t(Gtilde[[i]])
       kro[[i]] <- kronecker(PsiOmegaPsi[[i]], XX[[i]])
     }
     xyog <- Reduce(`+`, XYOG)/nrowy
     kroxx <- Reduce(`+`, kro)/nrowy
     Bhat <- t(t(xyog)%*%kroxx)
-    BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
+    BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
     resi <- list()
     fitte <- matrix(nrow = nrowy, ncol = ncoly)
     Ehat1 <- matrix(NA, ncol = ncoly, nrow = nrowy)
@@ -346,14 +347,14 @@ VLSTAR <- function(y, x = NULL, p = NULL,
     #3. Convergence check
     ll1 <- loglike1(BB, param1$par, Omega = Omegahat)
     if((ll1-ll0)>0){
-      param <- as.matrix(matrixcalc::vec(cgam1))
+      param <- as.matrix(vec(cgam1))
     }
     err <- abs(ll1 - ll0)
     ll0 <- ll1
     if(iter ==1) {
-      graphics::plot(ll0~1, xlim = c(0, n.iter), ylim = c(0, (ll0+ll0*0.1)))
+      plot(ll0~1, xlim = c(0, n.iter), ylim = c(0, (ll0+ll0*0.1)))
     }
-    graphics::points(ll0~iter)
+    points(ll0~iter)
     loglik1[iter] <- ll1
     bbhat[[iter]] <- BB
     omega[[iter]] <- Omegahat
@@ -373,7 +374,7 @@ VLSTAR <- function(y, x = NULL, p = NULL,
     bb2[[t]] <- as.data.frame(bbhat[[iter]][,(ncoly*(t-1)+1):(ncoly*t)] +
                                 bbhat[[iter]][,(ncoly*(t)+1):(ncoly*(t+1))])
   }
-  bb4 <- as.matrix(data.table::rbindlist(bb2))
+  bb4 <- as.matrix(rbindlist(bb2))
   BBhat <- rbind(bb1, bb4)
   colnames(cgam1) <- c('gamma', 'c')
   covbb <- matrix(nrow = m*ncolx, ncol = ncoly)
@@ -382,9 +383,9 @@ VLSTAR <- function(y, x = NULL, p = NULL,
   ee <- matrix(nrow = m*ncolx, ncol = ncoly)
   for (j in 1 : ncoly){
     #covbb[,j] <- diag(ginv(t(x[[j]])%*%XX[[j]])*sqrt(varhat[j]))
-    covbb[,j] <- sqrt(diag(MASS::ginv(t(x) %*%x))*varhat[j])
+    covbb[,j] <- sqrt(diag(ginv(t(x) %*%x))*varhat[j])
     ttest[,j] <- BBhat[,j]/covbb[,j]
-    pval[,j] <- 2*stats::pt(abs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower = FALSE)
+    pval[,j] <- 2*pt(abs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower.tail = FALSE)
   }
 
   loglike2 <- function(y, resid1, omega){
@@ -407,7 +408,7 @@ VLSTAR <- function(y, x = NULL, p = NULL,
   for(j in 1:m){
     names1[[j]] <- as.data.frame(paste(colnames(x), 'm_', j))
   }
-  names1 <- as.matrix(data.table::rbindlist(names1))
+  names1 <- as.matrix(rbindlist(names1))
   rownames(BBhat) <- names1
   colnames(BBhat) <- colnames(y)
   modeldata <- list(y, x)
@@ -437,19 +438,19 @@ VLSTAR <- function(y, x = NULL, p = NULL,
         Gt <- diag(glog[i,])
         GT[[t]] <- Gt
       }
-      Gtilde[[i]] <- t(cbind(In, rlist::list.cbind(GT)))
+      Gtilde[[i]] <- t(cbind(In, list.cbind(GT)))
       GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
       XX[[i]] <- x[i,] %*%t(x[i,])
       GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
       XY[[i]] <- x[i, ]%*%t(y[i,])
-      XYG[[i]] <- matrixcalc::vec(XY[[i]]%*%t(Gtilde[[i]]))
+      XYG[[i]] <- vec(XY[[i]]%*%t(Gtilde[[i]]))
       kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
     }
     ggxx <- Reduce(`+`, GGXX)/nrowx
     M <- t(do.call("cbind", kro))
-    Y <- matrixcalc::vec(t(y))
-    Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
-    BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
+    Y <- vec(t(y))
+    Bhat <- ginv(t(M)%*%M)%*%t(M)%*%Y
+    BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
 
     #Sum of squared error to be optimized
     ssq1 <- function(param){
@@ -472,7 +473,7 @@ VLSTAR <- function(y, x = NULL, p = NULL,
           Gt <- diag(glog[z,])
           GT[[t]] <- Gt
         }
-        Gtilde[[z]] <- t(cbind(In, rlist::list.cbind(GT)))
+        Gtilde[[z]] <- t(cbind(In, list.cbind(GT)))
         dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
       }
       sumdif <- sum(dify)
@@ -500,8 +501,8 @@ VLSTAR <- function(y, x = NULL, p = NULL,
           Gt <- diag(glog[z,])
           GT[[t]] <- Gt
         }
-        Gtilde[[z]] <- t(cbind(In, rlist::list.cbind(GT)))
-        dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%MASS::ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
+        Gtilde[[z]] <- t(cbind(In, list.cbind(GT)))
+        dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
       }
       sumdif <- sum(dify)
       logll <- -(nrowy*log(det(Omegahat))/2L) - sumdif/2L  - (nrowy*ncoly/2L)*log(2L*pi)
@@ -521,8 +522,8 @@ VLSTAR <- function(y, x = NULL, p = NULL,
     for(t in 1:(m-1)){
       PARAM1[[t]] <- as.data.frame(PARAM[[t]])
     }
-    param <- as.matrix(data.table::rbindlist(PARAM1))
-    param <- matrixcalc::vec(param)
+    param <- as.matrix(rbindlist(PARAM1))
+    param <- vec(param)
 
     message('NLS estimation\n')
 
@@ -537,7 +538,7 @@ VLSTAR <- function(y, x = NULL, p = NULL,
       #Parameters
       low1 <- replicate(ncoly, 0)
       #1.Maximum likelihood estimation of gamma and c
-      param1 <- stats::optim(par = param, fn = ssq1, lower = c(low1, apply(y, 2, min)),
+      param1 <- optim(par = param, fn = ssq1, lower = c(low1, apply(y, 2, min)),
                              method="L-BFGS-B")
 
       cgam1 <- matrix(param1$par, ncol = 2L, nrow = ncoly*(m-1))
@@ -561,19 +562,19 @@ VLSTAR <- function(y, x = NULL, p = NULL,
           Gt <- diag(glog[i,])
           GT[[t]] <- Gt
         }
-        Gtilde[[i]] <- t(cbind(In, rlist::list.cbind(GT)))
+        Gtilde[[i]] <- t(cbind(In, list.cbind(GT)))
         GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
         XX[[i]] <- x[i,] %*%t(x[i,])
         GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
         XY[[i]] <- x[i, ]%*%t(y[i,])
-        XYG[[i]] <- matrixcalc::vec(XY[[i]]%*%t(Gtilde[[i]]))
+        XYG[[i]] <- vec(XY[[i]]%*%t(Gtilde[[i]]))
         kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
       }
       ggxx <- Reduce(`+`, GGXX)/nrowx
       M <- t(do.call("cbind", kro))
-      Y <- matrixcalc::vec(t(y))
-      Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
-      BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
+      Y <- vec(t(y))
+      Bhat <- ginv(t(M)%*%M)%*%t(M)%*%Y
+      BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
       resi <- list()
       resiresi <- list()
       fitte <- matrix(nrow = nrowy, ncol = ncoly)
@@ -592,14 +593,14 @@ VLSTAR <- function(y, x = NULL, p = NULL,
       #3. Convergence check
       ll1 <- loglike1(BB, param1$par, Omega = Omegahat)
       if((ll1-ll0)>0){
-        param <- as.matrix(matrixcalc::vec(cgam1))
+        param <- as.matrix(vec(cgam1))
       }
       err <- abs(ll1 - ll0)
       ll0 <- ll1
       if(iter ==1) {
-        graphics::plot(ll0~1, xlim = c(0, n.iter), ylim = c(0, (ll0+ll0*0.1)))
+        plot(ll0~1, xlim = c(0, n.iter), ylim = c(0, (ll0+ll0*0.1)))
       }
-      graphics::points(ll0~iter)
+      points(ll0~iter)
       loglik1[iter] <- ll1
       bbhat[[iter]] <- BB
       omega[[iter]] <- Omegahat
@@ -629,7 +630,7 @@ VLSTAR <- function(y, x = NULL, p = NULL,
       bb2[[t]] <- as.data.frame(bbhat[[iter]][,(ncoly*(t-1)+1):(ncoly*t)] +
                                   bbhat[[iter]][,(ncoly*(t)+1):(ncoly*(t+1))])
     }
-    bb4 <- as.matrix(data.table::rbindlist(bb2))
+    bb4 <- as.matrix(rbindlist(bb2))
     BBhat <- rbind(bb1, bb4)
     colnames(cgam1) <- c('gamma', 'c')
     covbb <- matrix(nrow = m*ncolx, ncol = ncoly)
@@ -637,10 +638,10 @@ VLSTAR <- function(y, x = NULL, p = NULL,
     pval <- matrix(nrow = m*ncolx, ncol = ncoly)
     ee <- matrix(nrow = m*ncolx, ncol = ncoly)
     for (j in 1 : ncoly){
-      #covbb[,j] <- diag(MASS::ginv(t(x[[j]])%*%XX[[j]])*sqrt(varhat[j]))
-      covbb[,j] <- sqrt(diag(MASS::ginv(t(x) %*%x))*varhat[j])
+      #covbb[,j] <- diag(ginv(t(x[[j]])%*%XX[[j]])*sqrt(varhat[j]))
+      covbb[,j] <- sqrt(diag(ginv(t(x) %*%x))*varhat[j])
       ttest[,j] <- BBhat[,j]/covbb[,j]
-      pval[,j] <- 2*stats::pt(abs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower = FALSE)
+      pval[,j] <- 2*pt(abs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower.tail = FALSE)
     }
     signifi <- matrix('',nrow = nrow(pval), ncol = ncol(pval))
     for(i in 1:nrow(pval)){
@@ -683,7 +684,7 @@ VLSTAR <- function(y, x = NULL, p = NULL,
     for(j in 1:m){
       names1[[j]] <- as.data.frame(paste(colnames(x), 'm_', j))
     }
-    names1 <- as.matrix(data.table::rbindlist(names1))
+    names1 <- as.matrix(rbindlist(names1))
     rownames(BBhat) <- names1
     colnames(BBhat) <- colnames(y)
     rownames(bhat1) <- names1

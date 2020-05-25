@@ -5,7 +5,7 @@ summary.VLSTAR<-function(object,...){
   t<-nrow(x$Data[[1]])
   p<-x$p
   x$T <- nrow(x$yoriginal)
-  Z<-t(as.matrix(utils::tail.matrix(x$Data[[1]])))
+  Z<-t(as.matrix(tail.matrix(x$Data[[1]])))
   x$npar <- k*ncol(x$Data[[1]])*x$m + 2*(x$m-1)*ncol(x$Data[[1]])
 
   ## export results
@@ -17,7 +17,7 @@ summary.VLSTAR<-function(object,...){
   symp<-list()
   stars<-list()
   for(i in 1:length(x$Pvalues)){
-    symp[[i]] <- stats::symnum(x$Pvalues[[i]], corr=FALSE,cutpoints = c(0,  .001,.01,.05, .1, 1), symbols = c("***","**","*","."," "))
+    symp[[i]] <- symnum(x$Pvalues[[i]], corr=FALSE,cutpoints = c(0,  .001,.01,.05, .1, 1), symbols = c("***","**","*","."," "))
     stars[[i]]<-matrix(symp[[i]], nrow=length(x$Pvalues[[i]]))
     ab[[i]]<-matrix(paste(x$coefficients[[i]],"(", x$StDev[[i]],")",stars[[i]], sep=""), nrow=length(x$StDev[[i]]))
     dimnames(ab[[i]])<-dimnames(x$coefficients[[1]])
@@ -36,8 +36,7 @@ summary.VLSTAR<-function(object,...){
 }
 
 #' @S3method print summary.VLSTAR
-print.summary.VLSTAR<-function(object,...){
-  x <- object
+print.summary.VLSTAR<-function(x,...){
   signif.stars ="show.signif.stars"
   digits = 3
   coeftoprint<-list()

@@ -27,9 +27,9 @@ predict.VLSTAR <- function(object, ...){
   pred$LB <- NA
   pred$UB <- NA
   for(i in 1:ncol(object$Data[[1]])){
-   std_err <- sqrt(object$Omega[i,i])*t(newdata)%*%MASS::ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%newdata
-     pred$LB[i] <- pred$Prediction[i]-stats::qt((1-alpha), df = nrow(object$Data[[1]])*ncol(object$Data[[1]])-length(BB))*std_err
-     pred$UB[i] <- pred$Prediction[i]+stats::qt((1-alpha), df = nrow(object$Data[[1]])*ncol(object$Data[[1]])-length(BB))*std_err
+   std_err <- sqrt(object$Omega[i,i])*t(newdata)%*%ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%newdata
+     pred$LB[i] <- pred$Prediction[i]-qt((1-alpha), df = nrow(object$Data[[1]])*ncol(object$Data[[1]])-length(BB))*std_err
+     pred$UB[i] <- pred$Prediction[i]+qt((1-alpha), df = nrow(object$Data[[1]])*ncol(object$Data[[1]])-length(BB))*std_err
   }
 
   return(pred)

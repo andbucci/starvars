@@ -15,7 +15,7 @@
 
 \usage{
 
-\method{plot}{VLSTAR}(object, names = NULL, main.fit = NULL, main.acf = NULL, main.pacf = NULL, main.logi = NULL,
+\method{plot}{VLSTAR}(x, names = NULL, main.fit = NULL, main.acf = NULL, main.pacf = NULL, main.logi = NULL,
 ylim.fit = NULL, ylim.resid = NULL, lty.fit = NULL, lty.resid = NULL, lty.logi = NULL,
 lwd.fit = NULL, lwd.resid = NULL, lwd.logi = NULL, lag.acf = NULL, lag.pacf = NULL, col.fit = NULL,
 col.resid = NULL, col.logi = NULL,  ylab.fit = NULL, ylab.resid = NULL, ylab.acf = NULL, ylab.pacf = NULL,
@@ -40,15 +40,13 @@ adj.mtext = NA, padj.mtext = NA, col.mtext = NA,...)
   \item{main.acf}{Character vector, main for residuals' ACF.}
   \item{main.fit}{Character vector, main for diagram of fit.}
   \item{main.pacf}{Character vector, main for residuals' PACF.}
-  \item{main.resid}{Character vector, main for residual plot.}
   \item{main.logi}{Character vector, main for the plot of the logistic function.}
   \item{mar}{Setting of margins.}
   \item{names}{Character vector, the variables names to be plotted. If
     left \code{NULL}, all variables are plotted.}
-  \item{names.arg}{Character vector, names for x-axis of barplot.}
   \item{oma}{Setting of outer margins.}
   \item{padj.mtext}{Adjustment for \code{mtext()}.}
-  \item{xlab.acf}{Character, xlab for ACF and PACF of residuals.}
+  \item{x}{An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()}.}
   \item{xlab.fit}{Character vector, xlab for diagram of fit.}
   \item{xlab.resid}{Character vector, xlab for residual plot.}
   \item{xlab.logi}{Character vector, xlab for the plot of the logistic function.}
@@ -56,6 +54,7 @@ adj.mtext = NA, padj.mtext = NA, col.mtext = NA,...)
   \item{ylab.fit}{Character vector, ylab for diagram of fit.}
   \item{ylab.pacf}{Character, ylab for PACF}
   \item{ylab.resid}{Character vector, ylab for residual plot.}
+  \item{ylab.logi}{Character vector, ylab for the plot of the logistic function.}
   \item{ylim}{Vector, the limits of the y-axis.}
   \item{ylim.fit}{Vector, ylim for diagram of fit.}
   \item{ylim.resid}{Vector, ylim for residual plot.}
@@ -72,8 +71,8 @@ adj.mtext = NA, padj.mtext = NA, col.mtext = NA,...)
   Hamilton, J. (1994), \emph{Time Series Analysis}, Princeton
   University Press, Princeton.
 
-  L?tkepohl, H. (2006), \emph{New Introduction to Multiple Time Series
-    Analysis}, Springer, New York.
+Terasvirta T. and Yang Y. (2014), Specification, Estimation and Evaluation of Vector Smooth Transition Autoregressive Models with Applications. \emph{CREATES Research Paper 2014-8}
+}
 
 
 \seealso{

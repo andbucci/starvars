@@ -9,7 +9,7 @@ quiet <- function(x){
   invisible(force(x))
 }
 for(i in 1:ncoly){
-  gspec <- quiet(fGarch::garchFit(~garch(1,1), data = data[,i]))
+  gspec <- quiet(garchFit(~garch(1,1), data = data[,i]))
   h1[,i] <- gspec@h.t
   for(j in 1:(nrowy-1)){
   data[j, i] <- (data[j,i] - means[i])/sqrt(h1[j,i])
@@ -22,11 +22,11 @@ buildtau <- function(data){
     nupper <- 0.5*ncoly*(ncoly+1)
     tau <- matrix(0L, nrow = T1, ncol = nupper)
 for(t in 1:T1){
-  tau[t,] <- matrixcalc::vech(V[t,]%*%t(V[t,]))
+  tau[t,] <- vech(V[t,]%*%t(V[t,]))
 }
 zeros <- as.matrix(t(rep(0, nupper)))
 tau <- rbind(zeros, tau)
-tau <- zoo::zoo(tau, order.by = zoo::index(data))
+tau <- zoo(tau, order.by = index(data))
 return(tau)
 }
 
@@ -40,7 +40,7 @@ makeDT <- function(tau){
 }
 
 tau <- buildtau(data)
-tau <- zoo::zoo(tau, order.by = zoo::index(data))
+tau <- zoo(tau, order.by = index(data))
 D <- makeDT(tau)
 
 T1 <- nrow(tau)
@@ -79,7 +79,7 @@ critOmega <- rbind(c(1.33,1.33,1.32,1.31,1.31,1.30,1.29,1.28),
   M1 = 0
   M2 = 0
   for(t in 1:T1){
-    tmp = (tau[t,]-t*tauT)%*%MASS::ginv(D)%*%t(tau[t,]-t*tauT)
+    tmp = (tau[t,]-t*tauT)%*%ginv(D)%*%t(tau[t,]-t*tauT)
     if(tmp > M1){
       M1 = tmp
     }

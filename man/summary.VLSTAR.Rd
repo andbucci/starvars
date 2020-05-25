@@ -1,6 +1,7 @@
 \name{summary}
 \alias{summary}
 \alias{summary.VLSTAR}
+\alias{print.summary.VLSTAR}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Summary method for objects of class VLSTAR
@@ -12,7 +13,7 @@ Summary method for objects of class VLSTAR
 }
 \usage{
 \method{summary}{VLSTAR}(object, \dots)
-\method{print.summary}{VLSTAR}(object, \dots)
+\method{print.summary}{VLSTAR}(x, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -20,7 +21,10 @@ Summary method for objects of class VLSTAR
 An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()}.
 %%     ~~Describe \code{y1} here~~
 }
-
+\item{x}{
+A summary object of class \sQuote{\code{VLSTAR}} obtained through \command{summary()}.
+%%     ~~Describe \code{y1} here~~
+}
 \item{\dots}{further arguments to be passed to and from other methods}
 }
 %\details{

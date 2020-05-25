@@ -11,10 +11,10 @@ VLSTAR- Estimation
 This function allows the user to estimate the coefficients of a VLSTAR model with \emph{m} regimes through maximum likelihood or nonlinear least squares. The set of starting values of Gamma and C for the convergence algorithm can be either passed or obtained via searching grid.
 }
 \usage{
-VLSTAR(y, x = NULL, p = NULL, m = 2, st = NULL, constant = TRUE, n.combi = 50,
+VLSTAR(y, x1 = NULL, p = NULL, m = 2, st = NULL, constant = TRUE, n.combi = 50,
        n.iter = 500, starting = NULL, epsilon = 10^(-3), exo = FALSE,
        method = c('ML', 'NLS'))
-\method{print}{VLSTAR}(object, \dots)
+\method{print}{VLSTAR}(x, \dots)
 
 }
 \value{
@@ -26,7 +26,7 @@ An object of class VLSTAR, with standard methods.
   Data.frame or matrix of dependent variables of dimension Txn
 %%     ~~Describe \code{y1} here~~
 }
-  \item{x}{
+  \item{x1}{
   (optional) Data.frame or matrix of exogenous variables of dimension TxK
 %%     ~~Describe \code{x1} here~~
 }
@@ -71,7 +71,7 @@ An object of class VLSTAR, with standard methods.
   Fitting method: maximum likelihood or nonlinear least squares.
 %%     ~~Describe \code{exo} here~~
 }
-\item{object}{An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()}.}
+\item{x}{An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()} to be printed.}
 \item{\dots}{further arguments to be passed to and from other methods}
 }
 \details{
@@ -137,9 +137,10 @@ n.iter = 3, st = st, method ='NLS')
 # a few methods for VLSTAR
 summary(fit.VLSTAR)
 plot(fit.VLSTAR)
-predict(fit.VLSTAR, newdata = Realized[nrow(Realized),1:10])}
+predict(fit.VLSTAR, newdata = Realized[nrow(Realized),1:10])
 logLik(fit.VLSTAR)
-coef(fit.VLSTAR)
+coef(fit.VLSTAR)}
+
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
