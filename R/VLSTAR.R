@@ -411,6 +411,7 @@ VLSTAR <- function(y, x = NULL, p = NULL,
   rownames(BBhat) <- names1
   colnames(BBhat) <- colnames(y)
   modeldata <- list(y, x)
+  fitte <- fitte[!is.na(fitte[,1]),]
   results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB, m, p,
                   st, y, exo, constant)
   names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'fitted', 'residuals', 'MultiLL', 'LL', 'AIC',
@@ -582,7 +583,6 @@ VLSTAR <- function(y, x = NULL, p = NULL,
         resiresi[[o]] <- resi[[o]]%*%t(resi[[o]])
         fitte[o,] <- t(t(Gtilde[[o]])%*%t(BB)%*%x[o,])
       }
-      fitte <- fitte[!is.na(fitte[,1]),]
       #Ehat1 <- t(do.call("cbind", resi))
       #Omegahat <- (t(Ehat1)%*%Ehat1)/(nrowy-m*(ncoly+q)*ncoly-1)
       Ehat1 <- Reduce("+", resiresi)
@@ -689,6 +689,7 @@ VLSTAR <- function(y, x = NULL, p = NULL,
     rownames(bhat1) <- names1
     colnames(bhat1) <- colnames(y)
     modeldata <- list(y, x)
+    fitte <- fitte[!is.na(fitte[,1]),]
     results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB, m, p,
                     st, y, exo, constant)
     names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'fitted', 'residuals', 'MultiLL', 'LL', 'AIC',
