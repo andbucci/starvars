@@ -1,5 +1,7 @@
 \name{plot}
 
+\alias{plot}
+
 \alias{plot.VLSTAR}
 
 
@@ -24,7 +26,7 @@ adj.mtext = NA, padj.mtext = NA, col.mtext = NA,...)
 \arguments{
   \item{adj.mtext}{Adjustment for \code{mtext()}.}
   \item{col.fit}{Character vector, colors for diagram of fit.}
-  \item{col.mtext}{Character, color for \code{mtext()}, only applicable
+  \item{col.mtext}{Character, color for \code{mtext()}, only applicable.}
   \item{col.resid}{Character vector, colors for residual plot.}
   \item{col.logi}{Character vector, colors for logistic function plot.}
   \item{lag.acf}{Integer, lag.max for ACF of residuals.}
@@ -70,7 +72,7 @@ adj.mtext = NA, padj.mtext = NA, col.mtext = NA,...)
   Hamilton, J. (1994), \emph{Time Series Analysis}, Princeton
   University Press, Princeton.
 
-  Lütkepohl, H. (2006), \emph{New Introduction to Multiple Time Series
+  L?tkepohl, H. (2006), \emph{New Introduction to Multiple Time Series
     Analysis}, Springer, New York.
 
 
