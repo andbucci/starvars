@@ -11,16 +11,16 @@ Joint linearity test
 This function allows the user to test linearity against a Vector Smooth Transition Autoregressive Model with a single transition variable.
 }
 \usage{
-VLSTARjoint(y1, x1, st, alpha = 0.05)
+VLSTARjoint(y, x, st, alpha = 0.05)
 \method{print}{VLSTARjoint}(x, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{y1}{
+  \item{y}{
   Data.frame or matrix of dependent variables of dimension Txn
 %%     ~~Describe \code{y1} here~~
 }
-  \item{x1}{
+  \item{x}{
   (optional) Data.frame or matrix of exogenous variables of dimension TxK
 %%     ~~Describe \code{x1} here~~
 }

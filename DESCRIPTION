@@ -1,14 +1,14 @@
 Package: starvars
 Type: Package
 Title: Vector Logistic Smooth Transition Models / Realized Covariances Construction
-Version: 0.1.7
+Version: 0.1.8
 Authors@R: c(
   person("Andrea", "Bucci", email = "andrea.bucci@unich.it", role = c("aut", "cre", "cph")),
   person("Giulio", "Palomba", role = "aut"),
   person("Eduardo", "Rossi", role = "aut"),
   person("Andrea", "Faragalli", role = "ctb")
   )
-Description: Allows the user to estimate a Vector Logistic Smooth Transition AuroRegressive model via maximum log-likelihood or nonlinear least squares. It further permits to test for linearity in the multivariate framework against a Vector Logistic Smooth Transition AuroRegressive model with a single transition variable. The estimation method is discussed in Terasvirta T. and Yang Y. (2014, <doi:10.1108/S0731-9053(2013)0000031008>). Also, realized covariances can be constructed from stock market prices or returns, as explained in Andersen et al. (2001, <10.1016/S0304-405X(01)00055-1>).
+Description: Allows the user to estimate a vector logistic smooth transition autoregressive model via maximum log-likelihood or nonlinear least squares. It further permits to test for linearity in the multivariate framework against a vector logistic smooth transition autoregressive model with a single transition variable. The estimation method is discussed in Terasvirta and Yang (2014, <doi:10.1108/S0731-9053(2013)0000031008>). Also, realized covariances can be constructed from stock market prices or returns, as explained in Andersen et al. (2001, <doi:10.1016/S0304-405X(01)00055-1>).
 License: GPL
 Encoding: UTF-8
 LazyData: true

@@ -1,13 +1,22 @@
-VLSTARjoint <- function(y1, x1, st, alpha = 0.05){
-  y <- as.matrix(y1)
-  x <- as.matrix(x1)
-  nrowx <- nrow(x)
-  ncolx <- ncol(x)
+VLSTARjoint <- function(y, x = NULL, st, alpha = 0.05){
+  y <- as.matrix(y)
   ncoly <- ncol(y)
-  q <- ncolx-ncoly
 
-  ##VAR Estimation Y on X
-varest <- stats::lm(y~x)
+
+##VAR Estimation Y on X
+if(!is.null(x)){
+  varest <- vars::VAR(y, exogen = x)
+  #q <- ncolx-ncoly
+}else{
+  varest <- vars::VAR(y)
+}
+
+x <- varest$datamat[,-c(1:ncoly)]
+ncolx <- ncol(x)
+nrowx <- nrow(x)
+st <- as.matrix(st[varest$p:length(st)])
+
+
 ee <- stats::residuals(varest)
 RSS0 <- t(ee)%*%ee
 ZZ <- matrix(nrow = nrowx, ncol = ncolx*3)
@@ -17,12 +26,13 @@ for (i in 1:nrowx){
   xst3 <- as.matrix(x[i,]*st[i]^3)
  ZZ[i,] <- cbind(xst1, xst2, xst3)
 }
+
 ausvar <- stats::lm(ee ~ ZZ)
 ll <- stats::residuals(ausvar)
 RSS1 <- t(ll)%*%ll
 trac1 <- matrixcalc::matrix.trace(MASS::ginv(RSS0)%*%RSS1)
 LM3 <- nrowx*(ncoly - trac1)
-df <- 3*ncoly*(q+ncoly)
+df <- 3*ncoly*(ncolx)
 conflev <- 1-alpha/2
 chi <- stats::qchisq(conflev, df)
 pvalue <- stats::pchisq(LM3, df, lower.tail=FALSE)

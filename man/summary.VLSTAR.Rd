@@ -1,21 +1,23 @@
-\name{predict.VLSTAR}
-\alias{predict.VLSTAR}
+\name{summary}
+\alias{summary}
+\alias{summary.VLSTAR}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-VLSTAR Prediction
+Summary method for objects of class VLSTAR
 %%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-This function allows to obtain one-step ahead forecasts, with the prediction intervals, of a VLSTAR object.
+\sQuote{\code{summary}} methods for class \sQuote{\code{VLSTAR}}.
 }
 \usage{
-\method{predict}{VLSTAR}(object, \dots)
+\method{summary}{VLSTAR}(object, \dots)
+\method{print.summary}{VLSTAR}(object, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object}{
-  An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()}.
+An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()}.
 %%     ~~Describe \code{y1} here~~
 }
 
@@ -45,7 +47,7 @@ The code was written by Andrea Bucci
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{VLSTAR}} for log-likehood and nonlinear least squares estimation of the VLSTAR model.
+\code{\link{VLSTAR}}
 }
 \examples{
 ##

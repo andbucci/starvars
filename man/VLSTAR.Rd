@@ -1,8 +1,6 @@
 \name{VLSTAR}
 \alias{VLSTAR}
 \alias{print.VLSTAR}
-\alias{summary.VLSTAR}
-\alias{print.summary.VLSTAR}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 VLSTAR- Estimation
@@ -13,23 +11,22 @@ VLSTAR- Estimation
 This function allows the user to estimate the coefficients of a VLSTAR model with \emph{m} regimes through maximum likelihood or nonlinear least squares. The set of starting values of Gamma and C for the convergence algorithm can be either passed or obtained via searching grid.
 }
 \usage{
-VLSTAR(y1, x1 = NULL, p = NULL, m = 2, st = NULL, constant = TRUE, n.combi = 50,
+VLSTAR(y, x = NULL, p = NULL, m = 2, st = NULL, constant = TRUE, n.combi = 50,
        n.iter = 500, starting = NULL, epsilon = 10^(-3), exo = FALSE,
        method = c('ML', 'NLS'))
-\method{print}{VLSTAR}(x, \dots)
-\method{summary}{VLSTAR}(object, \dots)
-\method{print.summary}{VLSTAR}(x, \dots)
+\method{print}{VLSTAR}(object, \dots)
+
 }
 \value{
 An object of class VLSTAR, with standard methods.
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{y1}{
+  \item{y}{
   Data.frame or matrix of dependent variables of dimension Txn
 %%     ~~Describe \code{y1} here~~
 }
-  \item{x1}{
+  \item{x}{
   (optional) Data.frame or matrix of exogenous variables of dimension TxK
 %%     ~~Describe \code{x1} here~~
 }
@@ -74,7 +71,7 @@ An object of class VLSTAR, with standard methods.
   Fitting method: maximum likelihood or nonlinear least squares.
 %%     ~~Describe \code{exo} here~~
 }
-\item{x, object}{fitted \sQuote{VLSTAR} object}
+\item{object}{An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()}.}
 \item{\dots}{further arguments to be passed to and from other methods}
 }
 \details{
@@ -125,7 +122,7 @@ The code was written by Andrea Bucci
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{VLSTARjoint}} to test the presence of a unique transition variable among equations and \code{\link{predict.VLSTAR}} for details on predictions produced for this model
+\code{\link{VLSTARjoint}} to test the presence of a unique transition variable among equations and \code{\link{predict.VLSTAR}} for details on predictions produced for this model; \code{\link{summary}}, \code{\link{coef}}, \code{\link{plot}}, \code{\link{logLik}}
 }
 \examples{
 \donttest{
@@ -140,6 +137,7 @@ n.iter = 3, st = st, method ='NLS')
 # a few methods for VLSTAR
 summary(fit.VLSTAR)
 predict(fit.VLSTAR, newdata = Realized[nrow(Realized),1:10])}
+logLik(fit.VLSTAR)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -1,9 +1,9 @@
-VLSTAR <- function(y1, x1 = NULL, p = NULL,
+VLSTAR <- function(y, x = NULL, p = NULL,
                      m = 2, st = NULL, constant = TRUE,
                      n.combi = 50, n.iter = 500,
                      starting = NULL, epsilon = 10^(-3),
                      exo = FALSE, method = c('ML', 'NLS')){
-  y <- as.matrix(y1)
+  y <- as.matrix(y)
   if (any(is.na(y)))
     stop("\nNAs in y.\n")
   if(!method %in% c('ML', 'NLS'))
@@ -12,11 +12,11 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
     stop('The number of regimes should be greater than one.')
   if(is.null(st))
     stop('The transition variable must be supplied.')
-  if(is.null(x1)){
+  if(is.null(x)){
     if(length(y[,1]) != length(st))
       stop('The length of the variables does not match!')
   }else{
-    if(length(y[,1]) != length(as.matrix(x1[,1])) | length(st) != length(as.matrix(x1[,1])) | length(y[,1]) != length(st))
+    if(length(y[,1]) != length(as.matrix(x[,1])) | length(st) != length(as.matrix(x[,1])) | length(y[,1]) != length(st))
       stop('The length of the variables does not match!')
   }
 
@@ -40,21 +40,21 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
   ylag <- ylag[-(1:lagg),]
   }
   y <- y[-c(1:p), ]
-  ncoly <- ncol(y1)
+  ncoly <- ncol(y)
   ncolylag <- ncoly*p
-  nrowy <- nrow(y1)
-  ncolx1 <- ncol(x1)
+  nrowy <- nrow(y)
+  ncolx1 <- ncol(x)
   const <- rep(1, (nrowy-p))
   if (constant == TRUE){
     if(exo == TRUE){
-      x1a <- as.matrix(x1[-c(1:p),])
+      x1a <- as.matrix(x[-c(1:p),])
       x <- as.matrix(cbind(const,ylag,x1a))
     }else{
       x <- as.matrix(cbind(const,ylag))
     }
     ncolx <- ncol(x)
   }  else{
-    x <- as.matrix(x1)
+    x <- as.matrix(x)
   }
   nrowx <- nrow(x)
   st <- st[(1+p):length(st)]
@@ -399,7 +399,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
   AIC1 <- NULL
   BIC1 <- NULL
   for (l in 1:ncoly){
-    ll2[l] <- loglike2(y1[,l], residui[,l], omega1[l])
+    ll2[l] <- loglike2(y[,l], residui[,l], omega1[l])
     AIC1[l] <- 2*k - 2*ll2[l]
     BIC1[l] <- -2*ll2[l] + k*log(nrowy)
   }
@@ -412,7 +412,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
   colnames(BBhat) <- colnames(y)
   modeldata <- list(y, x)
   results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB, m, p,
-                  st, y1, exo, constant)
+                  st, y, exo, constant)
   names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'fitted', 'residuals', 'MultiLL', 'LL', 'AIC',
                       'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal', 'exo', 'constant')
   }else{
@@ -582,6 +582,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
         resiresi[[o]] <- resi[[o]]%*%t(resi[[o]])
         fitte[o,] <- t(t(Gtilde[[o]])%*%t(BB)%*%x[o,])
       }
+      fitte <- fitte[!is.na(fitte[,1]),]
       #Ehat1 <- t(do.call("cbind", resi))
       #Omegahat <- (t(Ehat1)%*%Ehat1)/(nrowy-m*(ncoly+q)*ncoly-1)
       Ehat1 <- Reduce("+", resiresi)
@@ -674,7 +675,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
     AIC1 <- NULL
     BIC1 <- NULL
     for (l in 1:ncoly){
-      ll2[l] <- loglike2(y1[,l], residui[,l], omega1[l])
+      ll2[l] <- loglike2(y[,l], residui[,l], omega1[l])
       AIC1[l] <- 2*k - 2*ll2[l]
       BIC1[l] <- -2*ll2[l] + k*log(nrowy)
     }
@@ -689,7 +690,7 @@ VLSTAR <- function(y1, x1 = NULL, p = NULL,
     colnames(bhat1) <- colnames(y)
     modeldata <- list(y, x)
     results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB, m, p,
-                    st, y1, exo, constant)
+                    st, y, exo, constant)
     names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'fitted', 'residuals', 'MultiLL', 'LL', 'AIC',
                         'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal', 'exo', 'constant')
 
@@ -721,92 +722,3 @@ print.VLSTAR <- function(x, ...) {
   invisible(object)
   NextMethod('print')
 }
-
-#' @S3method summary VLSTAR
-summary.VLSTAR<-function(object,...){
-  x<-object
-  k<-ncol(x$Data[[2]])
-  t<-nrow(x$Data[[1]])
-  p<-x$p
-  x$T <- nrow(x$yoriginal)
-  Z<-t(as.matrix(utils::tail.matrix(x$Data[[1]])))
-  x$npar <- k*ncol(x$Data[[1]])*x$m + 2*(x$m-1)*ncol(x$Data[[1]])
-
-  ## export results
-  x$coefficients<-as.list(as.data.frame(x$Bhat))
-  x$StDev<-as.list(as.data.frame(x$StDev))
-  x$Pvalues<-as.list(as.data.frame(x$pval))
-  x$Tvalues<-as.list(as.data.frame(x$ttest))
-  ab<-list()
-  symp<-list()
-  stars<-list()
-  for(i in 1:length(x$Pvalues)){
-    symp[[i]] <- stats::symnum(x$Pvalues[[i]], corr=FALSE,cutpoints = c(0,  .001,.01,.05, .1, 1), symbols = c("***","**","*","."," "))
-    stars[[i]]<-matrix(symp[[i]], nrow=length(x$Pvalues[[i]]))
-    ab[[i]]<-matrix(paste(x$coefficients[[i]],"(", x$StDev[[i]],")",stars[[i]], sep=""), nrow=length(x$StDev[[i]]))
-    dimnames(ab[[i]])<-dimnames(x$coefficients[[1]])
-  }
-  attributes(ab)<-attributes(x$coefficients)
-  x$stars<-stars
-  x$starslegend<-symp[[1]]
-  x$bigcoefficients<-ab
-  x$aic<-x$AIC
-  x$bic<-x$BIC
-  x$t <- t
-  x$k <- k
-  class(x) <- 'summary.VLSTAR'
-  return(x)
-  NextMethod('summary')
-}
-
-#' @S3method print summary.VLSTAR
-print.summary.VLSTAR<-function(x,...){
-  signif.stars ="show.signif.stars"
-  digits = 3
-  coeftoprint<-list()
-  myformat<-function(x,digits, toLatex=FALSE){
-    r<-x
-    littlex<-abs(x)<10^-(digits)
-    r[!littlex]<-formatC(x[!littlex],digits=digits, format="f")
-    r[littlex]<-format(x[littlex],digits=min(digits,2), scientific=TRUE)
-    if(toLatex)
-      r<-gsub("(e.*)","slashtext{\\1}",r)
-    if(class(x)=="numeric")
-      return(noquote(r))
-    if(class(x)=="matrix")
-      return(matrix(noquote(r), ncol=ncol(x), nrow=nrow(x)))
-  }
-  for(i in 1:length(x$bigcoefficients)){
-    a<-myformat(x$coefficients[[i]], digits)
-    b<-myformat(x$StDev[[i]], digits)
-    c<-myformat(x$Pvalues[[i]], digits)
-    aic1 <- round(x$AIC,2)
-    bic1 <- round(x$BIC,2)
-    if(signif.stars == getOption("show.signif.stars")){
-      stars1<-x$stars[[i]]
-    }else{
-      stars1<-NULL
-    }
-    #coeftoprint[[i]]<-matrix(c(paste(a,"(", b,")",stars, sep=""), '', round(x$Cgamma[i,1],4), round(x$Cgamma[i,2],4),'',
-    #                          aic1[i], bic1[i]), nrow=(length(x$StDev[[1]])+6))
-    coeftop <- cbind(a, b, c, stars1)
-    colnames(coeftop) <- c('Estimate', 'Std. Error', 'p-value', '')
-    coeftoprint[[i]] <- rbind(coeftop, rep('', 4), c(round(x$Cgamma[i,1],4),'','',''), c(round(x$Cgamma[i,2],4),'','',''),
-                              rep('', 4), c(aic1[i],'','',''), c(bic1[i], '','',''))
-    rownames(coeftoprint[[i]])<- c(rownames(x$Bhat),"---",'gamma', 'c',"---", 'AIC', 'BIC')
-  }
-  names(coeftoprint) <- colnames(x$Bhat)
-  cat("Model VLSTAR with ", x$m, " regimes\n", sep ='')
-  cat("\nFull sample size:",x$T, "\tEnd sample size:", x$t)
-  cat("\nNumber of variables:", x$k,"\tNumber of estimated parameters:", x$npar)
-  #cat("\nAIC",x$aic)
-  #cat("\nBIC", x$bic)
-  cat("\nMultivariate log-likelihood:", x$MultiLL,"\n\n")
-  cat('\nCoefficients:')
-  print(noquote(coeftoprint))
-  if (signif.stars)
-    cat("---\nSignif. codes: ", attr(x$starslegend, "legend"), "\n")
-  #cat("\nThreshold values:",x$Cgamma[,2])
-  NextMethod('print.summary')
-}
-

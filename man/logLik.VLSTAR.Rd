@@ -1,36 +1,43 @@
-\name{predict.VLSTAR}
-\alias{predict.VLSTAR}
+\name{logLik}
+
+\alias{logLik}
+\alias{logLik.VLSTAR}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-VLSTAR Prediction
+Log-Likelihood method
 %%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-This function allows to obtain one-step ahead forecasts, with the prediction intervals, of a VLSTAR object.
+Returns the log-Likelihood of a VLSTAR object.
 }
 \usage{
-\method{predict}{VLSTAR}(object, \dots)
+\method{logLik}{VLSTAR}(object, type = c('Univariate', 'Multivariate'), \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object}{
-  An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()}.
+An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()}.
 %%     ~~Describe \code{y1} here~~
 }
-
+\item{type}{
+Type of Log-Likelihood to be showed (univariate or multivariate).
+}
 \item{\dots}{further arguments to be passed to and from other methods}
 }
 %\details{
 
 %%  ~~ If necessary, more details than the description above ~~
 %}
+\details{
+  The log-likelihood of a VLSTAR model is defined as:
+  \deqn{
+\log l(y_t|I_t;\theta)=-\frac{T\tilde{n}}{2}\ln(2\pi)-\frac{T}{2}\ln|\Omega|-\frac{1}{2}\sum_{t=1}^{T}(y_t-\tilde{G}_tB\,z_t)'\Omega^{-1}(y_t-\tilde{G}_tB\,z_t)
+  }
+}
+
 \value{
-A data frame of predictions for each dependent variable and the (1-\eqn{\alpha}) prediction intervals.
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+  An object with class attribute \code{logLik}.
 }
 \references{
 
@@ -45,7 +52,7 @@ The code was written by Andrea Bucci
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{VLSTAR}} for log-likehood and nonlinear least squares estimation of the VLSTAR model.
+\code{\link{VLSTAR}}
 }
 \examples{
 ##
@@ -57,3 +64,5 @@ The code was written by Andrea Bucci
 %\keyword{ ~VLSTAR }% use one of  RShowDoc("KEYWORDS")
 \concept{VLSTAR}
 \concept{Vector Autoregressive Smooth Transition}
+\concept{logLik}
+
