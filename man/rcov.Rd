@@ -10,13 +10,13 @@ Realized Covariance
 Function returns the vectorization of the lowest triangular of the Realized Covariance matrices for different frequency.
 }
 \usage{
-rcov(data, freq, ret = FALSE,
+rcov(data, freq = c('daily', 'monthly', 'quarterly', 'yearly'), ret = FALSE,
     cholesky = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{data}{
-  a (T x N) xts object containing the N price/return series over period \emph{T}
+  a \code{(T x N)} \code{xts} object containing the \code{N} price/return series over period \code{T}
 %%     ~~Describe \code{y1} here~~
 }
   \item{freq}{
@@ -24,11 +24,11 @@ rcov(data, freq, ret = FALSE,
 %%     ~~Describe \code{x1} here~~
 }
   \item{ret}{
-  boolean, in case it is TRUE the data are converted to returns, FALSE by default
+  boolean, in case it is \code{TRUE} the data are converted to returns, \code{FALSE} by default
 %%     ~~Describe \code{p} here~~
 }
   \item{cholesky}{
-  boolean, in case it is TRUE the Cholesky factors of the Realized Covariance matrices are calculated, FALSE by default
+  boolean, in case it is \code{TRUE} the Cholesky factors of the Realized Covariance matrices are calculated, \code{FALSE} by default
 %%     ~~Describe \code{exo} here~~
 }
 }

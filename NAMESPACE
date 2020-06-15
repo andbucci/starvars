@@ -18,6 +18,12 @@ S3method(logLik, VLSTAR)
 
 S3method(plot, VLSTAR)
 
+S3method(predict, VLSTAR)
+
+S3method(plot, vlstarpred)
+
+S3method(print, vlstarpred)
+
 importFrom("data.table", "rbindlist")
 
 importFrom("fGarch", "garchFit")
@@ -37,14 +43,16 @@ importFrom("MASS", "ginv")
 
 importFrom("matrixcalc", "matrix.trace", "vec", "vech")
 
+importFrom('maxLik', 'maxLik')
+
 importFrom("methods", "is")
 
 importFrom("quantmod", "dailyReturn", "monthlyReturn")
 
 importFrom("rlist", "list.cbind")
 
-importFrom("stats", "acf", "fitted", "lag", "lm", "optim", "pacf", "pchisq",
-           "plot.ts", "pt", "qchisq", "qt", "resid", "residuals", "rnorm", "symnum")
+importFrom("stats", "acf", "fitted", "lag", "lm", "na.omit", "optim", "pacf", "pchisq",
+           "plot.ts", "pt", "quantile", "qchisq", "qt", "resid", "residuals", "rnorm", "sd", "symnum")
 
 importFrom("utils", "tail.matrix")
 

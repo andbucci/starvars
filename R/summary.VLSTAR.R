@@ -37,7 +37,6 @@ summary.VLSTAR<-function(object,...){
 
 #' @S3method print summary.VLSTAR
 print.summary.VLSTAR<-function(x,...){
-  signif.stars ="show.signif.stars"
   digits = 3
   coeftoprint<-list()
   myformat<-function(x,digits, toLatex=FALSE){
@@ -59,8 +58,6 @@ print.summary.VLSTAR<-function(x,...){
     aic1 <- round(x$AIC,2)
     bic1 <- round(x$BIC,2)
     stars1<-x$stars[[i]]
-    #coeftoprint[[i]]<-matrix(c(paste(a,"(", b,")",stars, sep=""), '', round(x$Cgamma[i,1],4), round(x$Cgamma[i,2],4),'',
-    #                          aic1[i], bic1[i]), nrow=(length(x$StDev[[1]])+6))
     coeftop <- cbind(a, b, c, stars1)
     colnames(coeftop) <- c('Estimate', 'Std. Error', 'p-value', '')
     coeftoprint[[i]] <- rbind(coeftop, rep('', 4), c(round(x$Cgamma[i,1],4),'','',''), c(round(x$Cgamma[i,2],4),'','',''),
@@ -76,8 +73,5 @@ print.summary.VLSTAR<-function(x,...){
   cat("\nMultivariate log-likelihood:", x$MultiLL,"\n\n")
   cat('\nCoefficients:')
   print(noquote(coeftoprint))
-  if (signif.stars)
-    cat("---\nSignif. codes: ", attr(x$starslegend, "legend"), "\n")
-  #cat("\nThreshold values:",x$Cgamma[,2])
   NextMethod('print.summary')
 }

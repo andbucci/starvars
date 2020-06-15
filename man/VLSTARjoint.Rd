@@ -17,15 +17,15 @@ VLSTARjoint(y, exo, st, alpha = 0.05)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{y}{
-  Data.frame or matrix of dependent variables of dimension Txn
+  \code{data.frame} or \code{matrix} of dependent variables of dimension \code{(Txn)}
 %%     ~~Describe \code{y1} here~~
 }
   \item{exo}{
-  (optional) Data.frame or matrix of exogenous variables of dimension TxK
+  (optional) \code{data.frame} or \code{matrix} of exogenous variables of dimension \code{(Txk)}
 %%     ~~Describe \code{x1} here~~
 }
   \item{st}{
-  single transition variable for all the equation of dimension Tx1
+  single transition variable for all the equation of dimension \code{(Tx1)}
 %%     ~~Describe \code{st} here~~
 }
   \item{alpha}{

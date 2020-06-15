@@ -11,23 +11,23 @@ VLSTAR- Estimation
 This function allows the user to estimate the coefficients of a VLSTAR model with \emph{m} regimes through maximum likelihood or nonlinear least squares. The set of starting values of Gamma and C for the convergence algorithm can be either passed or obtained via searching grid.
 }
 \usage{
-VLSTAR(y, x1 = NULL, p = NULL, m = 2, st = NULL, constant = TRUE, n.combi = 50,
-       n.iter = 500, starting = NULL, epsilon = 10^(-3), exo = FALSE,
-       method = c('ML', 'NLS'))
+VLSTAR(y, exo = NULL, p = 1, m = 2, st = NULL, constant = TRUE,
+       starting = NULL, n.combi = NULL,
+       method = c('ML', 'NLS'), n.iter = 500, epsilon = 10^(-3))
 \method{print}{VLSTAR}(x, \dots)
 
 }
 \value{
-An object of class VLSTAR, with standard methods.
+An object of class \code{VLSTAR}, with standard methods.
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{y}{
-  Data.frame or matrix of dependent variables of dimension Txn
+  \code{data.frame} or \code{matrix} of dependent variables of dimension \code{(Txn)}
 %%     ~~Describe \code{y1} here~~
 }
-  \item{x1}{
-  (optional) Data.frame or matrix of exogenous variables of dimension TxK
+  \item{exo}{
+  (optional) \code{data.frame} or \code{matrix} of exogenous variables of dimension \code{(Txk)}
 %%     ~~Describe \code{x1} here~~
 }
   \item{p}{
@@ -39,38 +39,38 @@ An object of class VLSTAR, with standard methods.
 %%     ~~Describe \code{m} here~~
 }
   \item{st}{
-  single transition variable for all the equation of dimension Tx1
+  single transition variable for all the equation of dimension \code{(Tx1)}
 %%     ~~Describe \code{st} here~~
 }
   \item{constant}{
-  TRUE or FALSE to include or not the constant
+  \code{TRUE} or \code{FALSE} to include or not the constant
 %%     ~~Describe \code{constant} here~~
 }
+  \item{starting}{
+  (optional) set of intial values for Gamma and C, inserted as a list of length \code{m-1}. Each element of the list should contain a \code{data.frame} with 2 columns (one for Gamma and one for c), and \code{n} rows.
+%%     ~~Describe \code{starting} here~~
+}
+
   \item{n.combi}{
   Number of combination for the searching grid of Gamma and C
 %%     ~~Describe \code{n.combi} here~~
+}
+
+\item{method}{
+  Fitting method: maximum likelihood or nonlinear least squares.
+%%     ~~Describe \code{exo} here~~
 }
   \item{n.iter}{
   number of iteration of the algorithm until forced convergence
 %%     ~~Describe \code{n.iter} here~~
 }
-  \item{starting}{
-  (optional) set of intial values for Gamma and C
-%%     ~~Describe \code{starting} here~~
-}
+
   \item{epsilon}{
   convergence check measure
 %%     ~~Describe \code{epsilon} here~~
 }
-  \item{exo}{
-  TRUE or FALSE to specify if exogenous variables enter in the model
-%%     ~~Describe \code{exo} here~~
-}
 
-  \item{method}{
-  Fitting method: maximum likelihood or nonlinear least squares.
-%%     ~~Describe \code{exo} here~~
-}
+
 \item{x}{An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()} to be printed.}
 \item{\dots}{further arguments to be passed to and from other methods}
 }

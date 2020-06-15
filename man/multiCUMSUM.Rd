@@ -11,23 +11,24 @@ Multivariate CUMSUM test
 Function returns the test statistics for the presence of co-breaks in a set of multivariate time series.
 }
 \usage{
-multiCUMSUM(data, alpha = 0.95)
+multiCUMSUM(data, conf.level = 0.95)
 \method{print}{multiCUMSUM}(x, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{data}{
-  a (T x N) matrix/data.frame containing the N time series over period \emph{T}
+  a \code{(T x N)} \code{matrix} or \code{data.frame} containing the \code{N} time series over period \code{T}
 }
-\item{alpha}{
+\item{conf.level}{
 Confidence level. By default set to 0.95
 }
 \item{x}{\sQuote{multiCUMSUM} object}
 \item{\dots}{further arguments to be passed to and from other methods}
 }
 \value{
-\item{Lambda Test statistics}{a \emph{test statistics on the presence of a co-break in the conditional mean}}
-\item{Omega Test statistics}{a \emph{test statistics on the presence of a co-break in the conditional variance}}
+\item{Lambda Test statistics}{a test statistics on the presence of a co-break in the conditional mean}
+\item{Omega Test statistics}{a test statistics on the presence of a co-break in the conditional variance}
+\item{Break location}{the index and the Date where the common break is located}
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
@@ -51,7 +52,8 @@ The code was written by Andrea Bucci and Giulio Palomba.
 \examples{
 data(Realized)
 
-testCS <- multiCUMSUM(Realized[,1:10], alpha = 0.95)
+testCS <- multiCUMSUM(Realized[,1:10], conf.level = 0.95)
+testCS
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

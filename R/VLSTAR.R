@@ -1,14 +1,14 @@
-VLSTAR <- function(y, x1 = NULL, p = NULL,
-                     m = 2, st = NULL, constant = TRUE,
-                     n.combi = 50, n.iter = 500,
-                     starting = NULL, epsilon = 10^(-3),
-                     exo = FALSE, method = c('ML', 'NLS')){
+VLSTAR <- function(y, exo = NULL, p = 1,
+                     m = 2, st = NULL, constant = TRUE, starting = NULL,
+                     n.combi = NULL, method = c('ML', 'NLS'), n.iter = 500,
+                      epsilon = 10^(-3)){
   y <- as.matrix(y)
-  x <- x1
+  x <- exo
+  method <- match.arg(method)
   if (any(is.na(y)))
     stop("\nNAs in y.\n")
-  if(!method %in% c('ML', 'NLS'))
-    stop('Please, provide a valid estimation method')
+  #if(!method %in% c('ML', 'NLS'))
+  #  stop('Please, provide a valid estimation method')
   if(m < 2)
     stop('The number of regimes should be greater than one.')
   if(is.null(st))
@@ -20,6 +20,9 @@ VLSTAR <- function(y, x1 = NULL, p = NULL,
     if(length(y[,1]) != length(as.matrix(x[,1])) | length(st) != length(as.matrix(x[,1])) | length(y[,1]) != length(st))
       stop('The length of the variables does not match!')
   }
+if(is.null(starting) & is.null(n.combi)){
+  stop('Starting values should be provided or estimated.')
+}
 
   if(is.null(p) | p < 1){
     stop('Please, specify a valid lag order.')
@@ -34,7 +37,7 @@ VLSTAR <- function(y, x1 = NULL, p = NULL,
   colnames(y) <- make.names(colnames(y))
   ##Definition of dimensions, creating variable x with constant
   yt <- zoo(y)
-  ylag <- lag(yt, -(1:p))
+  ylag <- stats::lag(yt, -(1:p))
   ylag <- as.matrix(ylag)
   if(p>1){
    lagg <- p-1
@@ -42,12 +45,22 @@ VLSTAR <- function(y, x1 = NULL, p = NULL,
   }
   y <- y[-c(1:p), ]
   ncoly <- ncol(y)
+  if(!is.null(starting)){
+    if(length(starting)!= (m-1)){
+      stop('The length of the list of initial values should be equal to m-1.')
+    }else{
+      if(any(unlist(lapply(starting, ncol))!=2) | any(unlist(lapply(starting, nrow))!=ncoly)){
+        stop('Each element of the starting argument should have two columns and n rows.')
+      }
+
+    }
+  }
   ncolylag <- ncoly*p
   nrowy <- nrow(y)
   ncolx1 <- ncol(x)
-  const <- rep(1, (nrowy-p))
+  const <- rep(1, nrowy)
   if (constant == TRUE){
-    if(exo == TRUE){
+    if(!is.null(exo)){
       x1a <- as.matrix(x[-c(1:p),])
       x <- as.matrix(cbind(const,ylag,x1a))
     }else{
@@ -64,7 +77,6 @@ VLSTAR <- function(y, x1 = NULL, p = NULL,
   param.init$gamma <- rep(1L, ncoly)
   param.init$cg <- colMeans(y)
   q <- ncol(x)-ncolylag
-
   if (is.null(starting)){
     COMBI <- list()
     GAMMA <- list()
@@ -415,7 +427,7 @@ VLSTAR <- function(y, x1 = NULL, p = NULL,
   fitte <- fitte[!is.na(fitte[,1]),]
   results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB, m, p,
                   st, y, exo, constant)
-  names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'fitted', 'residuals', 'MultiLL', 'LL', 'AIC',
+  names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Gammac', 'Omega', 'fitted', 'residuals', 'MultiLL', 'LL', 'AIC',
                       'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal', 'exo', 'constant')
   }else{
     #NLS Estimation of Bhat and Omegahat to be used in the first iteration of minimizing Qt
@@ -693,7 +705,7 @@ VLSTAR <- function(y, x1 = NULL, p = NULL,
     fitte <- fitte[!is.na(fitte[,1]),]
     results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB, m, p,
                     st, y, exo, constant)
-    names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Cgamma', 'Omega', 'fitted', 'residuals', 'MultiLL', 'LL', 'AIC',
+    names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Gammac', 'Omega', 'fitted', 'residuals', 'MultiLL', 'LL', 'AIC',
                         'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal', 'exo', 'constant')
 
   }

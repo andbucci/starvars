@@ -1,7 +1,5 @@
-rcov <- function(data, freq, ret = FALSE, cholesky = FALSE){
-  if(!freq %in% c('daily', 'monthly', 'quarterly', 'yearly')){
-    stop('Please, provide a correct frequency for the realized covariance matrix!')
-  }
+rcov <- function(data, freq = c('daily', 'monthly', 'quarterly', 'yearly'), ret = FALSE, cholesky = FALSE){
+freq <- match.arg(freq)
   if(is(data, 'xts') == FALSE){
     stop('Data should be of class "xts".')
   }

@@ -15,7 +15,7 @@ lrvarbart(x)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-  a (T x 1) vector containing the time series over period \emph{T}
+  a \code{(T x 1)} vector containing the time series over period \code{T}
 %%     ~~Describe \code{y1} here~~
 }
 }
