@@ -12,7 +12,7 @@ One-step or multi-step ahead forecasts, with interval forecast, of a VLSTAR obje
 }
 \usage{
 \method{predict}{VLSTAR}(object, \dots, n.ahead = 1, conf.lev = 0.95,
-st.new = NULL, st.num = NULL, newdata = NULL,
+st.new = NULL, M = 5000, B = 1000, st.num = NULL, newdata = NULL,
 method = c('naive', 'Monte Carlo', 'bootstrap'))
 }
 %- maybe also 'usage' for other objects documented here.
@@ -31,6 +31,12 @@ Confidence level
 }
 \item{st.new}{
 Vector of new data for the transition variable
+}
+\item{M}{
+An integer with the number of errors sampled for the \code{Monte Carlo} method
+}
+\item{B}{
+An integer with the number of errors sampled for the \code{bootstrap} method
 }
 \item{st.num}{
 An integer with the index of dependent variable if \code{st.new} is \code{NULL} and the transition variable is a lag of one of the dependent variables

@@ -109,7 +109,7 @@ Terasvirta T. and Yang Y. (2014), Specification, Estimation and Evaluation of Ve
 
 
 \seealso{
-  \code{\link{VLSTAR}}
+  \code{\link{VLSTAR}}, \code{\link{predict.VLSTAR}}
 }
 
 \examples{

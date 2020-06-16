@@ -1,6 +1,6 @@
 #'@S3method predict VLSTAR
 
-predict.VLSTAR <- function(object, ..., n.ahead = 1, conf.lev = 0.95, st.new = NULL,
+predict.VLSTAR <- function(object, ..., n.ahead = 1, conf.lev = 0.95, st.new = NULL, M = 5000, B = 1000,
                            st.num = NULL, newdata = NULL, method = c('naive', 'Monte Carlo', 'bootstrap')){
   st_new <- st.new
   method <- match.arg(method)
@@ -9,8 +9,6 @@ predict.VLSTAR <- function(object, ..., n.ahead = 1, conf.lev = 0.95, st.new = N
   alpha = 1-conf.lev
   K <- ncol(object$Data[[2]])
   k <- ncol(object$exo)
-  M <- 5000
-  B <- 1000
   datamat <- object$Data[[2]]
 if(is.null(object$exo)){
   if(object$constant == T){
@@ -77,7 +75,7 @@ if(!is.null(st.new)){
       tmp <- pred[i, ]
       yy <- c(tmp)
       if(is.null(st.new)){
-        st_new <- c(st_new,tmp[st.num])
+        st_new <- c(as.vector(st_new),tmp[st.num])
       }
       for(j in 1:ncoly){
         std_err <- sqrt(object$Omega[j,j])*t(Z)%*%ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z
@@ -110,7 +108,7 @@ if(!is.null(st.new)){
       tmp <- pred[i, ]
       yy <- c(tmp)
       if(is.null(st.new)){
-        st_new <- c(st_new,tmp[st.num])
+        st_new <- c(as.vector(st_new),tmp[st.num])
       }
       for(j in 1:ncoly){
         lower[i,j] <- t(t(BB1)%*%Z)[j] + quantile(nonlinearMC[,j], (alpha/2))
@@ -140,7 +138,7 @@ if(!is.null(st.new)){
       tmp <- pred[i, ]
       yy <- c(tmp)
       if(is.null(st.new)){
-        st_new <- c(st_new,tmp[st.num])
+        st_new <- c(as.vector(st_new),tmp[st.num])
       }
       for(j in 1:ncoly){
         lower[i,j] <- t(t(BB1)%*%Z)[j] + quantile(nonlinearBO[,j], (alpha/2))
