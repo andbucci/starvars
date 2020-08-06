@@ -363,10 +363,6 @@ if(is.null(starting) & is.null(n.combi)){
     }
     err <- abs(ll1 - ll0)
     ll0 <- ll1
-    if(iter ==1) {
-      plot(ll0~1, xlim = c(0, n.iter), ylim = c(0, (ll0+ll0*0.1)))
-    }
-    points(ll0~iter)
     loglik1[iter] <- ll1
     bbhat[[iter]] <- BB
     omega[[iter]] <- Omegahat
@@ -609,10 +605,6 @@ if(is.null(starting) & is.null(n.combi)){
       }
       err <- abs(ll1 - ll0)
       ll0 <- ll1
-      if(iter ==1) {
-        plot(ll0~1, xlim = c(0, n.iter), ylim = c(0, (ll0+ll0*0.1)))
-      }
-      points(ll0~iter)
       loglik1[iter] <- ll1
       bbhat[[iter]] <- BB
       omega[[iter]] <- Omegahat
@@ -722,8 +714,8 @@ print.VLSTAR <- function(x, ...) {
   order.H <- object$m
   lowCoef <- object$Bhat[grep(paste("m_ ", order.L, sep=''), rownames(object$Bhat)),]
   highCoef <- object$Bhat[grep(paste("m_ ", order.H, sep=''), rownames(object$Bhat)),]
-  gammaCoef <- object$Cgamma[,1]
-  cCoef <- object$Cgamma[,2]
+  gammaCoef <- object$Gammac[,1]
+  cCoef <- object$Gammac[,2]
 
   cat("Coefficients:\n")
   cat("Low regime:\n")

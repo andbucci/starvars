@@ -7,7 +7,7 @@ plot.vlstarpred <- function(x, type = c('single', 'multiple'), names = NULL,
                             col.vline = NULL, ylim = NULL, mar = par("mar"), oma = par("oma"),...){
   op <- par(no.readonly = TRUE)
   type <- match.arg(type)
-  ynames <- colnames(x$y)
+  ifelse(is.null(names), ynames <- colnames(x$y), ynames <- names)
   nrowy <- nrow(x$y)
   if(is.null(col.obs)){
     col.obs = 'black'
@@ -64,3 +64,4 @@ plot.vlstarpred <- function(x, type = c('single', 'multiple'), names = NULL,
   }
   on.exit(par(op))
 }
+

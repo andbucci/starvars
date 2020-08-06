@@ -27,7 +27,7 @@ method = c('naive', 'Monte Carlo', 'bootstrap'))
 \item{n.ahead}{An integer specifying the number of ahead predictions
 }
 \item{conf.lev}{
-Confidence level
+Confidence level of the interval forecast
 }
 \item{st.new}{
 Vector of new data for the transition variable

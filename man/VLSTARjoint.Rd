@@ -11,7 +11,7 @@ Joint linearity test
 This function allows the user to test linearity against a Vector Smooth Transition Autoregressive Model with a single transition variable.
 }
 \usage{
-VLSTARjoint(y, exo, st, alpha = 0.05)
+VLSTARjoint(y, exo, st, st.choice = FALSE, alpha = 0.05)
 \method{print}{VLSTARjoint}(x, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -25,7 +25,12 @@ VLSTARjoint(y, exo, st, alpha = 0.05)
 %%     ~~Describe \code{x1} here~~
 }
   \item{st}{
-  single transition variable for all the equation of dimension \code{(Tx1)}
+  a vector with single transition variable for all the equation of dimension \code{(Tx1)} or a matrix with \code{R} potential variables of dimension \code{(TxR)}
+%%     ~~Describe \code{st} here~~
+}
+
+  \item{st.choice}{
+  boolean identifying whether the transition variable should be selected from a matrix of \code{R} potential variables of dimension \code{(TxR)}
 %%     ~~Describe \code{st} here~~
 }
   \item{alpha}{

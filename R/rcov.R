@@ -63,7 +63,7 @@ if(ret == TRUE){
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nmonth)
       for (j in 1:nmonth){
         rcovmat <- invvech(as.matrix(realized[j,]))
-        chol1 <- t(chol(rcovmat))
+        chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
     }
@@ -85,7 +85,7 @@ if(ret == TRUE){
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nquarter)
       for (j in 1:nmonth){
         rcovmat <- invvech(as.matrix(realized[j,]))
-        chol1 <- t(chol(rcovmat))
+        chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
     }
@@ -107,7 +107,7 @@ if(ret == TRUE){
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nyear)
       for (j in 1:nyear){
         rcovmat <- invvech(as.matrix(realized[j,]))
-        chol1 <- t(chol(rcovmat))
+        chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
     }
@@ -121,7 +121,7 @@ if(ret == TRUE){
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (j in 1:nday){
         rcovmat <- invvech(as.matrix(realized[j,]))
-        chol1 <- t(chol(rcovmat))
+        chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
     }
@@ -140,7 +140,7 @@ if(ret == TRUE){
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nmonth)
       for (j in 1:nmonth){
         rcovmat <- invvech(as.matrix(realized[j,]))
-        chol1 <- t(chol(rcovmat))
+        chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
     }
@@ -159,7 +159,7 @@ if(ret == TRUE){
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nquarter)
       for (j in 1:nmonth){
         rcovmat <- invvech(as.matrix(realized[j,]))
-        chol1 <- t(chol(rcovmat))
+        chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
     }
@@ -178,7 +178,7 @@ if(ret == TRUE){
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nyear)
       for (j in 1:nyear){
         rcovmat <- invvech(as.matrix(realized[j,]))
-        chol1 <- t(chol(rcovmat))
+        chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
     }}

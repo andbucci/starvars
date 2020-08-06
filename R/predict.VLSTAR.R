@@ -7,11 +7,11 @@ predict.VLSTAR <- function(object, ..., n.ahead = 1, conf.lev = 0.95, st.new = N
   resid <- object$residuals
   ncoly <- ncol(object$Data[[1]])
   alpha = 1-conf.lev
-  K <- ncol(object$Data[[2]])
   k <- ncol(object$exo)
   datamat <- object$Data[[2]]
 if(is.null(object$exo)){
   if(object$constant == T){
+    constant <- matrix(rep(1, n.ahead), nrow = n.ahead, ncol = 1)
     yy <- datamat[nrow(datamat),c(2:(ncoly*object$p+1))]
   }else{
     yy <- datamat[nrow(datamat),c(1:(ncoly*object$p))]
@@ -26,9 +26,9 @@ if(is.null(object$exo)){
     }else{
       yy <- datamat[nrow(datamat),c(1:(ncoly*object$p))]
   }
-}
 
-  newdata <- as.matrix(newdata)
+newdata <- as.matrix(newdata)
+}
 
   BB <- object$B
   BB1 <- object$B[,seq(1, ncol(BB))[c(rep(TRUE, ncoly), rep(FALSE, ncoly))]]
@@ -45,7 +45,7 @@ if(is.null(object$exo)){
       stop('Please, provide valid index for the transition variable')
     }
 
-    st_new <-c(object$st[length(object$st)], pred[1,st.num])
+    st_new <-c(as.matrix(object$st[length(object$st)]), pred[1,st.num])
   }
 if(!is.null(st.new)){
   if(length(st.new) != n.ahead){
@@ -88,7 +88,7 @@ if(!is.null(st.new)){
     for(i in 2 : n.ahead){
     epsilon_mc <- matrix(NA, nrow = M, ncol = ncoly)
     for(k in 1:ncoly){
-      epsilon_mc[,k] <- rnorm(M,mean=0,sd=sd(resid[,k]))
+      epsilon_mc[,k] <- rnorm(M,mean=0,sd=sd(resid[,k])*3)
     }
     nonlinear_MC <- matrix(NA, ncol = M, nrow = ncoly)
       for(m in 1 : M){
@@ -155,7 +155,7 @@ rownames(pred) <- paste("Step", 1:n.ahead)
 forecasts <- list()
 for(i in 1 : ncoly){
   forecasts[[i]] <- cbind(pred[, i], lower[, i], upper[, i])
-  colnames(forecasts[[i]]) <- c("fcst", "lower", "upper")
+  colnames(forecasts[[i]]) <- c("fcst", paste("lower ", (conf.lev*100), "%", sep = ''), paste("upper ", (conf.lev*100), "%", sep = ''))
 }
 names(forecasts) <- colnames(object$Bhat)
 results <- list(forecasts = forecasts, y = object$Data[[1]])

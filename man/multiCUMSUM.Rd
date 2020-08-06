@@ -11,7 +11,7 @@ Multivariate CUMSUM test
 Function returns the test statistics for the presence of co-breaks in a set of multivariate time series.
 }
 \usage{
-multiCUMSUM(data, conf.level = 0.95)
+multiCUMSUM(data, conf.level = 0.95, max.breaks = 7)
 \method{print}{multiCUMSUM}(x, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -22,13 +22,16 @@ multiCUMSUM(data, conf.level = 0.95)
 \item{conf.level}{
 Confidence level. By default set to 0.95
 }
-\item{x}{\sQuote{multiCUMSUM} object}
+\item{max.breaks}{
+Integer, determines the highest number of common breaks from 1 to 7.
+}
+\item{x}{object of class \sQuote{\code{multiCUMSUM}}}
 \item{\dots}{further arguments to be passed to and from other methods}
 }
 \value{
-\item{Lambda Test statistics}{a test statistics on the presence of a co-break in the conditional mean}
-\item{Omega Test statistics}{a test statistics on the presence of a co-break in the conditional variance}
-\item{Break location}{the index and the Date where the common break is located}
+\item{Lambda Test statistics}{a matrix of test statistics on the presence of a number of co-break equal to \code{max.breaks} in the conditional mean}
+\item{Omega Test statistics}{a matrix of test statistics on the presence of a number of co-break equal to \code{max.breaks} in the conditional variance}
+\item{Break location}{the index and the Date where the common breaks are located}
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}

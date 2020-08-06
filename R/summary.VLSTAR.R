@@ -32,7 +32,7 @@ summary.VLSTAR<-function(object,...){
   x$k <- k
   class(x) <- 'summary.VLSTAR'
   return(x)
-  NextMethod('summary')
+  NextMethod('print.summary')
 }
 
 #' @S3method print summary.VLSTAR
@@ -60,18 +60,19 @@ print.summary.VLSTAR<-function(x,...){
     stars1<-x$stars[[i]]
     coeftop <- cbind(a, b, c, stars1)
     colnames(coeftop) <- c('Estimate', 'Std. Error', 'p-value', '')
-    coeftoprint[[i]] <- rbind(coeftop, rep('', 4), c(round(x$Cgamma[i,1],4),'','',''), c(round(x$Cgamma[i,2],4),'','',''),
+    coeftoprint[[i]] <- rbind(coeftop, rep('', 4), c(round(x$Gammac[i,1],4),'','',''), c(round(x$Gammac[i,2],4),'','',''),
                               rep('', 4), c(aic1[i],'','',''), c(bic1[i], '','',''))
     rownames(coeftoprint[[i]])<- c(rownames(x$Bhat),"---",'gamma', 'c',"---", 'AIC', 'BIC')
   }
   names(coeftoprint) <- colnames(x$Bhat)
   cat("Model VLSTAR with ", x$m, " regimes\n", sep ='')
-  cat("\nFull sample size:",x$T, "\tEnd sample size:", x$t)
-  cat("\nNumber of variables:", x$k,"\tNumber of estimated parameters:", x$npar)
+  cat("\nFull sample size:",x$T)
+  cat("\nNumber of variables used as covariates:", x$k,"\tNumber of estimated parameters:", x$npar)
   #cat("\nAIC",x$aic)
   #cat("\nBIC", x$bic)
   cat("\nMultivariate log-likelihood:", x$MultiLL,"\n\n")
   cat('\nCoefficients:')
   print(noquote(coeftoprint))
-  NextMethod('print.summary')
+  cat("=================================\n")
+  cat("\n Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1")
 }

@@ -7,6 +7,7 @@ plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.
   fitted <- fitted(object)
   y <- object$Data[[1]]
   ynames <- colnames(y)
+  dates <- as.Date(index(object$st), "%m/%d/%Y")
   colnames(fitted) <- ynames
   colnames(resids) <- ynames
   if (is.null(names)) {
@@ -23,7 +24,7 @@ plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.
   logistic <- matrix(ncol = ncol(object$yoriginal), nrow = length(object$st))
   for(j in 1:ncol(logistic)){
       for (i in 1:nrow(logistic)){
-   logistic[i,j] <- (1+exp(-object$Cgamma[j,1]*(object$st[i]-object$Cgamma[j,2])))^-1
+   logistic[i,j] <- (1+exp(-object$Gammac[j,1]*(object$st[i]-object$Gammac[j,2])))^-1
   }
   }
   logistic <- apply(logistic, 2, sort, decreasing = F)
@@ -57,19 +58,20 @@ plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.
                       ylab.acf, ylab.pacf, xlab.fit, xlab.resid, xlab.logi, adj.mtext, padj.mtext, col.mtext, ...){
     ifelse(is.null(ylim.fit), ylim.fit <- c(min(c(y, fitted)), max(c(y, fitted))), ylim.fit <- ylim.fit)
     ifelse(is.null(ylim.resid), ylim.resid <- c(min(resids), max(resids)), ylim.resid <- ylim.resid)
-    layout(matrix(c(1, 1, 2, 2, 3, 4, 5, 5), nrow = 4, ncol = 2, byrow = TRUE))
-    par(oma = c(5, 0, 4, 0), mar = c(0, 5.1, 0, 2.1))
+    layout(matrix(c(1, 1, 2, 2, 3, 4, 5, 5), nrow = 4, ncol = 2, byrow = TRUE), heights = c(lcm(2), lcm(2), lcm(5), lcm(3)))
+    par(oma = c(6, 0, 3, 0), mar = c(0, 5.1, 0, 2.1))
     plot.ts(y, main = "", ylim = ylim.fit, ylab = ylab.fit, xlab = xlab.fit, lty = lty.fit[1], lwd = lwd.fit[1], col = col.fit[1], axes = FALSE)
     lines(fitted, col = col.fit[2], lty = lty.fit[2], lwd = lwd.fit[2])
     box()
     axis(2, pretty(c(y, fitted))[-1])
     mtext(main.fit, side = 3, line = 3, adj = adj.mtext, padj = padj.mtext, col = col.mtext, ...)
-    plot.ts(resids, main = "", ylim = ylim.resid, ylab = ylab.resid, xlab = xlab.resid, lty = lty.resid[1], lwd = lwd.resid[1], col = col.resid[1])
+    plot.ts(resids, main = "",  ylim = ylim.resid, ylab = ylab.resid, xlab = xlab.resid, lty = lty.resid[1], lwd = lwd.resid[1], col = col.resid[1])
+    axis(1,at=NULL, labels=F)
     abline(h = 0, col = col.resid[2], lty = lty.resid[2], lwd = lwd.resid[2])
-    par(mar=c(1, 5.1, 5, 2.1))
+    par(mar=c(2, 5.1, 5, 2.1))
     acf(resids, main = main.acf, ylab = ylab.acf, lag.max = lag.acf, ...)
     pacf(resids, main = main.pacf, ylab = ylab.pacf, lag.max = lag.pacf, ...)
-    par(oma = c(6, 0, 5, 0), mar = c(0, 5.1, 0, 2.1))
+    par(mar = c(0, 5.1, 3, 2.1))
     plot(1:length(logistic),logistic, main = main.logi, ylim = c(0,1), ylab = ylab.logi, xlab = xlab.logi, lty = lty.logi[1], lwd = lwd.logi[1], col = col.logi[1], axes = T)
     }
   par(mar = mar, oma = oma)
