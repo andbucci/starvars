@@ -68,8 +68,8 @@ if(st.choice == TRUE){
   pvalue <- pchisq(LM3, df, lower.tail=FALSE)
 }
 
-results <- list(LM3, pvalue, chi, st.choice)
-names(results) <- c('LM', 'pval', 'critical', 'st.choice')
+results <- list(LM3, pvalue, chi, st, st.choice)
+names(results) <- c('LM', 'pval', 'critical','st', 'st.choice')
 class(results) = 'VLSTARjoint'
 #cat('Joint linearity test (Third-order Taylor expansion)\n')
 return(results)
