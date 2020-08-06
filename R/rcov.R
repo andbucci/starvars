@@ -1,4 +1,4 @@
-rcov <- function(data, freq = c('daily', 'monthly', 'quarterly', 'yearly'), ret = FALSE, cholesky = FALSE){
+rcov <- function(data, freq = c('daily', 'monthly', 'quarterly', 'yearly'), make.ret = FALSE, cholesky = FALSE){
 freq <- match.arg(freq)
   if(is(data, 'xts') == FALSE){
     stop('Data should be of class "xts".')
@@ -32,7 +32,7 @@ nyear <- elapsed_years(end_date, start_date)
 
 
 retu <- matrix(ncol = ncoly, nrow = nrowy)
-if(ret == TRUE){
+if(make.ret == TRUE){
     if(freq == 'daily'){
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (k in 1:nday){
