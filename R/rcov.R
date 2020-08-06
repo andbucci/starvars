@@ -1,4 +1,4 @@
-rcov <- function(data, freq = c('daily', 'monthly', 'quarterly', 'yearly'), make.ret = FALSE, cholesky = FALSE){
+rcov <- function(data, freq = c('daily', 'monthly', 'quarterly', 'yearly'), make.ret = TRUE, cholesky = FALSE){
 freq <- match.arg(freq)
   if(is(data, 'xts') == FALSE){
     stop('Data should be of class "xts".')
@@ -10,6 +10,7 @@ end_date <- index(data)[nrowy]
 if(freq == 'daily'){
   days <- as.Date(index(data), format = "%m/%d/%Y %I:%M:%S %p")
   days <- unique(days)
+  nday <- length(days)
 }
 
 elapsed_months <- function(end_date, start_date){
@@ -25,7 +26,6 @@ elapsed_years <- function(end_date, start_date){
   year(end_date)-
     year(start_date)+1
 }
-nday <- length(days)
 nmonth <- elapsed_months(end_date, start_date)
 nquarter <- elapsed_quarters(end_date, start_date)
 nyear <- elapsed_years(end_date, start_date)

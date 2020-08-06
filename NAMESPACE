@@ -28,7 +28,7 @@ importFrom("data.table", "rbindlist")
 
 importFrom("fGarch", "garchFit")
 
-importFrom("graphics", "abline", "axis", "box", "layout", "lines", "mtext", "par", "plot",
+importFrom("graphics", "abline", "axis", "box", "layout", "lcm", "lines", "mtext", "par", "plot",
            "points")
 
 importFrom("highfrequency", "rCov")
