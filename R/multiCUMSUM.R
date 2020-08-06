@@ -14,6 +14,7 @@ buildtau <- function(data){
   zeros <- as.matrix(t(rep(0, nupper)))
   tau <- rbind(zeros, tau)
   tau <- zoo(tau, order.by = index(data))
+  tau <- as.xts(tau, order.by = index(data))
   return(tau)
 }
 

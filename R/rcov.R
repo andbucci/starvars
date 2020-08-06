@@ -44,6 +44,8 @@ if(make.ret == TRUE){
         chol1 <- t(chol(rcovmat))
         chol2[j,] <- vech(chol1)
       }
+      realized <- as.xts(realized, order.by = days)
+      chol2 <- as.xts(chol2, order.by = days)
     }
     if(freq == 'monthly'){
       for(j in 1:ncoly){
@@ -66,6 +68,8 @@ if(make.ret == TRUE){
         chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
+      realized <- as.xts(realized, order.by = seq(start_date, end_date, by = 'month'))
+      chol2 <- as.xts(chol2, order.by = seq(start_date, end_date, by = 'month'))
     }
     if(freq == 'quarterly'){
       for(j in 1:ncoly){
@@ -88,6 +92,8 @@ if(make.ret == TRUE){
         chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
+      realized <- as.xts(realized, order.by = seq(start_date, end_date, by = 'quarter'))
+      chol2 <- as.xts(chol2, order.by = seq(start_date, end_date, by = 'quarter'))
     }
     if(freq == 'yearly'){
       for(j in 1:ncoly){
@@ -110,6 +116,8 @@ if(make.ret == TRUE){
         chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
+      realized <- as.xts(realized, order.by = seq(start_date, end_date, by = 'year'))
+      chol2 <- as.xts(chol2, order.by = seq(start_date, end_date, by = 'year'))
     }
 }else{
     retu <- data
@@ -124,6 +132,8 @@ if(make.ret == TRUE){
         chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
+      realized <- as.xts(realized, order.by = days)
+      chol2 <- as.xts(chol2, order.by = days)
     }
     if(freq == 'monthly'){
       crosspro <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nrowy)
@@ -143,6 +153,8 @@ if(make.ret == TRUE){
         chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
+      realized <- as.xts(realized, order.by = seq(start_date, end_date, by = 'month'))
+      chol2 <- as.xts(chol2, order.by = seq(start_date, end_date, by = 'month'))
     }
     if(freq == 'quarterly'){
       crosspro <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nrowy)
@@ -162,6 +174,8 @@ if(make.ret == TRUE){
         chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
+      realized <- as.xts(realized, order.by = seq(start_date, end_date, by = 'quarter'))
+      chol2 <- as.xts(chol2, order.by = seq(start_date, end_date, by = 'quarter'))
     }
     if(freq == 'yearly'){
       crosspro <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nrowy)
@@ -181,6 +195,8 @@ if(make.ret == TRUE){
         chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
+      realized <- as.xts(realized, order.by = seq(start_date, end_date, by = 'year'))
+      chol2 <- as.xts(chol2, order.by = seq(start_date, end_date, by = 'year'))
     }}
 
 names1 <- to('y', (ncoly*(ncoly+1)/2), same.size = FALSE)
