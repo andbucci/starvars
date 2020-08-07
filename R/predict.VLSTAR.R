@@ -107,7 +107,7 @@ if(!is.null(st.new)){
         }
         Gt <- diag(GT[,1])
         Gtilde <- t(cbind(In, Gt))
-        nonlinear_MC[,m] <- t(object$Gtilde)%*%t(BB2)%*%Zmc
+        nonlinear_MC[,m] <- t(Gtilde)%*%t(BB)%*%as.matrix(Zmc)
       }
     nonlinearMC <- t(nonlinear_MC)
       Z <- c(constant[i, ], yy, newdata)
@@ -137,7 +137,7 @@ if(!is.null(st.new)){
         }
         Gt <- diag(GT[,1])
         Gtilde <- t(cbind(In, Gt))
-        nonlinear_BO[,b] <- t(object$Gtilde)%*%t(BB2)%*%Zbo
+        nonlinear_BO[,b] <- t(Gtilde)%*%t(BB)%*%Zbo
       }}
       nonlinearBO <- t(nonlinear_BO)
       Z <- c(constant[i, ], yy, newdata)
