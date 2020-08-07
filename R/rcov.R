@@ -41,7 +41,7 @@ if(make.ret == TRUE){
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (j in 1:nday){
         rcovmat <- invvech(as.matrix(realized[j,]))
-        chol1 <- t(chol(rcovmat))
+        chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
       }
       realized <- as.xts(realized, order.by = days)
@@ -53,7 +53,7 @@ if(make.ret == TRUE){
       }
       crosspro <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nrowy)
       for (i in 1:nrowy){
-        cross <- t(retu[i,])%*%retu[i,]
+        cross <- retu[i,]%*%t(retu[i,])
         crosspro[i,] <- vech(cross)
       }
       cross1 <- zoo(crosspro, order.by = index(data))
@@ -77,7 +77,7 @@ if(make.ret == TRUE){
       }
       crosspro <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nrowy)
       for (i in 1:nrowy){
-        cross <- t(retu[i,])%*%retu[i,]
+        cross <- retu[i,]%*%t(retu[i,])
         crosspro[i,] <- vech(cross)
       }
       cross1 <- zoo(crosspro, order.by = index(data))
@@ -101,7 +101,7 @@ if(make.ret == TRUE){
       }
       crosspro <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nrowy)
       for (i in 1:nrowy){
-        cross <- t(retu[i,])%*%retu[i,]
+        cross <- retu[i,]%*%t(retu[i,])
         crosspro[i,] <- vech(cross)
       }
       cross1 <- zoo(crosspro, order.by = index(data))
@@ -138,7 +138,7 @@ if(make.ret == TRUE){
     if(freq == 'monthly'){
       crosspro <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nrowy)
       for (i in 1:nrowy){
-        cross <- t(retu[i,])%*%retu[i,]
+        cross <- retu[i,]%*%t(retu[i,])
         crosspro[i,] <- vech(cross)
       }
       cross1 <- zoo(crosspro, order.by = index(data))
@@ -159,7 +159,7 @@ if(make.ret == TRUE){
     if(freq == 'quarterly'){
       crosspro <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nrowy)
       for (i in 1:nrowy){
-        cross <- t(retu[i,])%*%retu[i,]
+        cross <- retu[i,]%*%t(retu[i,])
         crosspro[i,] <- vech(cross)
       }
       cross1 <- zoo(crosspro, order.by = index(data))
