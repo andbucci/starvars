@@ -6,6 +6,7 @@ predict.VLSTAR <- function(object, ..., n.ahead = 1, conf.lev = 0.95, st.new = N
   method <- match.arg(method)
   resid <- object$residuals
   ncoly <- ncol(object$Data[[1]])
+  nrowy <- nrow(object$Data[[1]])
   alpha = 1-conf.lev
   k <- ncol(object$exo)
   datamat <- object$Data[[2]]
@@ -56,9 +57,12 @@ if(!is.null(st.new)){
   lower <- matrix(NA, ncol = ncoly, nrow = n.ahead)
   upper <- matrix(NA, ncol = ncoly, nrow = n.ahead)
   for(j in 1:ncoly){
-    std_err <- sqrt(object$Omega[j,j])*t(Z)%*%ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z
-  lower[1,j] <- pred[1,j]-qt(1-alpha/2, df = nrow(object$Data[[1]])*ncol(object$Data[[1]])-length(BB))*std_err
-  upper[1,j] <- pred[1,j]+qt(1-alpha/2, df = nrow(object$Data[[1]])*ncol(object$Data[[1]])-length(BB))*std_err
+    std_err <- sqrt((ncoly-object$p-1)/(nrowy-object$p-ncoly)*qf(1-alpha/2, df1 = ncoly, df2 = (nrowy-object$p-ncoly)))*sqrt((1+t(Z)%*%ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z)*object$Omega[j,j])
+    lower[1,j] <- pred[1,j]-std_err
+    upper[1,j] <- pred[1,j]+std_err
+    #std_err <- sqrt(object$Omega[j,j])*t(Z)%*%ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z
+    #lower[1,j] <- pred[1,j]-qt(1-alpha/2, df = nrow(object$Data[[1]])*ncol(object$Data[[1]])-length(BB))*std_err
+  #upper[1,j] <- pred[1,j]+qt(1-alpha/2, df = nrow(object$Data[[1]])*ncol(object$Data[[1]])-length(BB))*std_err
   }
 
   if(n.ahead >1){
@@ -78,9 +82,12 @@ if(!is.null(st.new)){
         st_new <- c(as.vector(st_new),tmp[st.num])
       }
       for(j in 1:ncoly){
-        std_err <- sqrt(object$Omega[j,j])*t(Z)%*%ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z
-        lower[i,j] <- pred[i,j]-qt(1-alpha/2, df = nrow(object$Data[[1]]+i-1)*ncol(object$Data[[1]])-length(BB))*std_err
-        upper[i,j] <- pred[i,j]+qt(1-alpha/2, df = nrow(object$Data[[1]]+i-1)*ncol(object$Data[[1]])-length(BB))*std_err
+        std_err <- sqrt((ncoly-object$p-1)/(nrowy-object$p-ncoly)*qf(1-alpha/2, df1 = ncoly, df2 = (nrowy-object$p-ncoly)))*sqrt((1+t(Z)%*%ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z)*object$Omega[j,j])
+        lower[i,j] <- pred[1,j]-std_err
+        upper[i,j] <- pred[1,j]+std_err
+        #std_err <- sqrt(object$Omega[j,j])*t(Z)%*%ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z
+        #lower[i,j] <- pred[i,j]-qt(1-alpha/2, df = nrow(object$Data[[1]]+i-1)*ncol(object$Data[[1]])-length(BB))*std_err
+        #upper[i,j] <- pred[i,j]+qt(1-alpha/2, df = nrow(object$Data[[1]]+i-1)*ncol(object$Data[[1]])-length(BB))*std_err
       }
     }
 
