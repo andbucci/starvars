@@ -36,7 +36,7 @@ if(make.ret == TRUE){
     if(freq == 'daily'){
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (k in 1:nday){
-        realized[k,] <- vech(rCov(rdata = data[as.character(days[k])], makeReturns = TRUE))
+        realized[k,] <- vech(rCov(rData = data[as.character(days[k])], makeReturns = TRUE))
       }
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (j in 1:nday){
@@ -124,7 +124,7 @@ if(make.ret == TRUE){
     if(freq == 'daily'){
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (k in 1:nday){
-        realized[k,] <- vech(rCov(rdata = data[as.character(days[k])], makeReturns = FALSE))
+        realized[k,] <- vech(rCov(rData = data[as.character(days[k])], makeReturns = FALSE))
       }
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (j in 1:nday){

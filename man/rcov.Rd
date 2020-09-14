@@ -56,9 +56,9 @@ The code was written by Andrea Bucci
 \examples{
 require(highfrequency)
 
-data(sample_5minprices_jumps)
+data(sample5MinPricesJumps)
 
-rc <- rcov(sample_5minprices_jumps, freq = 'daily', cholesky = TRUE, make.ret = TRUE)
+rc <- rcov(sample5MinPricesJumps, freq = 'daily', cholesky = TRUE, make.ret = TRUE)
 rc
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
