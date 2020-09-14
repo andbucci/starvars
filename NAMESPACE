@@ -52,7 +52,7 @@ importFrom("quantmod", "dailyReturn", "monthlyReturn")
 importFrom("rlist", "list.cbind")
 
 importFrom("stats", "acf", "fitted", "lag", "lm", "na.omit", "optim", "pacf", "pchisq",
-           "plot.ts", "pt", "quantile", "qchisq", "qt", "resid", "residuals", "rnorm", "sd", "symnum")
+           "plot.ts", "pt", "quantile", "qchisq", "qt", "resid", "residuals", "rnorm", "sd", "symnum", "qf")
 
 importFrom("utils", "tail.matrix")
 
