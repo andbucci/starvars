@@ -26,6 +26,17 @@ elapsed_years <- function(end_date, start_date){
   year(end_date)-
     year(start_date)+1
 }
+
+makeReturns <- function (ts){
+  l <- dim(ts)[1]
+  col_names <- names(ts)
+  x <- matrix(as.numeric(ts), nrow = l)
+  x[(2:l), ] <- log(x[(2:l), ]) - log(x[(1:(l - 1)), ])
+  x[1, ] <- rep(0, dim(ts)[2])
+  x <- xts(x, order.by = index(ts))
+  names(x) <- col_names
+  return(x)
+}
 nmonth <- elapsed_months(end_date, start_date)
 nquarter <- elapsed_quarters(end_date, start_date)
 nyear <- elapsed_years(end_date, start_date)
@@ -34,9 +45,19 @@ nyear <- elapsed_years(end_date, start_date)
 retu <- matrix(ncol = ncoly, nrow = nrowy)
 if(make.ret == TRUE){
     if(freq == 'daily'){
+      for(j in 1:ncoly){
+        retu[,j] <- makeReturns(data[,j])*100
+      }
+      crosspro <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nrowy)
+      for (i in 1:nrowy){
+        cross <- retu[i,]%*%t(retu[i,])
+        crosspro[i,] <- vech(cross)
+      }
+      cross1 <- zoo(crosspro, order.by = index(data))
+
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (k in 1:nday){
-        realized[k,] <- vech(rCov(rdata = data[as.character(days[k])], makeReturns = TRUE))
+        realized[, k] <- apply.daily(cross1[,k], sum)
       }
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (j in 1:nday){
@@ -122,9 +143,16 @@ if(make.ret == TRUE){
 }else{
     retu <- data
     if(freq == 'daily'){
+      crosspro <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nrowy)
+      for (i in 1:nrowy){
+        cross <- retu[i,]%*%t(retu[i,])
+        crosspro[i,] <- vech(cross)
+      }
+      cross1 <- zoo(crosspro, order.by = index(data))
+
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
-      for (k in 1:nday){
-        realized[k,] <- vech(rCov(rdata = data[as.character(days[k])], makeReturns = FALSE))
+      for (k in 1:(ncoly*(ncoly+1)/2)){
+        realized[, k] <- apply.daily(cross1[,k], sum)
       }
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
       for (j in 1:nday){

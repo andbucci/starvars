@@ -54,11 +54,10 @@ The code was written by Andrea Bucci
 }
 
 \examples{
-require(highfrequency)
 
-data(sample_5minprices_jumps)
+data(Sample5minutes)
 
-rc <- rcov(sample_5minprices_jumps, freq = 'daily', cholesky = TRUE, make.ret = TRUE)
+rc <- rcov(Sample5minutes, freq = 'daily', cholesky = TRUE, make.ret = TRUE)
 rc
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

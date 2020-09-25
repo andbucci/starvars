@@ -31,8 +31,6 @@ importFrom("fGarch", "garchFit")
 importFrom("graphics", "abline", "axis", "box", "layout", "lcm", "lines", "mtext", "par", "plot",
            "points")
 
-importFrom("highfrequency", "rCov")
-
 importFrom("ks", "invvec", "invvech")
 
 importFrom("lessR", "to")
@@ -52,13 +50,13 @@ importFrom("quantmod", "dailyReturn", "monthlyReturn")
 importFrom("rlist", "list.cbind")
 
 importFrom("stats", "acf", "fitted", "lag", "lm", "na.omit", "optim", "pacf", "pchisq",
-           "plot.ts", "pt", "quantile", "qchisq", "qt", "resid", "residuals", "rnorm", "sd", "symnum")
+           "plot.ts", "pt", "quantile", "qchisq", "qf", "qt", "resid", "residuals", "rnorm", "sd", "symnum")
 
 importFrom("utils", "tail.matrix")
 
 importFrom("vars", "VAR")
 
-importFrom("xts", "apply.monthly", "apply.quarterly", "apply.yearly", "as.xts")
+importFrom("xts", "xts", "apply.daily", "apply.monthly", "apply.quarterly", "apply.yearly", "as.xts")
 
 importFrom("zoo", "as.Date", "as.yearqtr", "index", "zoo")
 
