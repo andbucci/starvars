@@ -14,7 +14,11 @@ coef.VLSTAR <-
       c<-signif(x$Pvalues[[i]], 3)
       coeftop <- as.data.frame(cbind(a, b, c))
       colnames(coeftop) <- c('Estimate', 'Std. Error', 'p-value')
-      coeftoprint[[i]] <- rbind(coeftop, rep('', 3), c(round(x$Cgamma[i,1],3),'',''), c(round(x$Cgamma[i,2],3),'',''))
+      if(x$singlecgamma == TRUE){
+        coeftoprint[[i]] <- rbind(coeftop, rep('', 3), c(round(x$Cgamma[1,1],3),'',''), c(round(x$Cgamma[1,2],3),'',''))
+      } else{
+        coeftoprint[[i]] <- rbind(coeftop, rep('', 3), c(round(x$Gammac[i,1],3),'',''), c(round(x$Gammac[i,2],3),'',''))
+        }
       rownames(coeftoprint[[i]])<- c(rownames(x$Bhat),"---",'gamma', 'c')
     }
     names(coeftoprint) <- colnames(object$yoriginal)

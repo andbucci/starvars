@@ -13,7 +13,8 @@ This function allows the user to estimate the coefficients of a VLSTAR model wit
 \usage{
 VLSTAR(y, exo = NULL, p = 1, m = 2, st = NULL, constant = TRUE,
        starting = NULL, n.combi = NULL,
-       method = c('ML', 'NLS'), n.iter = 500, epsilon = 10^(-3))
+       method = c('ML', 'NLS'),
+        n.iter = 500, singlecgamma = FALSE, epsilon = 10^(-3))
 \method{print}{VLSTAR}(x, \dots)
 
 }
@@ -59,6 +60,10 @@ An object of class \code{VLSTAR}, with standard methods.
 \item{method}{
   Fitting method: maximum likelihood or nonlinear least squares.
 %%     ~~Describe \code{exo} here~~
+}
+
+  \item{singlecgamma}{
+  \code{TRUE} or \code{FALSE} to use single gamma and c
 }
   \item{n.iter}{
   number of iteration of the algorithm until forced convergence
@@ -131,14 +136,14 @@ y <- Realized[-1,1:10]
 y <- y[-nrow(y),]
 st <- Realized[-nrow(Realized),1]
 st <- st[-length(st)]
-fit.VLSTAR <- VLSTAR(y, p = 1, n.combi = 3,
+fit.VLSTAR <- VLSTAR(y, p = 1, n.combi = 3, singlecgamma = FALSE,
 n.iter = 3, st = st, method ='NLS')
 
 # a few methods for VLSTAR
 summary(fit.VLSTAR)
 plot(fit.VLSTAR)
-predict(fit.VLSTAR, newdata = Realized[nrow(Realized),1:10])
-logLik(fit.VLSTAR)
+predict(fit.VLSTAR, st.num = 1, n.ahead = 1)
+logLik(fit.VLSTAR, type = 'Univariate')
 coef(fit.VLSTAR)}
 
 }

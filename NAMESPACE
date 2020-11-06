@@ -26,6 +26,8 @@ S3method(print, vlstarpred)
 
 importFrom("data.table", "rbindlist")
 
+importFrom("dplyr", "if_else")
+
 importFrom("fGarch", "garchFit")
 
 importFrom("graphics", "abline", "axis", "box", "layout", "lcm", "lines", "mtext", "par", "plot",

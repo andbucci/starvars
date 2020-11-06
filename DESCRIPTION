@@ -1,7 +1,7 @@
 Package: starvars
 Type: Package
 Title: Vector Logistic Smooth Transition Models / Realized Covariances Construction
-Version: 1.1.1
+Version: 1.1.2
 Authors@R: c(
   person("Andrea", "Bucci", email = "andrea.bucci@unich.it", role = c("aut", "cre", "cph")),
   person("Giulio", "Palomba", role = "aut"),
@@ -13,5 +13,5 @@ License: GPL
 Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.5.0)
-Imports:  MASS, ks, zoo, data.table, methods, matrixcalc, vars, maxLik, rlist, fGarch, lubridate, xts, lessR, quantmod
+Imports:  MASS, ks, zoo, data.table, dplyr, methods, matrixcalc, vars, maxLik, rlist, fGarch, lubridate, xts, lessR, quantmod
 URL: https://github.com/andbucci/starvars
