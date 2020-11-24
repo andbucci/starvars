@@ -339,7 +339,7 @@ if (is.null(starting)){
       param1 <- optim(par = param, fn = loglike, lower = c(low1, apply(y, 2, min)),
                       method="L-BFGS-B")
 
-      cgam1 <- matrix(param1$par, ncol = 2, nrow = ny)
+      cgam1 <- matrix(param1$par, ncol = 2, nrow = (ny*(m-1)))
 
       #2.Maximum likelihood estimation of Bhat with new values of gamma and c
       glog <- matrix(ncol=ny, nrow = nrowy)
@@ -451,7 +451,7 @@ if (is.null(starting)){
     colnames(BBhat) <- colnames(y)
     modeldata <- list(y, x)
     fitte <- fitte[!is.na(fitte[,1]),]
-    results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB, m, p,
+    results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gtilde, modeldata, BB, m, p,
                     st, y, exo, constant, method, singlecgamma)
     names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Gammac', 'Omega', 'fitted', 'residuals', 'MultiLL', 'LL', 'AIC',
                         'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal', 'exo', 'constant', 'method', 'singlecgamma')
@@ -591,7 +591,7 @@ if (is.null(starting)){
       param1 <- optim(par = param, fn = ssq1, lower = c(low1, apply(y, 2, min)),
                       method="L-BFGS-B")
 
-      cgam1 <- matrix(param1$par, ncol = 2L, nrow = ny*(m-1))
+      cgam1 <- matrix(param1$par, ncol = 2L, nrow = (ny*(m-1)))
 
       #2.NLS estimation of Bhat with new values of gamma and c
       glog <- matrix(ncol=ny, nrow = nrowy)
@@ -741,7 +741,7 @@ if (is.null(starting)){
     colnames(bhat1) <- colnames(y)
     modeldata <- list(y, x)
     fitte <- fitte[!is.na(fitte[,1]),]
-    results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gt, modeldata, BB, m, p,
+    results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gtilde, modeldata, BB, m, p,
                     st, y, exo, constant, method, singlecgamma)
     names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Gammac', 'Omega', 'fitted', 'residuals', 'MultiLL', 'LL', 'AIC',
                         'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal', 'exo', 'constant', 'method', 'singlecgamma')

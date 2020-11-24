@@ -35,7 +35,7 @@ newdata <- as.matrix(newdata)
   BB1 <- object$B[,seq(1, ncol(BB))[c(rep(TRUE, ncoly), rep(FALSE, ncoly))]]
   BB2 <- object$B[,seq(1, ncol(BB))[c(rep(FALSE, ncoly), rep(TRUE, ncoly))]]
   In <- diag(ncol(object$Data[[1]]))
-  Gtilde <- t(cbind(In, object$Gtilde))
+  Gtilde <- t(cbind(In, object$Gtilde[[]]))
   pred <- matrix(NA, ncol = ncoly, nrow = n.ahead)
   Z <- c(constant[1, ], yy, newdata)
   pred[1,] <- as.matrix((t(Gtilde)%*%t(BB)%*%Z))

@@ -21,14 +21,22 @@ plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.
 
   }
   nv <- length(names)
-  logistic <- matrix(ncol = ncol(object$yoriginal), nrow = length(object$st))
+  if(x$singlecgamma == TRUE){
+    ny <- 1
+  }else{
+    ny <- ncol(object$yoriginal)
+  }
+  logistic <- matrix(ncol = ny, nrow = length(object$st))
   for(j in 1:ncol(logistic)){
       for (i in 1:nrow(logistic)){
    logistic[i,j] <- (1+exp(-object$Gammac[j,1]*(object$st[i]-object$Gammac[j,2])))^-1
   }
   }
   logistic <- apply(logistic, 2, sort, decreasing = F)
-  colnames(logistic) <- ynames
+  if(x$singlecgamma == FALSE){
+    colnames(logistic) <- ynames
+  }
+
 
   ifelse(is.null(main.fit), main.fit <- paste("Diagram of fit and residuals for", names), main.fit <- rep(main.fit, nv)[1:nv])
   ifelse(is.null(main.acf), main.acf <- rep("ACF Residuals", nv), main.acf <- rep(main.acf, nv)[1:nv])
@@ -76,7 +84,11 @@ plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.
     }
   par(mar = mar, oma = oma)
   for (i in 1:nv) {
-    plotest(y = y[, names[i]], fitted = fitted[, names[i]], resids = resids[, names[i]], logistic = logistic[, names[i]], main.fit = main.fit[i], main.acf = main.acf[i], main.pacf = main.pacf[i], main.logi = main.logi[i], ylab.fit = ylab.fit[i], ylab.resid = ylab.resid[i], ylab.acf = ylab.acf[i], ylab.pacf = ylab.pacf[i], ylab.logi = ylab.logi[i], xlab.fit = xlab.fit[i], xlab.resid = xlab.resid[i], xlab.logi = xlab.logi[i], adj.mtext = adj.mtext, padj.mtext = padj.mtext, col.mtext = col.mtext)
+    if(x$singlecgamma == TRUE){
+      plotest(y = y[, names[i]], fitted = fitted[, names[i]], resids = resids[, names[i]], logistic = logistic, main.fit = main.fit[i], main.acf = main.acf[i], main.pacf = main.pacf[i], main.logi = main.logi[i], ylab.fit = ylab.fit[i], ylab.resid = ylab.resid[i], ylab.acf = ylab.acf[i], ylab.pacf = ylab.pacf[i], ylab.logi = ylab.logi[i], xlab.fit = xlab.fit[i], xlab.resid = xlab.resid[i], xlab.logi = xlab.logi[i], adj.mtext = adj.mtext, padj.mtext = padj.mtext, col.mtext = col.mtext)
+    }else{
+      plotest(y = y[, names[i]], fitted = fitted[, names[i]], resids = resids[, names[i]], logistic = logistic[, names[i]], main.fit = main.fit[i], main.acf = main.acf[i], main.pacf = main.pacf[i], main.logi = main.logi[i], ylab.fit = ylab.fit[i], ylab.resid = ylab.resid[i], ylab.acf = ylab.acf[i], ylab.pacf = ylab.pacf[i], ylab.logi = ylab.logi[i], xlab.fit = xlab.fit[i], xlab.resid = xlab.resid[i], xlab.logi = xlab.logi[i], adj.mtext = adj.mtext, padj.mtext = padj.mtext, col.mtext = col.mtext)
+    }
     if (nv > 1) par(ask = TRUE)
   }
   on.exit(par(op))

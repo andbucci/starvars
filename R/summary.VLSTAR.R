@@ -64,7 +64,8 @@ print.summary.VLSTAR<-function(x,...){
       coeftoprint[[i]] <- rbind(coeftop, rep('', 4), c(aic1[i],'','',''), c(bic1[i], '','',''))
       rownames(coeftoprint[[i]])<- c(rownames(x$Bhat),"---",'AIC', 'BIC')
     } else{
-      coeftoprint[[i]] <- rbind(coeftop, rep('', 4), c(round(x$Gammac[i,1],4),'','',''), c(round(x$Gammac[i,2],4),'','',''),
+      coeftoprint[[i]] <- rbind(coeftop, rep('', 4), c(round(x$Gammac[seq(i, nrow(x$Gammac), ncol(x$Data[[1]])),1],4),rep('',(4-m+1))),
+                                c(round(x$Gammac[seq(i, nrow(x$Gammac), ncol(x$Data[[1]])),2],4),rep('',(4-m+1))),
                                 rep('', 4), c(aic1[i],'','',''), c(bic1[i], '','',''))
       rownames(coeftoprint[[i]])<- c(rownames(x$Bhat),"---",'gamma', 'c',"---", 'AIC', 'BIC')
     }
@@ -78,7 +79,7 @@ print.summary.VLSTAR<-function(x,...){
   #cat("\nBIC", x$bic)
   cat("\nMultivariate log-likelihood:", x$MultiLL,"\n")
   if(x$singlecgamma == TRUE){
-    cat("\nUnique gamma:", round(x$Gammac[1,1],4),"\tUnique c:", round(x$Gammac[1,2],4), "\n")
+    cat("\nUnique gamma:", round(x$Gammac[seq(1, nrow(x$Gammac), ncol(x$Data[[1]])),1],4),"\tUnique c:", round(x$Gammac[seq(1, nrow(x$Gammac), ncol(x$Data[[1]])),2],4), "\n")
   }
   cat('\nCoefficients:')
   print(noquote(coeftoprint))
