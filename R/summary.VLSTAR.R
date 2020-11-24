@@ -64,8 +64,8 @@ print.summary.VLSTAR<-function(x,...){
       coeftoprint[[i]] <- rbind(coeftop, rep('', 4), c(aic1[i],'','',''), c(bic1[i], '','',''))
       rownames(coeftoprint[[i]])<- c(rownames(x$Bhat),"---",'AIC', 'BIC')
     } else{
-      coeftoprint[[i]] <- rbind(coeftop, rep('', 4), c(round(x$Gammac[seq(i, nrow(x$Gammac), ncol(x$Data[[1]])),1],4),rep('',(4-m+1))),
-                                c(round(x$Gammac[seq(i, nrow(x$Gammac), ncol(x$Data[[1]])),2],4),rep('',(4-m+1))),
+      coeftoprint[[i]] <- rbind(coeftop, rep('', 4), c(round(x$Gammac[seq(i, nrow(x$Gammac), ncol(x$Data[[1]])),1],4),rep('',(4-x$m+1))),
+                                c(round(x$Gammac[seq(i, nrow(x$Gammac), ncol(x$Data[[1]])),2],4),rep('',(4-x$m+1))),
                                 rep('', 4), c(aic1[i],'','',''), c(bic1[i], '','',''))
       rownames(coeftoprint[[i]])<- c(rownames(x$Bhat),"---",'gamma', 'c',"---", 'AIC', 'BIC')
     }
