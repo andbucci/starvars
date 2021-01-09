@@ -6,7 +6,7 @@ summary.VLSTAR<-function(object,...){
   p<-x$p
   x$T <- nrow(x$yoriginal)
   Z<-t(as.matrix(tail.matrix(x$Data[[1]])))
-  x$npar <- k*ncol(x$Data[[1]])*x$m + 2*(x$m-1)*ncol(x$Data[[1]])
+  x$npar <- 2*ncol(x$Data[[1]])*x$m + x$m*ncol(x$Data[[2]])*ncol(x$Data[[1]])
 
   ## export results
   x$coefficients<-as.list(as.data.frame(x$Bhat))
