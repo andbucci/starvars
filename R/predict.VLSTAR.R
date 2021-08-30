@@ -9,6 +9,7 @@ predict.VLSTAR <- function(object, ..., n.ahead = 1, conf.lev = 0.95, st.new = N
   nrowy <- nrow(object$Data[[1]])
   alpha = 1-conf.lev
   k <- ncol(object$exo)
+  In <- diag(ncol(object$Data[[1]]))
   datamat <- object$Data[[2]]
 if(is.null(object$exo)){
   if(object$constant == T){

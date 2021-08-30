@@ -1,5 +1,8 @@
 multiCUMSUM <- function(data, conf.level = 0.95, max.breaks = 7){
 
+  if(conf.level > 1 | conf.level < 0){
+    stop('Please provide a valid value for alpha')
+  }
 nrowy <- nrow(data)
 ncoly <- ncol(data)
 

@@ -108,7 +108,7 @@ if(make.ret == TRUE){
         realized[, k] <- apply.quarterly(cross1[,k], sum)
       }
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nquarter)
-      for (j in 1:nmonth){
+      for (j in 1:nquarter){
         rcovmat <- invvech(as.matrix(realized[j,]))
         chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
@@ -118,7 +118,7 @@ if(make.ret == TRUE){
     }
     if(freq == 'yearly'){
       for(j in 1:ncoly){
-        retu[,j] <- monthlyReturn(data[,j])*100
+        retu[,j] <- dailyReturn(data[,j])*100
       }
       crosspro <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nrowy)
       for (i in 1:nrowy){
@@ -197,7 +197,7 @@ if(make.ret == TRUE){
         realized[, k] <- apply.quarterly(cross1[,k], sum)
       }
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nquarter)
-      for (j in 1:nmonth){
+      for (j in 1:nquarter){
         rcovmat <- invvech(as.matrix(realized[j,]))
         chol1 <- t(chol(rcovmat, pivot = T))
         chol2[j,] <- vech(chol1)
@@ -232,12 +232,22 @@ names1 <- to('y', (ncoly*(ncoly+1)/2), same.size = FALSE)
 colnames(realized) <- names1
 colnames(chol2) <- names1
 
-if(cholesky == TRUE){
+if(make.ret == T){
+  if(cholesky == TRUE){
+    results <- list(realized, chol2, retu)
+    names(results) <- c('Realized Covariances', 'Cholesky Factors', 'returns')
+  }else{
+    results <- list(realized, retu)
+    names(results) <- c('Realized Covariances', 'returns')
+  }
+}else{
+  if(cholesky == TRUE){
   results <- list(realized, chol2)
   names(results) <- c('Realized Covariances', 'Cholesky Factors')
-}else{
+  }else{
   results <- list(realized)
   names(results) <- 'Realized Covariances'
+  }
 }
 return(results)
 }

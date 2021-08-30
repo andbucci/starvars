@@ -6,6 +6,7 @@ plot.vlstarpred <- function(x, type = c('single', 'multiple'), names = NULL,
                             lwd.ci = 1, lwd.vline = 1, col.obs = NULL, col.pred = NULL, col.ci = NULL,
                             col.vline = NULL, ylim = NULL, mar = par("mar"), oma = par("oma"),...){
   op <- par(no.readonly = TRUE)
+  on.exit(par(op))
   type <- match.arg(type)
   ifelse(is.null(names), ynames <- colnames(x$y), ynames <- names)
   nrowy <- nrow(x$y)
@@ -62,6 +63,5 @@ plot.vlstarpred <- function(x, type = c('single', 'multiple'), names = NULL,
       plotprediction(x = x, name = ynames[i], main = main[i], col = col, lty = lty, lwd = lwd, ylab = ylab[i], xlab = xlab[i], ...)
     }
   }
-  on.exit(par(op))
 }
 

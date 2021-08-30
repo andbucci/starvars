@@ -46,9 +46,9 @@ print.summary.VLSTAR<-function(x,...){
     r[littlex]<-format(x[littlex],digits=min(digits,2), scientific=TRUE)
     if(toLatex)
       r<-gsub("(e.*)","slashtext{\\1}",r)
-    if(class(x)=="numeric")
+    if (is(x, "numeric"))
       return(noquote(r))
-    if(class(x)=="matrix")
+    if (is(x, "matrix"))
       return(matrix(noquote(r), ncol=ncol(x), nrow=nrow(x)))
   }
   for(i in 1:length(x$bigcoefficients)){
@@ -84,5 +84,5 @@ print.summary.VLSTAR<-function(x,...){
   cat('\nCoefficients:')
   print(noquote(coeftoprint))
   cat("=================================\n")
-  cat("\n Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1")
+  cat("\n Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 \n")
 }

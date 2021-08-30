@@ -20,15 +20,23 @@ S3method(plot, VLSTAR)
 
 S3method(predict, VLSTAR)
 
+S3method(print, VLSTAR)
+
 S3method(plot, vlstarpred)
 
 S3method(print, vlstarpred)
 
 importFrom("data.table", "rbindlist")
 
+importFrom("doParallel", "dopar", "registerDoParallel")
+
+importFrom("doSNOW", "makeCluster", ".options.snow", "registerDoSNOW")
+
 importFrom("dplyr", "if_else")
 
 importFrom("fGarch", "garchFit")
+
+importFrom("foreach", "foreach")
 
 importFrom("graphics", "abline", "axis", "box", "layout", "lcm", "lines", "mtext", "par", "plot",
            "points")
@@ -47,14 +55,16 @@ importFrom('maxLik', 'maxLik')
 
 importFrom("methods", "is")
 
-importFrom("quantmod", "dailyReturn", "monthlyReturn")
+importFrom("optimParallel", "optimParallel")
 
-importFrom("rlist", "list.cbind")
+importFrom("parallel", "detectCores")
+
+importFrom("quantmod", "dailyReturn", "monthlyReturn", "yearlyReturn")
 
 importFrom("stats", "acf", "fitted", "lag", "lm", "na.omit", "optim", "pacf", "pchisq",
            "plot.ts", "pt", "quantile", "qchisq", "qf", "qt", "resid", "residuals", "rnorm", "sd", "symnum")
 
-importFrom("utils", "tail.matrix")
+importFrom("utils", "setTxtProgressBar", "tail.matrix")
 
 importFrom("vars", "VAR")
 

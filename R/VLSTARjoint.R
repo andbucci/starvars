@@ -12,6 +12,11 @@ if(!is.null(x)){
   varest <- VAR(y)
 }
 
+
+  if(alpha > 1 | alpha < 0){
+    stop('Please provide a valid value for alpha')
+  }
+
 if(ncol(as.matrix(st))>1 & st.choice == FALSE){
   stop('Please provide a valid transition variable or specify the automatic selection')
 }

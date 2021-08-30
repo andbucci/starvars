@@ -2,6 +2,7 @@
 
 plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.pacf = NULL, main.logi = NULL, ylim.fit = NULL, ylim.resid = NULL, lty.fit = NULL, lty.resid = NULL, lty.logi = NULL, lwd.fit = NULL, lwd.resid = NULL, lwd.logi = NULL, lag.acf = NULL, lag.pacf = NULL, col.fit = NULL, col.resid = NULL, col.logi = NULL,  ylab.fit = NULL, ylab.resid = NULL, ylab.acf = NULL, ylab.pacf = NULL, ylab.logi = NULL, xlab.fit = NULL, xlab.resid = NULL, xlab.logi = NULL, mar = par("mar"), oma = par("oma"), adj.mtext = NA, padj.mtext = NA, col.mtext = NA,...){
   op <- par(no.readonly = TRUE)
+  on.exit(par(op))
   object <- x
   resids <- resid(object)
   fitted <- fitted(object)
@@ -91,5 +92,4 @@ plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.
     }
     if (nv > 1) par(ask = TRUE)
   }
-  on.exit(par(op))
 }

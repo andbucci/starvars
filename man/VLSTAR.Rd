@@ -1,6 +1,5 @@
 \name{VLSTAR}
 \alias{VLSTAR}
-\alias{print.VLSTAR}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 VLSTAR- Estimation
@@ -12,10 +11,8 @@ This function allows the user to estimate the coefficients of a VLSTAR model wit
 }
 \usage{
 VLSTAR(y, exo = NULL, p = 1, m = 2, st = NULL, constant = TRUE,
-       starting = NULL, n.combi = NULL,
-       method = c('ML', 'NLS'),
+       starting = NULL, method = c('ML', 'NLS'),
         n.iter = 500, singlecgamma = FALSE, epsilon = 10^(-3))
-\method{print}{VLSTAR}(x, \dots)
 
 }
 \value{
@@ -48,13 +45,8 @@ An object of class \code{VLSTAR}, with standard methods.
 %%     ~~Describe \code{constant} here~~
 }
   \item{starting}{
-  (optional) set of intial values for Gamma and C, inserted as a list of length \code{m-1}. Each element of the list should contain a \code{data.frame} with 2 columns (one for Gamma and one for c), and \code{n} rows.
+  set of intial values for Gamma and C, inserted as a list of length \code{m-1}. Each element of the list should contain a \code{data.frame} with 2 columns (one for Gamma and one for c), and \code{n} rows.
 %%     ~~Describe \code{starting} here~~
-}
-
-  \item{n.combi}{
-  Number of combination for the searching grid of Gamma and C
-%%     ~~Describe \code{n.combi} here~~
 }
 
 \item{method}{
@@ -75,9 +67,6 @@ An object of class \code{VLSTAR}, with standard methods.
 %%     ~~Describe \code{epsilon} here~~
 }
 
-
-\item{x}{An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()} to be printed.}
-\item{\dots}{further arguments to be passed to and from other methods}
 }
 \details{
 The multivariate smooth transition model is an extension of the smooth transition regression model
@@ -127,7 +116,7 @@ The code was written by Andrea Bucci
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{VLSTARjoint}} to test the presence of a unique transition variable among equations and \code{\link{predict.VLSTAR}} for details on predictions produced for this model; \code{\link{summary}}, \code{\link{coef}}, \code{\link{plot}}, \code{\link{logLik}}
+\code{\link{VLSTARjoint}} to test the presence of a unique transition variable among equations and \code{\link{predict.VLSTAR}} for details on predictions produced for this model; \code{\link{print}}, \code{\link{summary}}, \code{\link{coef}}, \code{\link{plot}}, \code{\link{logLik}}
 }
 \examples{
 \donttest{
@@ -136,10 +125,13 @@ y <- Realized[-1,1:10]
 y <- y[-nrow(y),]
 st <- Realized[-nrow(Realized),1]
 st <- st[-length(st)]
-fit.VLSTAR <- VLSTAR(y, p = 1, n.combi = 3, singlecgamma = FALSE,
+stvalues <- startingVLSTAR(y, p = 1, n.combi = 3,
+singlecgamma = FALSE, st = st)
+fit.VLSTAR <- VLSTAR(y, p = 1, singlecgamma = FALSE, starting = stvalues,
 n.iter = 3, st = st, method ='NLS')
 
 # a few methods for VLSTAR
+print(fit.VLSTAR)
 summary(fit.VLSTAR)
 plot(fit.VLSTAR)
 predict(fit.VLSTAR, st.num = 1, n.ahead = 1)

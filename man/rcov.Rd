@@ -35,7 +35,7 @@ rcov(data, freq = c('daily', 'monthly', 'quarterly', 'yearly'), make.ret = TRUE,
 \value{
 \item{Realized Covariances}{a \eqn{M \times N(N+1)/2} matrix of realized covariances, where \emph{M} is the number of lower frequency data}
 \item{Cholesky Factors (optional)}{a \eqn{M \times N(N+1)/2} matrix of Cholesky factors of the realized covariance matrices, where \emph{M} is the number of lower frequency data}
-\item{returns (optional)}{a \eqn{M \times N} matrix of returns, when \code{make.ret = TRUE}}
+\item{returns (optional)}{a \eqn{T \times N} matrix of returns, when \code{make.ret = TRUE}}
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
