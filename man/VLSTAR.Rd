@@ -12,7 +12,8 @@ This function allows the user to estimate the coefficients of a VLSTAR model wit
 \usage{
 VLSTAR(y, exo = NULL, p = 1, m = 2, st = NULL, constant = TRUE,
        starting = NULL, method = c('ML', 'NLS'),
-        n.iter = 500, singlecgamma = FALSE, epsilon = 10^(-3))
+        n.iter = 500, singlecgamma = FALSE,
+        epsilon = 10^(-3), ncores = 2)
 
 }
 \value{
@@ -65,6 +66,11 @@ An object of class \code{VLSTAR}, with standard methods.
   \item{epsilon}{
   convergence check measure
 %%     ~~Describe \code{epsilon} here~~
+}
+
+  \item{ncores}{
+  Number of cores used for parallel computation. Set to 2 by default
+%%     ~~Describe \code{n.combi} here~~
 }
 
 }

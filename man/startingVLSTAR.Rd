@@ -11,8 +11,9 @@ This function allows the user to obtain the set of starting values of Gamma and 
 }
 \usage{
 startingVLSTAR(y, exo = NULL, p = 1,
-m = 2, st = NULL, constant = TRUE,
-n.combi = NULL,singlecgamma = FALSE)
+                   m = 2, st = NULL, constant = TRUE,
+                   n.combi = NULL, ncores = 2,
+                   singlecgamma = FALSE)
 
 }
 \value{
@@ -49,15 +50,19 @@ An object of class \code{startingVLSTAR}.
   Number of combination for the searching grid of Gamma and C
 %%     ~~Describe \code{n.combi} here~~
 }
+  \item{ncores}{
+  Number of cores used for parallel computation. Set to 2 by default
+%%     ~~Describe \code{n.combi} here~~
+}
   \item{singlecgamma}{
   \code{TRUE} or \code{FALSE} to use single gamma and c
 }
 }
 
 \details{
-The searching grid algorithm allows for the optimal choice of the parameters \gamma and c by minimizing the sum of the Squared residuals for each possible combination.
+The searching grid algorithm allows for the optimal choice of the parameters \eqn{\gamma} and c by minimizing the sum of the Squared residuals for each possible combination.
 
-The parameter c is initialized by using the mean of the dependent(s) variable, while \gamma is sampled between 0 and 100.
+The parameter c is initialized by using the mean of the dependent(s) variable, while \eqn{\gamma} is sampled between 0 and 100.
 %%  ~~ If necessary, more details than the description above ~~
 }
 \references{
@@ -87,7 +92,7 @@ st <- Realized[-nrow(Realized),1]
 st <- st[-length(st)]
 starting <- startingVLSTAR(y, p = 1, n.combi = 3,
 singlecgamma = FALSE, st = st)
-
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

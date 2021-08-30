@@ -2,10 +2,9 @@ VLSTAR <- function(y, exo = NULL, p = 1,
                    m = 2, st = NULL, constant = TRUE, starting = NULL,
                    method = c('ML', 'NLS'), n.iter = 500,
                    singlecgamma = FALSE,
-                   epsilon = 10^(-3)){
+                   epsilon = 10^(-3), ncores = 2){
   y <- as.matrix(y)
   x <- exo
-  ncores <- detectCores()
   method <- match.arg(method)
   ##Checks and warnings
   if (anyNA(y))

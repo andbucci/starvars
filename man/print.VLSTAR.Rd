@@ -11,11 +11,11 @@ Print method for objects of class VLSTAR
 \sQuote{\code{print}} methods for class \sQuote{\code{VLSTAR}}.
 }
 \usage{
-\method{print}{VLSTAR}(object, \dots)
+\method{print}{VLSTAR}(x, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{
+  \item{x}{
 An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()}.
 %%     ~~Describe \code{y1} here~~
 }

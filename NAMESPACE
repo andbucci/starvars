@@ -28,15 +28,15 @@ S3method(print, vlstarpred)
 
 importFrom("data.table", "rbindlist")
 
-importFrom("doParallel", "dopar", "registerDoParallel")
+importFrom("doParallel",  "registerDoParallel")
 
-importFrom("doSNOW", "makeCluster", ".options.snow", "registerDoSNOW")
+importFrom("doSNOW", "registerDoSNOW")
 
 importFrom("dplyr", "if_else")
 
 importFrom("fGarch", "garchFit")
 
-importFrom("foreach", "foreach")
+importFrom("foreach", "%dopar%", "foreach")
 
 importFrom("graphics", "abline", "axis", "box", "layout", "lcm", "lines", "mtext", "par", "plot",
            "points")
@@ -57,14 +57,14 @@ importFrom("methods", "is")
 
 importFrom("optimParallel", "optimParallel")
 
-importFrom("parallel", "detectCores")
+importFrom("parallel", "makeCluster", "setDefaultCluster")
 
 importFrom("quantmod", "dailyReturn", "monthlyReturn", "yearlyReturn")
 
 importFrom("stats", "acf", "fitted", "lag", "lm", "na.omit", "optim", "pacf", "pchisq",
            "plot.ts", "pt", "quantile", "qchisq", "qf", "qt", "resid", "residuals", "rnorm", "sd", "symnum")
 
-importFrom("utils", "setTxtProgressBar", "tail.matrix")
+importFrom("utils", "setTxtProgressBar", "tail.matrix", "txtProgressBar")
 
 importFrom("vars", "VAR")
 

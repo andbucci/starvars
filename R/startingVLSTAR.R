@@ -1,6 +1,6 @@
 startingVLSTAR <- function(y, exo = NULL, p = 1,
                    m = 2, st = NULL, constant = TRUE,
-                   n.combi = NULL,
+                   n.combi = NULL, ncores = 2,
                    singlecgamma = FALSE){
   y <- as.matrix(y)
   x <- exo
@@ -20,7 +20,7 @@ startingVLSTAR <- function(y, exo = NULL, p = 1,
   if(is.null(n.combi)){
     stop('A number of combinations should be provided.')
   }
-  
+
   if(is.null(p) || p < 1){
     stop('Please, specify a valid lag order.')
   }
@@ -70,7 +70,6 @@ startingVLSTAR <- function(y, exo = NULL, p = 1,
   }
   ny <- ifelse(singlecgamma == TRUE, 1, ncoly)
   q <- ncol(x)-ncolylag
-  ncores <- detectCores() ##Number of cores to make parallel computations
   COMBI <- list()
   GAMMA <- list()
   CJ <- list()
@@ -93,7 +92,7 @@ startingVLSTAR <- function(y, exo = NULL, p = 1,
       }
       COMBI[[t]] <- combi
       }
-    
+
 #NLS for each combination of c and gamma
 
 message(paste('Searching optimal c and gamma among', n.combi*n.combi, 'combinations\n'))
@@ -102,6 +101,7 @@ registerDoSNOW(cl)
 pb <- txtProgressBar(max = n.combi*n.combi, style = 3)
 progress <- function(n) setTxtProgressBar(pb, n)
 opts <- list(progress = progress)
+l = 1
 ssq <- foreach(l = 1:(n.combi*n.combi), .errorhandling='pass', .combine = rbind,.options.snow = opts) %dopar% {
     Sys.sleep(0.1)
       glog <- matrix(ncol=ny, nrow = nrowy)
@@ -149,9 +149,9 @@ ssq <- foreach(l = 1:(n.combi*n.combi), .errorhandling='pass', .combine = rbind,
       return(SSQ)
 }
 close(pb)
-    
+
 #c and gamma minimazing the sum of squared residuals for each equation
-    
+
 cgamma <- matrix(nrow = ny, ncol = 2)
 CGAMMA <- list()
 for (t in 1:(m-1)){
@@ -164,8 +164,8 @@ for (t in 1:(m-1)){
       }
   CGAMMA[[t]] <- cgamma
   }
-    
-    
+
+
 #Definition of c0 gamma0
 PARAM <- list()
 for (t in 1:(m-1)){
