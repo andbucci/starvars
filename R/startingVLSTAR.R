@@ -149,7 +149,7 @@ ssq <- foreach(l = 1:(n.combi*n.combi), .errorhandling='pass', .combine = rbind,
       return(SSQ)
 }
 close(pb)
-
+stopCluster(cl)
 #c and gamma minimazing the sum of squared residuals for each equation
 
 cgamma <- matrix(nrow = ny, ncol = 2)

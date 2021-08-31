@@ -13,5 +13,5 @@ License: GPL
 Encoding: UTF-8
 LazyData: true
 Depends: R (>= 4.0)
-Imports:  MASS, ks, zoo, data.table, doParallel, doSNOW, dplyr, foreach, methods, matrixcalc, optimParallel, parallel, vars, maxLik, fGarch, lubridate, xts, lessR, quantmod
+Imports:  MASS, ks, zoo, data.table, doSNOW, dplyr, foreach, methods, matrixcalc, optimParallel, parallel, vars, maxLik, fGarch, lubridate, xts, lessR, quantmod
 URL: https://github.com/andbucci/starvars

@@ -28,8 +28,6 @@ S3method(print, vlstarpred)
 
 importFrom("data.table", "rbindlist")
 
-importFrom("doParallel",  "registerDoParallel")
-
 importFrom("doSNOW", "registerDoSNOW")
 
 importFrom("dplyr", "if_else")
@@ -57,7 +55,7 @@ importFrom("methods", "is")
 
 importFrom("optimParallel", "optimParallel")
 
-importFrom("parallel", "makeCluster", "setDefaultCluster")
+importFrom("parallel", "makeCluster", "setDefaultCluster", "stopCluster")
 
 importFrom("quantmod", "dailyReturn", "monthlyReturn", "yearlyReturn")
 
