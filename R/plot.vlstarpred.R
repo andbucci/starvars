@@ -63,6 +63,5 @@ plot.vlstarpred <- function(x, type = c('single', 'multiple'), names = NULL,
       plotprediction(x = x, name = ynames[i], main = main[i], col = col, lty = lty, lwd = lwd, ylab = ylab[i], xlab = xlab[i], ...)
     }
   }
-  dev.off()
 }
 

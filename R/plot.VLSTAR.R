@@ -1,6 +1,11 @@
 #'@S3method predict VLSTAR
 
-plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.pacf = NULL, main.logi = NULL, ylim.fit = NULL, ylim.resid = NULL, lty.fit = NULL, lty.resid = NULL, lty.logi = NULL, lwd.fit = NULL, lwd.resid = NULL, lwd.logi = NULL, lag.acf = NULL, lag.pacf = NULL, col.fit = NULL, col.resid = NULL, col.logi = NULL,  ylab.fit = NULL, ylab.resid = NULL, ylab.acf = NULL, ylab.pacf = NULL, ylab.logi = NULL, xlab.fit = NULL, xlab.resid = NULL, xlab.logi = NULL, mar = par("mar"), oma = par("oma"), adj.mtext = NA, padj.mtext = NA, col.mtext = NA,...){
+plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.pacf = NULL,
+                        main.logi = NULL, ylim.fit = NULL, ylim.resid = NULL, lty.fit = NULL, lty.resid = NULL,
+                        lty.logi = NULL, lwd.fit = NULL, lwd.resid = NULL, lwd.logi = NULL, lag.acf = NULL, lag.pacf = NULL,
+                        col.fit = NULL, col.resid = NULL, col.logi = NULL,  ylab.fit = NULL, ylab.resid = NULL, ylab.acf = NULL,
+                        ylab.pacf = NULL, ylab.logi = NULL, xlab.fit = NULL, xlab.resid = NULL, xlab.logi = NULL, mar = par("mar"),
+                        oma = par("oma"), adj.mtext = NA, padj.mtext = NA, col.mtext = NA,...){
   op <- par(no.readonly = TRUE)
   on.exit(par(op))
   object <- x
@@ -37,8 +42,6 @@ plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.
   if(x$singlecgamma == FALSE){
     colnames(logistic) <- ynames
   }
-
-
   ifelse(is.null(main.fit), main.fit <- paste("Diagram of fit and residuals for", names), main.fit <- rep(main.fit, nv)[1:nv])
   ifelse(is.null(main.acf), main.acf <- rep("ACF Residuals", nv), main.acf <- rep(main.acf, nv)[1:nv])
   ifelse(is.null(main.pacf), main.pacf <- rep("PACF Residuals", nv), main.pacf <- rep(main.pacf, nv)[1:nv])
@@ -67,24 +70,23 @@ plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.
                       ylab.acf, ylab.pacf, xlab.fit, xlab.resid, xlab.logi, adj.mtext, padj.mtext, col.mtext, ...){
     ifelse(is.null(ylim.fit), ylim.fit <- c(min(c(y, fitted)), max(c(y, fitted))), ylim.fit <- ylim.fit)
     ifelse(is.null(ylim.resid), ylim.resid <- c(min(resids), max(resids)), ylim.resid <- ylim.resid)
-    layout(matrix(c(1, 1, 2, 2, 3, 4, 5, 5), nrow = 4, ncol = 2, byrow = TRUE), heights = c(lcm(2), lcm(2), lcm(5), lcm(3)))
-    par(oma = c(6, 0, 3, 0), mar = c(0, 5.1, 0, 2.1))
+    layout(matrix(c(1, 1, 2, 2, 3, 4, 5, 5), nrow = 4, ncol = 2, byrow = TRUE), heights = c(0.5,0.5,0.5,0.5))
+    par(oma = c(0,2,1.2,0.5), mar = c(2.5, 0, 0, 0),lheight=.1)
     plot.ts(y, main = "", ylim = ylim.fit, ylab = ylab.fit, xlab = xlab.fit, lty = lty.fit[1], lwd = lwd.fit[1], col = col.fit[1], axes = FALSE)
     lines(fitted, col = col.fit[2], lty = lty.fit[2], lwd = lwd.fit[2])
     box()
     axis(2, pretty(c(y, fitted))[-1])
-    mtext(main.fit, side = 3, line = 3, adj = adj.mtext, padj = padj.mtext, col = col.mtext, ...)
+    mtext(main.fit, side = 3, line = 0.2, cex = 0.75, adj = adj.mtext, padj = padj.mtext, col = col.mtext, ...)
     plot.ts(resids, main = "",  ylim = ylim.resid, ylab = ylab.resid, xlab = xlab.resid, lty = lty.resid[1], lwd = lwd.resid[1], col = col.resid[1])
     axis(1,at=NULL, labels=F)
     abline(h = 0, col = col.resid[2], lty = lty.resid[2], lwd = lwd.resid[2])
-    par(mar=c(2, 5.1, 5, 2.1))
-    acf(resids, main = main.acf, ylab = ylab.acf, lag.max = lag.acf, ...)
-    pacf(resids, main = main.pacf, ylab = ylab.pacf, lag.max = lag.pacf, ...)
-    par(mar = c(0, 5.1, 3, 2.1))
+    par(mar=c(2, 1, 4, 1.1))
+    acf(resids, main = main.acf, ylab = ylab.acf, lag.max = lag.acf, cex.main = 0.75, ...)
+    pacf(resids, main = main.pacf, ylab = ylab.pacf, lag.max = lag.pacf, cex.main = 0.75, ...)
+    par(mar = c(3, 2.1, 2, 1.1))
     plot(1:length(logistic),logistic, main = main.logi, ylim = c(0,1), ylab = ylab.logi, xlab = xlab.logi, lty = lty.logi[1], lwd = lwd.logi[1], col = col.logi[1], axes = T)
-    }
-  par(mar = mar, oma = oma)
-  dev.new()
+  }
+  #par(mar = mar, oma = oma)
   for (i in 1:nv) {
     if(x$singlecgamma == TRUE){
       plotest(y = y[, names[i]], fitted = fitted[, names[i]], resids = resids[, names[i]], logistic = logistic, main.fit = main.fit[i], main.acf = main.acf[i], main.pacf = main.pacf[i], main.logi = main.logi[i], ylab.fit = ylab.fit[i], ylab.resid = ylab.resid[i], ylab.acf = ylab.acf[i], ylab.pacf = ylab.pacf[i], ylab.logi = ylab.logi[i], xlab.fit = xlab.fit[i], xlab.resid = xlab.resid[i], xlab.logi = xlab.logi[i], adj.mtext = adj.mtext, padj.mtext = padj.mtext, col.mtext = col.mtext)
@@ -93,5 +95,4 @@ plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.
     }
     if (nv > 1) par(ask = TRUE)
   }
-  dev.off()
 }
