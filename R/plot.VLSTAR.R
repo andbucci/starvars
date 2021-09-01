@@ -84,6 +84,7 @@ plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.
     plot(1:length(logistic),logistic, main = main.logi, ylim = c(0,1), ylab = ylab.logi, xlab = xlab.logi, lty = lty.logi[1], lwd = lwd.logi[1], col = col.logi[1], axes = T)
     }
   par(mar = mar, oma = oma)
+  dev.new()
   for (i in 1:nv) {
     if(x$singlecgamma == TRUE){
       plotest(y = y[, names[i]], fitted = fitted[, names[i]], resids = resids[, names[i]], logistic = logistic, main.fit = main.fit[i], main.acf = main.acf[i], main.pacf = main.pacf[i], main.logi = main.logi[i], ylab.fit = ylab.fit[i], ylab.resid = ylab.resid[i], ylab.acf = ylab.acf[i], ylab.pacf = ylab.pacf[i], ylab.logi = ylab.logi[i], xlab.fit = xlab.fit[i], xlab.resid = xlab.resid[i], xlab.logi = xlab.logi[i], adj.mtext = adj.mtext, padj.mtext = padj.mtext, col.mtext = col.mtext)
@@ -92,4 +93,5 @@ plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.
     }
     if (nv > 1) par(ask = TRUE)
   }
+  dev.off()
 }
