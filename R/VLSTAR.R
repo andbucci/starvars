@@ -4,12 +4,13 @@ VLSTAR <- function(y, exo = NULL, p = 1,
                    singlecgamma = FALSE,
                    epsilon = 10^(-3), ncores = NULL){
   chk <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
-  if (nzchar(chk) && chk == "TRUE") {
+  if(is.null(ncores)){
+    if (nzchar(chk) && chk == "TRUE") {
     # use 2 cores in CRAN/Travis/AppVeyor
     ncores <- 2L
   } else {
     ncores <- parallel::detectCores()
-  }
+  }}
   y <- as.matrix(y)
   x <- exo
   method <- match.arg(method)
@@ -214,7 +215,7 @@ if(method == 'ML'){
       cl <- makeCluster(ncores)     # set the number of processor cores
       setDefaultCluster(cl=cl)
       param1 <- optimParallel(par = as.vector(param), fn = loglike, lower = c(low1, apply(y, 2, min)),
-                      data = data, parallel = list(cl = cl, forward = FALSE, loginfo = TRUE))
+                      data = data, parallel = list(cl = cl, forward = FALSE, loginfo = FALSE))
       stopCluster(cl)
       cgam1 <- matrix(param1$par, ncol = 2, nrow = (ny*(m-1)))
 
@@ -334,7 +335,7 @@ if(method == 'ML'){
       cl <- makeCluster(ncores)     # set the number of processor cores
       setDefaultCluster(cl=cl)
       param1 <- optimParallel(par = as.vector(param), fn = ssq1, lower = c(low1, apply(y, 2, min)),
-                      data = data, parallel = list(cl = cl, forward = FALSE, loginfo = TRUE))
+                      data = data, parallel = list(cl = cl, forward = FALSE, loginfo = FALSE))
       stopCluster(cl)
       cgam1 <- matrix(param1$par, ncol = 2L, nrow = (ny*(m-1)))
 
