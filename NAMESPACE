@@ -53,7 +53,7 @@ importFrom("methods", "is")
 
 importFrom("optimParallel", "optimParallel")
 
-importFrom("parallel", "makeCluster", "setDefaultCluster", "stopCluster")
+importFrom("parallel", "detectCores", "makeCluster", "setDefaultCluster", "stopCluster")
 
 importFrom("quantmod", "dailyReturn", "monthlyReturn", "yearlyReturn")
 

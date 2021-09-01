@@ -2,7 +2,15 @@ VLSTAR <- function(y, exo = NULL, p = 1,
                    m = 2, st = NULL, constant = TRUE, starting = NULL,
                    method = c('ML', 'NLS'), n.iter = 500,
                    singlecgamma = FALSE,
-                   epsilon = 10^(-3), ncores = 2){
+                   epsilon = 10^(-3), ncores = NULL){
+  chk <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
+  if (nzchar(chk) && chk == "TRUE") {
+    # use 2 cores in CRAN/Travis/AppVeyor
+    ncores <- 2L
+  } else {
+    # use all cores in devtools::test()
+    ncores <- parallel::detectCores()
+  }
   y <- as.matrix(y)
   x <- exo
   method <- match.arg(method)

@@ -13,7 +13,7 @@ This function allows the user to estimate the coefficients of a VLSTAR model wit
 VLSTAR(y, exo = NULL, p = 1, m = 2, st = NULL, constant = TRUE,
        starting = NULL, method = c('ML', 'NLS'),
         n.iter = 500, singlecgamma = FALSE,
-        epsilon = 10^(-3), ncores = 2)
+        epsilon = 10^(-3), ncores = NULL)
 
 }
 \value{
@@ -69,7 +69,7 @@ An object of class \code{VLSTAR}, with standard methods.
 }
 
   \item{ncores}{
-  Number of cores used for parallel computation. Set to 2 by default
+  Number of cores used for parallel computation. Set to NULL by default and automatically calculated.
 %%     ~~Describe \code{n.combi} here~~
 }
 
