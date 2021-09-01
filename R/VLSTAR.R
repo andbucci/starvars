@@ -8,7 +8,6 @@ VLSTAR <- function(y, exo = NULL, p = 1,
     # use 2 cores in CRAN/Travis/AppVeyor
     ncores <- 2L
   } else {
-    # use all cores in devtools::test()
     ncores <- parallel::detectCores()
   }
   y <- as.matrix(y)
@@ -215,7 +214,7 @@ if(method == 'ML'){
       cl <- makeCluster(ncores)     # set the number of processor cores
       setDefaultCluster(cl=cl)
       param1 <- optimParallel(par = as.vector(param), fn = loglike, lower = c(low1, apply(y, 2, min)),
-                      data = data, parallel = list(cl = cl, forward = FALSE, loginfo = FALSE))
+                      data = data, parallel = list(cl = cl, forward = FALSE, loginfo = TRUE))
       stopCluster(cl)
       cgam1 <- matrix(param1$par, ncol = 2, nrow = (ny*(m-1)))
 
@@ -335,7 +334,7 @@ if(method == 'ML'){
       cl <- makeCluster(ncores)     # set the number of processor cores
       setDefaultCluster(cl=cl)
       param1 <- optimParallel(par = as.vector(param), fn = ssq1, lower = c(low1, apply(y, 2, min)),
-                      data = data, parallel = list(cl = cl, forward = FALSE, loginfo = FALSE))
+                      data = data, parallel = list(cl = cl, forward = FALSE, loginfo = TRUE))
       stopCluster(cl)
       cgam1 <- matrix(param1$par, ncol = 2L, nrow = (ny*(m-1)))
 
