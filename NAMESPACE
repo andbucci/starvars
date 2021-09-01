@@ -20,8 +20,6 @@ S3method(plot, VLSTAR)
 
 S3method(predict, VLSTAR)
 
-S3method(print, VLSTAR)
-
 S3method(plot, vlstarpred)
 
 S3method(print, vlstarpred)

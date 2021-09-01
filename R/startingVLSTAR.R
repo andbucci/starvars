@@ -107,13 +107,7 @@ ssq <- foreach(l = 1:(n.combi*n.combi), .errorhandling='pass', .combine = rbind,
       glog <- matrix(ncol=ny, nrow = nrowy)
       GT <- list()
       Gtilde <- list()
-      GG <- list()
-      XX <- list()
-      GGXX <- list()
-      XY <- list()
-      XYG <- list()
       kro <- list()
-      ggxx <- matrix(ncol = (q+ncoly)*m*ncoly, nrow = (q+ncoly)*m*ncoly)
       for (i in 1:nrowx){
         for(t in 1:(m-1)){
           for (j in 1 : ny){
@@ -127,14 +121,8 @@ ssq <- foreach(l = 1:(n.combi*n.combi), .errorhandling='pass', .combine = rbind,
           GT[[t]] <- Gt
         }
         Gtilde[[i]] <- t(cbind(In, do.call(cbind,GT)))
-        GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
-        XX[[i]] <- x[i,] %*%t(x[i,])
-        GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
-        XY[[i]] <- x[i, ]%*%t(y[i,])
-        XYG[[i]] <- matrixcalc::vec(XY[[i]]%*%t(Gtilde[[i]]))
         kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
       }
-      ggxx <- Reduce(`+`, GGXX)/nrowx
       M <- t(do.call("cbind", kro))
       Y <- matrixcalc::vec(t(y))
       Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y

@@ -94,13 +94,7 @@ VLSTAR <- function(y, exo = NULL, p = 1,
   glog <- matrix(ncol=ny, nrow = nrowy)
   GT <- list()
   Gtilde <- list()
-  GG <- list()
-  XX <- list()
-  GGXX <- list()
-  XY <- list()
-  XYG <- list()
   kro <- list()
-  ggxx <- matrix(ncol = (q+ncoly)*m*ncoly, nrow = (q+ncoly)*m*ncoly)
   for (i in 1:nrowx){
     for (t in 1:(m-1)){
       for (j in 1 : ny){
@@ -114,14 +108,8 @@ VLSTAR <- function(y, exo = NULL, p = 1,
       GT[[t]] <- Gt
     }
     Gtilde[[i]] <- t(cbind(In, do.call(cbind,GT)))
-    GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
-    XX[[i]] <- x[i,] %*%t(x[i,])
-    GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
-    XY[[i]] <- x[i, ]%*%t(y[i,])
-    XYG[[i]] <- vec(XY[[i]]%*%t(Gtilde[[i]]))
     kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
   }
-  ggxx <- Reduce(`+`, GGXX)/nrowx
   M <- t(do.call("cbind", kro))
   Y <- vec(t(y))
   Bhat <- ginv(t(M)%*%M)%*%t(M)%*%Y
@@ -143,7 +131,6 @@ VLSTAR <- function(y, exo = NULL, p = 1,
   ll0 <- 10^(4)
   epsi <- epsilon ##Value used as convergence check
   loglik1 <- NULL
-  bbhat <- list()
   omega <- list()
   PARAM1 <- list()
   for(t in 1:(m-1)){
@@ -228,13 +215,10 @@ if(method == 'ML'){
       glog <- matrix(ncol=ny, nrow = nrowy)
       GT <- list()
       Gtilde <- list()
-      GG <- list()
       XX <- list()
-      XY <- list()
       XYOG <- list()
       kro <- list()
       PsiOmegaPsi <- list()
-      ggxx <- matrix(ncol = (q+ncoly)*m*ncoly, nrow = (q+ncoly)*m*ncoly)
       for (i in 1:nrowx){
         for(t in 1:(m-1)){
           for (j in 1 : ny){
@@ -248,10 +232,8 @@ if(method == 'ML'){
           GT[[t]] <- Gt
         }
         Gtilde[[i]] <- t(cbind(In, do.call(cbind,GT)))
-        GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
         XX[[i]] <- x[i,] %*%t(x[i,])
-        XY[[i]] <- x[i, ]%*%t(y[i,])
-        XYOG[[i]] <- vec(XY[[i]]%*%ginv(Omegahat)%*%t(Gtilde[[i]]))
+        XYOG[[i]] <- vec((x[i, ]%*%t(y[i,]))%*%ginv(Omegahat)%*%t(Gtilde[[i]]))
         PsiOmegaPsi[[i]] <- Gtilde[[i]]%*%ginv(Omegahat)%*%t(Gtilde[[i]])
         kro[[i]] <- kronecker(PsiOmegaPsi[[i]], XX[[i]])
       }
@@ -278,8 +260,8 @@ if(method == 'ML'){
       err <- abs(ll1 - ll0)
       ll0 <- ll1
       loglik1[iter] <- ll1
-      bbhat[[iter]] <- BB
-      omega[[iter]] <- Omegahat
+      # bbhat <- BB
+      # omega <- Omegahat
 
       message(paste("iteration", iter, "complete\n"))
 
@@ -353,13 +335,7 @@ if(method == 'ML'){
       glog <- matrix(ncol=ny, nrow = nrowy)
       GT <- list()
       Gtilde <- list()
-      GG <- list()
-      XX <- list()
-      XY <- list()
-      XYOG <- list()
       kro <- list()
-      PsiOmegaPsi <- list()
-      ggxx <- matrix(ncol = (q+ncoly)*m*ncoly, nrow = (q+ncoly)*m*ncoly)
       for (i in 1:nrowx){
         for(t in 1:(m-1)){
           for (j in 1 : ny){
@@ -373,14 +349,8 @@ if(method == 'ML'){
           GT[[t]] <- Gt
         }
         Gtilde[[i]] <- t(cbind(In, do.call(cbind,GT)))
-        GG[[i]] <- Gtilde[[i]]%*%t(Gtilde[[i]])
-        XX[[i]] <- x[i,] %*%t(x[i,])
-        GGXX[[i]] <- kronecker(GG[[i]], XX[[i]])
-        XY[[i]] <- x[i, ]%*%t(y[i,])
-        XYG[[i]] <- vec(XY[[i]]%*%t(Gtilde[[i]]))
         kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
       }
-      ggxx <- Reduce(`+`, GGXX)/nrowx
       M <- t(do.call("cbind", kro))
       Y <- vec(t(y))
       Bhat <- ginv(t(M)%*%M)%*%t(M)%*%Y
@@ -407,8 +377,8 @@ if(method == 'ML'){
       err <- abs(ll1 - ll0)
       ll0 <- ll1
       loglik1[iter] <- ll1
-      bbhat[[iter]] <- BB
-      omega[[iter]] <- Omegahat
+      # bbhat <- BB
+      # omega <- Omegahat
 
       message(paste("iteration", iter, "complete\n"))
 
@@ -424,12 +394,12 @@ if(method == 'ML'){
 
     #Calculating residuals and estimating standard errors
     residuals1 <- t(do.call("cbind", resi))
-    varhat <- diag(omega[[iter]])
-    bb1 <- bbhat[[iter]][,1:ncoly]
+    varhat <- diag(Omegahat)
+    bb1 <- BB[,1:ncoly]
     bb2 <- list()
     for(t in 1:(m-1)){
-      bb2[[t]] <- as.data.frame(bbhat[[iter]][,(ncoly*(t-1)+1):(ncoly*t)] +
-                                  bbhat[[iter]][,(ncoly*(t)+1):(ncoly*(t+1))])
+      bb2[[t]] <- as.data.frame(BB[,(ncoly*(t-1)+1):(ncoly*t)] +
+                                  BB[,(ncoly*(t)+1):(ncoly*(t+1))])
     }
     bb4 <- as.matrix(rbindlist(bb2))
     BBhat <- rbind(bb1, bb4) ##Estimates of the coefficients
@@ -462,7 +432,7 @@ if(method == 'ML'){
 
     ##Calculating univariate log-likelihoods, AIC and BIC criteria
     residui <- residuals1
-    omega1 <- diag(omega[[iter]])
+    omega1 <- diag(Omegahat)
     k <- nrow(BBhat)
     ll2 <- NULL
     AIC1 <- NULL
@@ -481,7 +451,7 @@ if(method == 'ML'){
     colnames(BBhat) <- colnames(y)
     modeldata <- list(y, x)
     fitte <- fitte[!is.na(fitte[,1]),]
-    results <- list(BBhat, covbb, ttest, pval, cgam1, omega[[iter]], fitte, residuals1, ll1, ll2, AIC1, BIC1, Gtilde, modeldata, BB, m, p,
+    results <- list(BBhat, covbb, ttest, pval, cgam1, Omegahat, fitte, residuals1, ll1, ll2, AIC1, BIC1, Gtilde, modeldata, BB, m, p,
                     st, y, exo, constant, method, singlecgamma)
     names(results) <- c('Bhat','StDev', 'ttest', 'pval', 'Gammac', 'Omega', 'fitted', 'residuals', 'MultiLL', 'LL', 'AIC',
                         'BIC', 'Gtilde', 'Data', 'B', 'm', 'p', 'st', 'yoriginal', 'exo', 'constant', 'method', 'singlecgamma')
