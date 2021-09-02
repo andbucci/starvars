@@ -258,8 +258,6 @@ if(method == 'ML'){
 
       if (err<epsi | iter == n.iter) message('Converged\n')}
   } else{
-    #NLS Estimation of Bhat and Omegahat to be used in the first iteration of minimizing Qt
-
     message('NLS estimation\n')
 
     #Inizialization of iter
