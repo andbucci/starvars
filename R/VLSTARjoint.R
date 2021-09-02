@@ -1,3 +1,4 @@
+#' @export
 VLSTARjoint <- function(y, exo = NULL, st, st.choice = FALSE, alpha = 0.05){
   y <- as.matrix(y)
   ncoly <- ncol(y)

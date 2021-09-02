@@ -1,5 +1,8 @@
 exportPattern("^[[:alpha:]]+")
 
+export(VLSTAR, startingVLSTAR, lrvarbart, rcov, VLSTARjoint, multiCUMSUM)
+exportClasses(VLSTAR, VLSTARjoint, startingVLSTAR)
+
 S3method(print, VLSTAR)
 
 S3method(print, summary.VLSTAR)

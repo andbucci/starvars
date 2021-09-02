@@ -1,3 +1,4 @@
+#' @export
 startingVLSTAR <- function(y, exo = NULL, p = 1,
                    m = 2, st = NULL, constant = TRUE,
                    n.combi = NULL, ncores = 2,

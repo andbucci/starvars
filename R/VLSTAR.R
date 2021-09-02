@@ -1,3 +1,4 @@
+#' @export
 VLSTAR <- function(y, exo = NULL, p = 1,
                    m = 2, st = NULL, constant = TRUE, starting = NULL,
                    method = c('ML', 'NLS'), n.iter = 500,
