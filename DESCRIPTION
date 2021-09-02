@@ -1,7 +1,7 @@
 Package: starvars
 Type: Package
 Title: Vector Logistic Smooth Transition Models / Realized Covariances Construction
-Version: 1.1.4
+Version: 1.1.5
 Authors@R: c(
   person("Andrea", "Bucci", email = "andrea.bucci@unich.it", role = c("aut", "cre", "cph")),
   person("Giulio", "Palomba", role = "aut"),

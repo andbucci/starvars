@@ -1,5 +1,7 @@
 exportPattern("^[[:alpha:]]+")
 
+export(VLSTAR)
+
 S3method(print, VLSTAR)
 
 S3method(print, summary.VLSTAR)
