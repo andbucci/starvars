@@ -150,44 +150,29 @@ VLSTAR <- function(y, exo = NULL, p = 1,
 
   #Log-likelihood to be optimized in the ML method and used to check convergence in both methods
   loglike <- function(param, data){
-    m = data$m
     y = data$y
-    x = data$x
-    st = data$st
-    BB = data$BB
     Omegahat = data$Omegahat
-    ncoly = ncol(y)
-    nrowy = nrow(y)
-    singlecgamma = data$singlecgamma
-    gamma <- param[1:((m-1)*ncoly)]
-    c <- param[(ncoly*(m-1)+1):length(param)]
-    gamma1 <- matrix(gamma, ncol = (m-1))
-    c1 <- matrix(c, ncol = (m-1))
-    glog <- matrix(ncol=ncoly, nrow = nrowy)
+    gamma <- param[1:((data$m-1)*ncol(y))]
+    c <- param[(ncol(y)*(data$m-1)+1):length(param)]
+    glog <- rep(0, ncol(y))
     GT <- list()
     Gtilde <- list()
     dify <- matrix(ncol = 1, nrow = nrow(y))
-    ncoly <- dim(y)[2]
-    In <- diag(ncoly)
-
     for (z in 1:nrow(y)){
-      for(t in 1:(m-1)){
-        for (o in 1:ncoly){
-          gammao <- gamma[o]
-          co <- c[o]
-          glog[z,o] <- (1L+exp(-gammao*(st[z]-co)))^(-1)}
-        if(singlecgamma == TRUE){
-          Gt <- diag(rep(glog[z,1], ncoly))
+      for(t in 1:(data$m-1)){
+        for (o in 1:ncol(y)){
+          glog[o] <- (1L+exp(-gamma[o]*(data$st[z]-c[o])))^(-1)}
+        if(data$singlecgamma == TRUE){
+          GT[[t]] <- diag(rep(glog[1], ncol(y)))
         }else{
-          Gt <- diag(glog[z,])
+          GT[[t]] <- diag(glog)
         }
-        GT[[t]] <- Gt
       }
-      Gtilde[[z]] <- t(cbind(In, do.call(cbind,GT)))
-      dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%MASS::ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
+      Gtilde[[z]] <- t(cbind(diag(ncol(y)), do.call(cbind,GT)))
+      dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(data$BB)%*%data$x[z,])%*%MASS::ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(data$BB)%*%data$x[z,])
     }
     sumdif <- sum(dify)
-    logll <- -(nrowy*log(det(Omegahat))/2L) - sumdif/2L  - (nrowy*ncoly/2L)*log(2L*pi)##Normal distribution assumed
+    logll <- -(nrow(y)*log(det(Omegahat))/2L) - sumdif/2L  - (nrow(y)*ncol(y)/2L)*log(2L*pi)##Normal distribution assumed
     return(-logll)
   }
 
@@ -197,6 +182,8 @@ loglike2 <- function(y, resid1, omega){
     return(logll)
 }
 ##Actual iteration to estimate the coefficients
+cl <- makeCluster(ncores)     # set the number of processor cores
+setDefaultCluster(cl=cl)
 if(method == 'ML'){
     #NLS Estimation of Bhat and Omegahat to be used in the first iteration of maximum likelihood
   message('Maximum likelihood estimation\n')
@@ -212,15 +199,12 @@ if(method == 'ML'){
       #Parameters
       low1 <- replicate(ncoly, 0)
       #1.Maximum likelihood estimation of gamma and c
-      cl <- makeCluster(ncores)     # set the number of processor cores
-      setDefaultCluster(cl=cl)
       param1 <- optimParallel(par = as.vector(param), fn = loglike, lower = c(low1, apply(y, 2, min)),
                       data = data, parallel = list(cl = cl, forward = FALSE, loginfo = FALSE))
-      stopCluster(cl)
       cgam1 <- matrix(param1$par, ncol = 2, nrow = (ny*(m-1)))
 
       #2.Maximum likelihood estimation of Bhat with new values of gamma and c
-      glog <- matrix(ncol=ny, nrow = nrowy)
+      glog <- rep(0, ncol(y))
       GT <- list()
       Gtilde <- list()
       XX <- list()
@@ -230,14 +214,13 @@ if(method == 'ML'){
       for (i in 1:nrowx){
         for(t in 1:(m-1)){
           for (j in 1 : ny){
-            glog[i,j] <- (1+exp(-cgam1[j,1]*(st[i]-cgam1[j,2])))^(-1)
+            glog[j] <- (1+exp(-cgam1[j,1]*(st[i]-cgam1[j,2])))^(-1)
           }
           if(singlecgamma == TRUE){
-            Gt <- diag(rep(glog[i,1], ncoly))
+            GT[[t]] <- diag(rep(glog[1], ncoly))
           }else{
-            Gt <- diag(glog[i,])
+            GT[[t]] <- diag(glog)
           }
-          GT[[t]] <- Gt
         }
         Gtilde[[i]] <- t(cbind(In, do.call(cbind,GT)))
         XX[[i]] <- x[i,] %*%t(x[i,])
@@ -268,8 +251,6 @@ if(method == 'ML'){
       err <- abs(ll1 - ll0)
       ll0 <- ll1
       loglik1[iter] <- ll1
-      # bbhat <- BB
-      # omega <- Omegahat
 
       message(paste("iteration", iter, "complete\n"))
 
@@ -285,38 +266,26 @@ if(method == 'ML'){
     #Sum of squared error to be optimized
     ssq1 <- function(param, data){
       y <- data$y
-      ncoly = ncol(y)
-      nrowy = nrow(y)
-      m = data$m
-      BB = data$BB
-      x = data$x
-      st = data$st
-      singlecgamma = data$singlecgamma
-      gamma <- param[1:((m-1)*ncoly)]
-      c <- param[(ncoly*(m-1)+1):length(param)]
-      gamma1 <- matrix(gamma, ncol = (m-1))
-      c1 <- matrix(c, ncol = (m-1))
-      glog <- matrix(ncol=ncoly, nrow = nrowy)
+      gamma <- param[1:((data$m-1)*ncol(y))]
+      c <- param[(ncol(y)*(data$m-1)+1):length(param)]
+      gamma1 <- matrix(gamma, ncol = (data$m-1))
+      c1 <- matrix(c, ncol = (data$m-1))
+      glog <- rep(0, ncol(y))
       GT <- list()
       Gtilde <- list()
-      dify <- matrix(ncol = 1, nrow = nrowy)
-      ncoly <- dim(y)[2]
-      In <- diag(ncoly)
+      dify <- matrix(ncol = 1, nrow = nrow(y))
       for (z in 1:nrow(y)){
-        for(t in 1:(m-1)){
-          for (o in 1:ncoly){
-            gammao <- gamma1[o,t]
-            co <- c1[o,t]
-            glog[z,o] <- (1L+exp(-gammao*(st[z]-co)))^(-1)}
-          if(singlecgamma == TRUE){
-            Gt <- diag(rep(glog[z,1], ncoly))
+        for(t in 1:(data$m-1)){
+          for (o in 1:ncol(y)){
+            glog[o] <- (1L+exp(-gamma1[o,t]*(data$st[z]-c1[o,t])))^(-1)}
+          if(data$singlecgamma == TRUE){
+            GT[[t]] <- diag(rep(glog[1], ncol(y)))
           }else{
-            Gt <- diag(glog[z,])
+            GT[[t]] <- diag(glog)
           }
-          GT[[t]] <- Gt
         }
-        Gtilde[[z]] <- t(cbind(In, do.call(cbind,GT)))
-        dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])%*%(y[z, ] - t(Gtilde[[z]])%*%t(BB)%*%x[z,])
+        Gtilde[[z]] <- t(cbind(diag(ncol(y)), do.call(cbind,GT)))
+        dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(data$BB)%*%data$x[z,])%*%(y[z, ] - t(Gtilde[[z]])%*%t(data$BB)%*%data$x[z,])
       }
       sumdif <- sum(dify)
       return(sumdif)
@@ -332,36 +301,30 @@ if(method == 'ML'){
       #Parameters
       low1 <- replicate(ny, 0)
       #1.Maximum likelihood estimation of gamma and c
-      cl <- makeCluster(ncores)     # set the number of processor cores
-      setDefaultCluster(cl=cl)
       param1 <- optimParallel(par = as.vector(param), fn = ssq1, lower = c(low1, apply(y, 2, min)),
                       data = data, parallel = list(cl = cl, forward = FALSE, loginfo = FALSE))
-      stopCluster(cl)
       cgam1 <- matrix(param1$par, ncol = 2L, nrow = (ny*(m-1)))
 
       #2.NLS estimation of Bhat with new values of gamma and c
-      glog <- matrix(ncol=ny, nrow = nrowy)
+      glog <- rep(0, ncol(y))
       GT <- list()
       Gtilde <- list()
       kro <- list()
       for (i in 1:nrowx){
         for(t in 1:(m-1)){
           for (j in 1 : ny){
-            glog[i,j] <- (1+exp(-cgam1[((t-1)*ny + j),1]*(st[i]-cgam1[((t-1)*ny + j),2])))^(-1)
+            glog[j] <- (1+exp(-cgam1[((t-1)*ny + j),1]*(st[i]-cgam1[((t-1)*ny + j),2])))^(-1)
           }
           if(singlecgamma == TRUE){
-            Gt <- diag(rep(glog[i,1], ncoly))
+            GT[[t]] <- diag(rep(glog[1], ncoly))
           }else{
-            Gt <- diag(glog[i,])
+            GT[[t]] <- diag(glog)
           }
-          GT[[t]] <- Gt
         }
         Gtilde[[i]] <- t(cbind(In, do.call(cbind,GT)))
         kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
       }
-      M <- t(do.call("cbind", kro))
-      Y <- vec(t(y))
-      Bhat <- ginv(t(M)%*%M)%*%t(M)%*%Y
+      Bhat <- ginv(t(t(do.call("cbind", kro)))%*%(t(do.call("cbind", kro))))%*%t(t(do.call("cbind", kro)))%*%(vec(t(y)))
       BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
       resi <- list()
       resiresi <- list()
@@ -385,8 +348,6 @@ if(method == 'ML'){
       err <- abs(ll1 - ll0)
       ll0 <- ll1
       loglik1[iter] <- ll1
-      # bbhat <- BB
-      # omega <- Omegahat
 
       message(paste("iteration", iter, "complete\n"))
 
@@ -399,6 +360,7 @@ if(method == 'ML'){
 
       if (err<epsi | iter == n.iter) message('Converged\n')}
   }
+stopCluster(cl)
 
     #Calculating residuals and estimating standard errors
     residuals1 <- t(do.call("cbind", resi))
