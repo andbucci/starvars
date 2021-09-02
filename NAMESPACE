@@ -46,7 +46,7 @@ importFrom("lessR", "to")
 
 importFrom("lubridate", "year")
 
-importFrom("MASS", "ginv")
+#importFrom("MASS", "ginv")
 
 importFrom("matrixcalc", "matrix.trace", "vec", "vech")
 
