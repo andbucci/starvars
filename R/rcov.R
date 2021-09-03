@@ -1,3 +1,32 @@
+#' Realized Covariance
+#'
+#' Function returns the vectorization of the lowest triangular of the Realized Covariance matrices for different frequencies.
+#' @param data a \code{(T x N)} \code{xts} object containing the \code{N} price/return series over period \code{T}
+#' @param freq a string defining the desired frequency for the Realized Covariance matrices between "daily", "monthly", "quarterly" or "yearly"
+#' @param make.ret boolean, in case it is \code{TRUE} the data are converted in returns, \code{FALSE} otherwise
+#' @param cholesky boolean, in case it is \code{TRUE} the Cholesky factors of the Realized Covariance matrices are calculated, \code{FALSE} by default
+#' @return
+#' \item{Realized Covariances}{a \eqn{M \times N(N+1)/2} matrix of realized covariances, where \emph{M} is the number of lower frequency data}
+#' \item{Cholesky Factors (optional)}{a \eqn{M \times N(N+1)/2} matrix of Cholesky factors of the realized
+#' covariance matrices, where \emph{M} is the number of lower frequency data}
+#' \item{returns (optional)}{a \eqn{T \times N} matrix of returns, when \code{make.ret = TRUE}}
+#' @references Andersen T.G., Bollerslev T., Diebold F.X. and Labys P. (2003), Modeling and Forecasting Realized Volatility. \emph{Econometrica}. 71: 579-625
+#'
+#' Barndorff-Nielsen O.E. and Shephard  N. (2002), Econometric analysis of realised volatility and its use in estimating stochastic volatility models \emph{Journal of the Royal Statistical Society}. 64(2): 253-280
+#' @author Andrea Bucci
+#' @importFrom methods is
+#' @importFrom zoo as.yearqtr
+#' @importFrom xts xts apply.daily apply.monthly apply.quarterly apply.yearly
+#' @importFrom lubridate year
+#' @importFrom quantmod dailyReturn monthlyReturn yearlyReturn
+#' @importFrom ks invvech
+#' @export
+#' @keywords RCOV
+#' @examples
+#' data(Sample5minutes)
+#' rc <- rcov(Sample5minutes, freq = 'daily', cholesky = TRUE, make.ret = TRUE)
+#' print(rc)
+#'
 rcov <- function(data, freq = c('daily', 'monthly', 'quarterly', 'yearly'), make.ret = TRUE, cholesky = FALSE){
 freq <- match.arg(freq)
   if(is(data, 'xts') == FALSE){

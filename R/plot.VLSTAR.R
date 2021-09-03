@@ -1,4 +1,52 @@
-#'@S3method predict VLSTAR
+#' Plot methods for a VLSTAR object
+#'
+#' Plot method for objects with class attribute \code{VLSTAR}.
+#'
+#' When the \code{plot} function is applied to a \code{VLSTAR} object, the values of the logistic function, given the estimated values of gamma and c through \code{VLSTAR}, are reported.
+#'
+#' @param adj.mtext Adjustment for \code{mtext()}.
+#' @param col.fit Character vector, colors for diagram of fit.
+#' @param col.logi Character vector, colors for logistic function plot.
+#' @param col.mtext Character, color for \code{mtext()}, only applicable.
+#' @param col.resid Character vector, colors for residual plot.
+#' @param lag.acf Integer, lag.max for ACF of residuals.
+#' @param lag.pacf Integer, lag.max for PACF of residuals.
+#' @param lty.fit Vector, lty for diagram of fit.
+#' @param lty.resid Vector, lty for residual plot.
+#' @param lty.logi Vector, lty for the plot of the logistic function.
+#' @param lwd.fit Vector, lwd for diagram of fit.
+#' @param lwd.logi Vector, lwd for the plot of the logistic function.
+#' @param lwd.resid Vector, lwd for residual plot.
+#' @param main Character vector, the titles of the plot.
+#' @param main.acf Character vector, main for residuals' ACF.
+#' @param main.fit Character vector, main for diagram of fit.
+#' @param main.pacf Character vector, main for residuals' PACF.
+#' @param main.logi Character vector, main for the plot of the logistic function.
+#' @param mar Setting of margins.
+#' @param names Character vector, the variables names to be plotted. If left \code{NULL}, all variables are plotted.
+#' @param oma Setting of outer margins.
+#' @param padj.mtext Adjustment for \code{mtext()}.
+#' @param x An object of class \sQuote{\code{VLSTAR}}.
+#' @param xlab Character vector signifying the labels for the x-axis.
+#' @param xlab.fit Character vector, xlab for diagram of fit.
+#' @param xlab.resid Character vector, xlab for residual plot.
+#' @param xlab.logi Character vector, xlab for the plot of the logistic function.
+#' @param ylab Character vector signifying the labels for the y-axis.
+#' @param ylab.acf Character, ylab for ACF.
+#' @param ylab.fit Character vector, ylab for diagram of fit.
+#' @param ylab.pacf Character, ylab for PACF
+#' @param ylab.resid Character vector, ylab for residual plot.
+#' @param ylab.logi Character vector, ylab for the plot of the logistic function.
+#' @param ylim Vector, the limits of the y-axis.
+#' @param ylim.fit Vector, ylim for diagram of fit.
+#' @param ylim.resid Vector, ylim for residual plot.
+#' @param \dots Passed to internal plot function.
+#' @importFrom stats fitted resid plot.ts quantile na.omit rnorm sd pacf pt qf qt symnum
+#' @importFrom graphics abline axis box layout lcm lines mtext par plot points
+#' @export
+#' @keywords VLSTAR
+#' @author Andrea Bucci
+#' @seealso \code{\link{VLSTAR}}
 
 plot.VLSTAR <- function(x, names = NULL, main.fit = NULL, main.acf = NULL, main.pacf = NULL,
                         main.logi = NULL, ylim.fit = NULL, ylim.resid = NULL, lty.fit = NULL, lty.resid = NULL,

@@ -1,4 +1,8 @@
-#Log-likelihood to be optimized in the ML method and used to check convergence in both methods
+#'Multivariate log-likelihood
+#'
+#'Log-likelihood to be optimized in the ML method and used to check convergence in both methods
+#'@keywords internal
+#'
 loglike <- function(param, data){
   y = data$y
   Omegahat = data$Omegahat
@@ -26,7 +30,11 @@ loglike <- function(param, data){
   return(-logll)
 }
 
-#Sum of squared error to be optimized in the NLS method
+#'Sum of squared error
+#'
+#'Sum of squared error to be optimized in the NLS method
+#'@keywords internal
+#'
 SSQ <- function(param, data){
   y <- data$y
   gamma <- param[1:((data$m-1)*ncol(y))]

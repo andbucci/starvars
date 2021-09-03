@@ -1,3 +1,20 @@
+#' Long-run variance using Bartlett kernel
+#'
+#' Function returns the long-run variance of a time series, relying on the Bartlett kernel.
+#' The window size of the kernel is the cube root of the sample size.
+#' @param x a \code{(T x 1)} vector containing the time series over period \code{T}
+#' @return
+#' \item{lrv}{long-run variance}
+#' \item{return}{bandwidth size of the window}
+#' @references Hamilton J. D. (1994), Time Series Analysis. \emph{Princeton University Press}; Tsay R.S. (2005), Analysis of Financial Time Series. \emph{John Wiley & SONS}
+#' @author Andrea Bucci
+#' @keywords VLSTAR
+#' @export
+#' @importFrom stats acf
+#' @examples
+#' data(Realized)
+#' lrvarbart(Realized[,1])
+#'
 lrvarbart <- function(x){
   x <- as.xts(x)
     N <- length(x)

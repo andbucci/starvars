@@ -1,4 +1,32 @@
-#'@S3method predict VLSTAR
+#' VLSTAR Prediction
+#'
+#' One-step or multi-step ahead forecasts, with interval forecast, of a VLSTAR object.
+#' @param object An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()}
+#' @param n.ahead An integer specifying the number of ahead predictions
+#' @param conf.lev Confidence level of the interval forecast
+#' @param st.new Vector of new data for the transition variable
+#' @param M An integer with the number of errors sampled for the \code{Monte Carlo} method
+#' @param B An integer with the number of errors sampled for the \code{bootstrap} method
+#' @param st.num An integer with the index of dependent variable if \code{st.new} is \code{NULL}
+#' and the transition variable is a lag of one of the dependent variables
+#' @param method A character identifying which multi-step ahead method should be used among \code{naive}, \code{Monte Carlo} and \code{bootstrap}
+#' @param newdata \code{data.frame} or \code{matrix} of new data for the exogenous variables
+#' @param \dots further arguments to be passed to and from other methods
+#' @return A \code{list} containing:
+#'\item{forecasts}{\code{data.frame} of predictions for each dependent variable and the (1-\eqn{\alpha}) prediction intervals}
+#'\item{y}{a matrix of values for y}
+#' @aliases predict print.vlstarpred
+#' @references Granger C.W.J. and Terasvirta T. (1993), Modelling Non-Linear Economic Relationships. \emph{Oxford University Press};
+#'
+#' Lundbergh S. and Terasvirta T. (2007), Forecasting with Smooth Transition Autoregressive Models. \emph{John Wiley and Sons};
+#'
+#' Terasvirta T. and Yang Y. (2014), Specification, Estimation and Evaluation of Vector Smooth Transition Autoregressive Models with Applications. \emph{CREATES Research Paper 2014-8}
+#' @author Andrea Bucci and Eduardo Rossi
+#' @seealso \code{\link{VLSTAR}} for log-likehood and nonlinear least squares estimation of the VLSTAR model.
+#' @export
+#' @keywords VLSTAR
+
+
 
 predict.VLSTAR <- function(object, ..., n.ahead = 1, conf.lev = 0.95, st.new = NULL, M = 5000, B = 1000,
                            st.num = NULL, newdata = NULL, method = c('naive', 'Monte Carlo', 'bootstrap')){
@@ -60,9 +88,6 @@ if(!is.null(st.new)){
     std_err <- sqrt((ncoly-object$p-1)/(nrowy-object$p-ncoly)*qf(1-alpha/2, df1 = ncoly, df2 = (nrowy-object$p-ncoly)))*sqrt((1+t(Z)%*%ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z)*object$Omega[j,j])
     lower[1,j] <- pred[1,j]-std_err
     upper[1,j] <- pred[1,j]+std_err
-    #std_err <- sqrt(object$Omega[j,j])*t(Z)%*%ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z
-    #lower[1,j] <- pred[1,j]-qt(1-alpha/2, df = nrow(object$Data[[1]])*ncol(object$Data[[1]])-length(BB))*std_err
-  #upper[1,j] <- pred[1,j]+qt(1-alpha/2, df = nrow(object$Data[[1]])*ncol(object$Data[[1]])-length(BB))*std_err
   }
 
   if(n.ahead >1){
@@ -85,9 +110,6 @@ if(!is.null(st.new)){
         std_err <- sqrt((ncoly-object$p-1)/(nrowy-object$p-ncoly)*qf(1-alpha/2, df1 = ncoly, df2 = (nrowy-object$p-ncoly)))*sqrt((1+t(Z)%*%ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z)*object$Omega[j,j])
         lower[i,j] <- pred[1,j]-std_err
         upper[i,j] <- pred[1,j]+std_err
-        #std_err <- sqrt(object$Omega[j,j])*t(Z)%*%ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z
-        #lower[i,j] <- pred[i,j]-qt(1-alpha/2, df = nrow(object$Data[[1]]+i-1)*ncol(object$Data[[1]])-length(BB))*std_err
-        #upper[i,j] <- pred[i,j]+qt(1-alpha/2, df = nrow(object$Data[[1]]+i-1)*ncol(object$Data[[1]])-length(BB))*std_err
       }
     }
 

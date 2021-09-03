@@ -1,3 +1,15 @@
+#' Print method for objects of class VLSTAR
+#'
+#' \sQuote{\code{print}} methods for class \sQuote{\code{VLSTAR}}.
+#' @aliases print
+#' @param x An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()}.
+#' @param \dots further arguments to be passed to and from other methods
+#' @references Terasvirta T. and Yang Y. (2014), Specification, Estimation and Evaluation of Vector Smooth Transition Autoregressive Models with Applications. \emph{CREATES Research Paper 2014-8}
+#' @author Andrea Bucci
+#' @keywords VLSTAR
+#' @seealso \code{\link{VLSTAR}}
+#' @export
+#'
 print.VLSTAR <- function(x, ...) {
   digits = 3
   cat(paste("\nVLSTAR model Estimation through", x$method, "\n"))

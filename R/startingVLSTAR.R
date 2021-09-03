@@ -1,4 +1,44 @@
+#' Starting parameters for a VLSTAR model
+#'
+#' This function allows the user to obtain the set of starting values of Gamma and C for the convergence algorithm via searching grid.
+#'
+#' The searching grid algorithm allows for the optimal choice of the parameters \eqn{\gamma} and c by minimizing the sum of the Squared residuals for each possible combination.
+#'
+#' The parameter c is initialized by using the mean of the dependent(s) variable, while \eqn{\gamma} is sampled between 0 and 100.
+#'
+#' @param y \code{data.frame} or \code{matrix} of dependent variables of dimension \code{(Txn)}
+#' @param exo (optional) \code{data.frame} or \code{matrix} of exogenous variables of dimension \code{(Txk)}
+#' @param p lag order
+#' @param m number of regimes
+#' @param st single transition variable for all the equation of dimension \code{(Tx1)}
+#' @param constant \code{TRUE} or \code{FALSE} to include or not the constant
+#' @param n.combi Number of combination for the searching grid of Gamma and C
+#' @param ncores  Number of cores used for parallel computation. Set to 2 by default
+#' @param singlecgamma \code{TRUE} or \code{FALSE} to use single gamma and c
+#' @return An object of class \code{startingVLSTAR}.
+#' @importFrom foreach %dopar% foreach
+#' @importFrom doSNOW registerDoSNOW
+#' @importFrom utils setTxtProgressBar tail.matrix txtProgressBar
+#' @seealso \code{\link{VLSTAR}}
+#' @references Anderson H.M. and Vahid F. (1998), Testing multiple equation systems for common nonlinear components. \emph{Journal of Econometrics}. 84: 1-36
+#'
+#' Bacon D.W. and Watts D.G. (1971), Estimating the transition between two intersecting straight lines. \emph{Biometrika}. 58: 525-534
+#'
+#' Terasvirta T. and Yang Y. (2014), Specification, Estimation and Evaluation of Vector Smooth Transition Autoregressive Models with Applications. \emph{CREATES Research Paper 2014-8}
+#' @author Andrea Bucci
+#' @keywords VLSTAR
 #' @export
+#' @examples
+#' \donttest{
+#' data(Realized)
+#' y <- Realized[-1,1:10]
+#' y <- y[-nrow(y),]
+#' st <- Realized[-nrow(Realized),1]
+#' st <- st[-length(st)]
+#' starting <- startingVLSTAR(y, p = 1, n.combi = 3,
+#'                            singlecgamma = FALSE, st = st)}
+
+
 startingVLSTAR <- function(y, exo = NULL, p = 1,
                    m = 2, st = NULL, constant = TRUE,
                    n.combi = NULL, ncores = 2,
