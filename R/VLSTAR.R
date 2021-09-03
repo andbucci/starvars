@@ -243,7 +243,7 @@ if(method == 'ML'){
       #Parameters
       low1 <- replicate(ny, 0)
       #1.Maximum likelihood estimation of gamma and c
-      param1 <- optimParallel(par = as.vector(param), fn = ssq1, lower = c(low1, apply(y, 2, min)),
+      param1 <- optimParallel(par = as.vector(param), fn = SSQ, lower = c(low1, apply(y, 2, min)),
                       data = data, parallel = list(cl = cl, forward = FALSE, loginfo = FALSE))
       cgam1 <- matrix(param1$par, ncol = 2L, nrow = (ny*(m-1)))
 
@@ -350,7 +350,7 @@ stopCluster(cl)
     AIC1 <- NULL
     BIC1 <- NULL
     for (l in 1:ncoly){
-      ll2[l] <- loglike2(y[,l], residui[,l], omega1[l])
+      ll2[l] <- -(nrow(y[,l])/2)*log(omega1[l]) - (t(residui[,l])%*%residui[,l])/(2*omega1[l])
       AIC1[l] <- 2*k - 2*ll2[l]
       BIC1[l] <- -2*ll2[l] + k*log(nrowy)
     }

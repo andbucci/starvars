@@ -26,14 +26,8 @@ loglike <- function(param, data){
   return(-logll)
 }
 
-loglike2 <- function(y, resid1, omega){
-  nrowy <- nrow(as.matrix(y))
-  logll <- -(nrowy/2)*log(2*pi) -(nrowy/2)*log(omega) - (t(resid1)%*%resid1)/(2*omega)
-  return(logll)
-}
-
-#Sum of squared error to be optimized
-ssq1 <- function(param, data){
+#Sum of squared error to be optimized in the NLS method
+SSQ <- function(param, data){
   y <- data$y
   gamma <- param[1:((data$m-1)*ncol(y))]
   c <- param[(ncol(y)*(data$m-1)+1):length(param)]
