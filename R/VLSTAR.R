@@ -433,7 +433,7 @@ stopCluster(cl)
     AIC1 <- NULL
     BIC1 <- NULL
     for (l in 1:ncoly){
-      ll2[l] <- -(nrow(y[,l])/2)*log(omega1[l]) - (t(residui[,l])%*%residui[,l])/(2*omega1[l])
+      ll2[l] <- -(nrow(y)/2)*log(omega1[l]) - (t(residui[,l])%*%residui[,l])/(2*omega1[l])
       AIC1[l] <- 2*k - 2*ll2[l]
       BIC1[l] <- -2*ll2[l] + k*log(nrowy)
     }
