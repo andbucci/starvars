@@ -396,7 +396,7 @@ stopCluster(cl)
     pval <- matrix(nrow = m*ncolx, ncol = ncoly)
     ee <- matrix(nrow = m*ncolx, ncol = ncoly)
     for (j in 1 : ncoly){
-      covbb[,j] <- sqrt(diag(ginv(t(x) %*%x))*varhat[j])
+      covbb[,j] <- sqrt(diag(MASS::ginv(t(x) %*%x))*varhat[j])
       ttest[,j] <- BBhat[,j]/covbb[,j]
       pval[,j] <- 2*pt(abs(ttest[,j]),df=(nrowy*m-m*(ncolx)), lower.tail = FALSE)
     }
