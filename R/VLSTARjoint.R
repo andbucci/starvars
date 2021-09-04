@@ -95,7 +95,7 @@ if(st.choice == TRUE){
   ausvar <- lm(ee ~ ZZ)
   ll <- residuals(ausvar)
   RSS1 <- t(ll)%*%ll
-  trac1 <- matrix.trace(ginv(RSS0)%*%RSS1)
+  trac1 <- matrix.trace(MASS::ginv(RSS0)%*%RSS1)
   LM3[j,] <- nrowx*(ncoly - trac1)
   df <- 3*ncoly + (ncolx)
   conflev <- 1-alpha/2
@@ -116,7 +116,7 @@ if(st.choice == TRUE){
   ausvar <- lm(ee ~ ZZ)
   ll <- residuals(ausvar)
   RSS1 <- t(ll)%*%ll
-  trac1 <- matrix.trace(ginv(RSS0)%*%RSS1)
+  trac1 <- matrix.trace(MASS::ginv(RSS0)%*%RSS1)
   LM3 <- nrowx*(ncoly - trac1)
   df <- 3*ncoly + (ncolx)
   conflev <- 1-alpha/2
