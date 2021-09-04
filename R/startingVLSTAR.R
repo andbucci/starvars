@@ -17,6 +17,7 @@
 #' @param singlecgamma \code{TRUE} or \code{FALSE} to use single gamma and c
 #' @return An object of class \code{startingVLSTAR}.
 #' @importFrom foreach %dopar% foreach
+#' @importFrom parallel setDefaultCluster stopCluster
 #' @importFrom doSNOW registerDoSNOW
 #' @importFrom utils setTxtProgressBar tail.matrix txtProgressBar
 #' @seealso \code{\link{VLSTAR}}
@@ -137,8 +138,8 @@ startingVLSTAR <- function(y, exo = NULL, p = 1,
 #NLS for each combination of c and gamma
 
 message(paste('Searching optimal c and gamma among', n.combi*n.combi, 'combinations\n'))
-cl <- makeCluster(ncores)
-registerDoSNOW(cl)
+cl <- parallel::makeCluster(ncores)
+doSNOW::registerDoSNOW(cl)
 pb <- txtProgressBar(max = n.combi*n.combi, style = 3)
 progress <- function(n) setTxtProgressBar(pb, n)
 opts <- list(progress = progress)

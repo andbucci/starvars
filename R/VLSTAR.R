@@ -54,16 +54,6 @@
 #' @author Andrea Bucci
 #' @export
 #' @exportClass VLSTAR
-#' @importFrom MASS ginv
-#' @importFrom dplyr if_else
-#' @importFrom ks invvec
-#' @importFrom matrixcalc vec vech
-#' @importFrom optimParallel optimParallel
-#' @importFrom zoo zoo
-#' @importFrom lessR to
-#' @importFrom data.table rbindlist
-#' @importFrom parallel detectCores makeCluster setDefaultCluster stopCluster
-#' @importFrom stats lag residuals
 #' @keywords VLSTAR
 #' @examples
 #' \donttest{
@@ -95,7 +85,7 @@ VLSTAR <- function(y, exo = NULL, p = 1,
     # use 2 cores in CRAN/Travis/AppVeyor
     ncores <- 2L
   } else {
-    ncores <- detectCores()
+    ncores <- parallel::detectCores()
   }}
   y <- as.matrix(y)
   x <- exo
@@ -132,7 +122,7 @@ VLSTAR <- function(y, exo = NULL, p = 1,
   }
   colnames(y) <- make.names(colnames(y))
   ##Definition of dimensions, creating variable x with constant
-  yt <- zoo(y)
+  yt <- zoo::zoo(y)
   ylag <- stats::lag(yt, -(1:p))
   ylag <- as.matrix(ylag)
   if(p>1){
@@ -205,9 +195,9 @@ VLSTAR <- function(y, exo = NULL, p = 1,
     kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
   }
   M <- t(do.call("cbind", kro))
-  Y <- vec(t(y))
-  Bhat <- ginv(t(M)%*%M)%*%t(M)%*%Y
-  BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q)) ##Estimated coefficients
+  Y <- matrixcalc::vec(t(y))
+  Bhat <- MASS::ginv(t(M)%*%M)%*%t(M)%*%Y
+  BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q)) ##Estimated coefficients
   ##Calculating the estimated covariance matrix
   resi <- list()
   Ehat1 <- matrix(NA, ncol = ncoly, nrow = nrowy)
@@ -230,14 +220,14 @@ VLSTAR <- function(y, exo = NULL, p = 1,
   for(t in 1:(m-1)){
     PARAM1[[t]] <- as.data.frame(PARAM[[t]])
   }
-  param <- rbindlist(PARAM1)
-  param <- vec(as.matrix(param)) ##the parameters c and gamma are vectorized in order to be passed in the optimParallel function
+  param <- do.call(rbind,PARAM1)
+  param <- matrix.calc::vec(as.matrix(param)) ##the parameters c and gamma are vectorized in order to be passed in the optimParallel function
   err <- 10^5
 
 
 ##Actual iteration to estimate the coefficients
-cl <- makeCluster(ncores)     # set the number of processor cores
-setDefaultCluster(cl=cl)
+cl <- parallel::makeCluster(ncores)     # set the number of processor cores
+parallel::setDefaultCluster(cl=cl)
 if(method == 'ML'){
     #NLS Estimation of Bhat and Omegahat to be used in the first iteration of maximum likelihood
   message('Maximum likelihood estimation\n')
@@ -253,7 +243,7 @@ if(method == 'ML'){
       #Parameters
       low1 <- replicate(ncoly, 0)
       #1.Maximum likelihood estimation of gamma and c
-      param1 <- optimParallel(par = as.vector(param), fn = loglike, lower = c(low1, apply(y, 2, min)),
+      param1 <- optimParallel::optimParallel(par = as.vector(param), fn = loglike, lower = c(low1, apply(y, 2, min)),
                       data = data, parallel = list(cl = cl, forward = FALSE, loginfo = FALSE))
       cgam1 <- matrix(param1$par, ncol = 2, nrow = (ny*(m-1)))
 
@@ -278,14 +268,14 @@ if(method == 'ML'){
         }
         Gtilde[[i]] <- t(cbind(In, do.call(cbind,GT)))
         XX[[i]] <- x[i,] %*%t(x[i,])
-        XYOG[[i]] <- vec((x[i, ]%*%t(y[i,]))%*%ginv(Omegahat)%*%t(Gtilde[[i]]))
-        PsiOmegaPsi[[i]] <- Gtilde[[i]]%*%ginv(Omegahat)%*%t(Gtilde[[i]])
+        XYOG[[i]] <- matrixcalc::vec((x[i, ]%*%t(y[i,]))%*%MASS::ginv(Omegahat)%*%t(Gtilde[[i]]))
+        PsiOmegaPsi[[i]] <- Gtilde[[i]]%*%MASS::ginv(Omegahat)%*%t(Gtilde[[i]])
         kro[[i]] <- kronecker(PsiOmegaPsi[[i]], XX[[i]])
       }
       xyog <- Reduce(`+`, XYOG)/nrowy
       kroxx <- Reduce(`+`, kro)/nrowy
       Bhat <- t(t(xyog)%*%kroxx)
-      BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
+      BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
       resi <- list()
       fitte <- matrix(nrow = nrowy, ncol = ncoly)
       Ehat1 <- matrix(NA, ncol = ncoly, nrow = nrowy)
@@ -326,7 +316,7 @@ if(method == 'ML'){
       #Parameters
       low1 <- replicate(ny, 0)
       #1.Maximum likelihood estimation of gamma and c
-      param1 <- optimParallel(par = as.vector(param), fn = SSQ, lower = c(low1, apply(y, 2, min)),
+      param1 <- optimParallel::optimParallel(par = as.vector(param), fn = SSQ, lower = c(low1, apply(y, 2, min)),
                       data = data, parallel = list(cl = cl, forward = FALSE, loginfo = FALSE))
       cgam1 <- matrix(param1$par, ncol = 2L, nrow = (ny*(m-1)))
 
@@ -349,8 +339,8 @@ if(method == 'ML'){
         Gtilde[[i]] <- t(cbind(In, do.call(cbind,GT)))
         kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
       }
-      Bhat <- ginv(t(t(do.call("cbind", kro)))%*%(t(do.call("cbind", kro))))%*%t(t(do.call("cbind", kro)))%*%(vec(t(y)))
-      BB <- invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
+      Bhat <- MASS::ginv(t(t(do.call("cbind", kro)))%*%(t(do.call("cbind", kro))))%*%t(t(do.call("cbind", kro)))%*%(vec(t(y)))
+      BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
       resi <- list()
       resiresi <- list()
       fitte <- matrix(nrow = nrowy, ncol = ncoly)
@@ -396,7 +386,7 @@ stopCluster(cl)
       bb2[[t]] <- as.data.frame(BB[,(ncoly*(t-1)+1):(ncoly*t)] +
                                   BB[,(ncoly*(t)+1):(ncoly*(t+1))])
     }
-    bb4 <- as.matrix(rbindlist(bb2))
+    bb4 <- as.matrix(do.call(rbind,bb2))
     BBhat <- rbind(bb1, bb4) ##Estimates of the coefficients
 
     ##Calculating standard errors, t-test and p-values
@@ -441,7 +431,7 @@ stopCluster(cl)
     for(j in 1:m){
       names1[[j]] <- as.data.frame(paste(colnames(x), 'm_', j))
     }
-    names1 <- as.matrix(rbindlist(names1))
+    names1 <- as.matrix(do.call(rbind,names1))
     rownames(BBhat) <- names1
     colnames(BBhat) <- colnames(y)
     modeldata <- list(y, x)

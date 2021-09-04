@@ -47,7 +47,7 @@
 #' @keywords VLSTAR
 #' @export
 #' @importFrom vars VAR
-#' @importFrom stats lm qchisq pchisq
+#' @importFrom stats lm qchisq pchisq residuals
 #' @importFrom matrixcalc matrix.trace
 VLSTARjoint <- function(y, exo = NULL, st, st.choice = FALSE, alpha = 0.05){
   y <- as.matrix(y)

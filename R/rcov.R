@@ -18,8 +18,12 @@
 #' @importFrom zoo as.yearqtr
 #' @importFrom xts xts apply.daily apply.monthly apply.quarterly apply.yearly
 #' @importFrom lubridate year
+#' @importFrom matrixcalc vech
 #' @importFrom quantmod dailyReturn monthlyReturn yearlyReturn
 #' @importFrom ks invvech
+#' @importFrom zoo zoo
+#' @importFrom lessR to
+#' @importFrom dplyr if_else
 #' @export
 #' @keywords RCOV
 #' @examples

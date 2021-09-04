@@ -91,7 +91,7 @@ st <- Realized[-nrow(Realized),1]
 st <- st[-length(st)]
 stvalues <- startingVLSTAR(y, p = 1, n.combi = 3,
  singlecgamma = FALSE, st = st)
- fit.VLSTAR <- VLSTAR(y, p = 1, singlecgamma = FALSE, starting = stvalues,
+fit.VLSTAR <- VLSTAR(y, p = 1, singlecgamma = FALSE, starting = stvalues,
  n.iter = 3, st = st, method ='NLS')
 # a few methods for VLSTAR
 print(fit.VLSTAR)
