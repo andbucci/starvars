@@ -150,7 +150,7 @@ for(k in 4:7){
       tmp <- vech(t(data_1[[k]][i,])%*%data_1[[k]][i,])
       tmp1 <- tmp1 + tmp
       Sk[i,] <- t(1/sqrt(nrow(data_1[[k]])) * (tmp1 - (i/nrowy)*sumvechy))
-      Lambda_hat[i] <- t(Sk[i,])%*%ginv(D)%*%Sk[i,]
+      Lambda_hat[i] <- t(Sk[i,])%*%MASS::ginv(D)%*%Sk[i,]
 
     }
     Lambda[[k]] <- max(Lambda_hat)
