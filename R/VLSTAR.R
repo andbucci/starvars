@@ -221,7 +221,7 @@ VLSTAR <- function(y, exo = NULL, p = 1,
     PARAM1[[t]] <- as.data.frame(PARAM[[t]])
   }
   param <- do.call(rbind,PARAM1)
-  param <- matrix.calc::vec(as.matrix(param)) ##the parameters c and gamma are vectorized in order to be passed in the optimParallel function
+  param <- matrixcalc::vec(as.matrix(param)) ##the parameters c and gamma are vectorized in order to be passed in the optimParallel function
   err <- 10^5
 
 
@@ -290,7 +290,7 @@ if(method == 'ML'){
       #3. Convergence check
       ll1 <- loglike(param = param1$par, data)
       if((ll1-ll0)>0){
-        param <- as.matrix(vec(cgam1))
+        param <- as.matrix(matrixcalc::vec(cgam1))
       }
       err <- abs(ll1 - ll0)
       ll0 <- ll1
@@ -339,7 +339,7 @@ if(method == 'ML'){
         Gtilde[[i]] <- t(cbind(In, do.call(cbind,GT)))
         kro[[i]] <- kronecker(Gtilde[[i]], x[i,])
       }
-      Bhat <- MASS::ginv(t(t(do.call("cbind", kro)))%*%(t(do.call("cbind", kro))))%*%t(t(do.call("cbind", kro)))%*%(vec(t(y)))
+      Bhat <- MASS::ginv(t(t(do.call("cbind", kro)))%*%(t(do.call("cbind", kro))))%*%t(t(do.call("cbind", kro)))%*%(matrixcalc::vec(t(y)))
       BB <- ks::invvec(Bhat, ncol = (m*ncoly), nrow = (ncolylag + q))
       resi <- list()
       resiresi <- list()
@@ -358,7 +358,7 @@ if(method == 'ML'){
       #3. Convergence check
       ll1 <- loglike(param = param1$par, data)
       if((ll1-ll0)>0){
-        param <- as.matrix(vec(cgam1))
+        param <- as.matrix(matrixcalc::vec(cgam1))
       }
       err <- abs(ll1 - ll0)
       ll0 <- ll1
