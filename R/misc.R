@@ -14,7 +14,7 @@ loglike <- function(param, data){
   for (z in 1:nrow(y)){
     for(t in 1:(data$m-1)){
       for (o in 1:ncol(y)){
-        glog[o] <- (1L+exp(-gamma1[o,t]*(data$st[z]-c1[o,t])))^(-1)}
+        glog[o] <- (1L+exp(-gamma[o,t]*(data$st[z]-c1[o,t])))^(-1)}
       ifelse(data$singlecgamma == TRUE, GT[[t]] <- diag(rep(glog[1], ncol(y))), GT[[t]] <- diag(glog))
     }
     Gtilde <- t(cbind(diag(ncol(y)), do.call(cbind,GT)))
