@@ -17,7 +17,6 @@ loglike <- function(param, data){
         glog[o] <- (1L+exp(-gamma1[o,t]*(data$st[z]-c1[o,t])))^(-1)}
       ifelse(data$singlecgamma == TRUE, GT[[t]] <- diag(rep(glog[1], ncol(y))), GT[[t]] <- diag(glog))
     }
-  }
     Gtilde <- t(cbind(diag(ncol(y)), do.call(cbind,GT)))
     dify[z] <-  t(y[z, ] - t(Gtilde)%*%t(data$BB)%*%data$x[z,])%*%MASS::ginv(Omegahat)%*%(y[z, ] - t(Gtilde)%*%t(data$BB)%*%data$x[z,])
   }
