@@ -15,7 +15,11 @@ loglike <- function(param, data){
     for(t in 1:(data$m-1)){
       for (o in 1:ncol(y)){
         glog[o] <- (1L+exp(-gamma[o]*(data$st[z]-c[o])))^(-1)}
-      ifelse(data$singlecgamma == TRUE, GT[[t]] <- diag(rep(glog[1], ncol(y))), GT[[t]] <- diag(glog))
+      if(data$singlecgamma == TRUE){
+        GT[[t]] <- diag(rep(glog[1], ncol(y)))
+      }else{
+        GT[[t]] <- diag(glog)
+      }
     }
     Gtilde <- t(cbind(diag(ncol(y)), do.call(cbind,GT)))
     dify[z] <-  t(y[z, ] - t(Gtilde)%*%t(data$BB)%*%data$x[z,])%*%MASS::ginv(Omegahat)%*%(y[z, ] - t(Gtilde)%*%t(data$BB)%*%data$x[z,])
@@ -42,8 +46,12 @@ SSQ <- function(param, data){
   for (z in 1:nrow(y)){
     for(t in 1:(data$m-1)){
       for (o in 1:ncol(y)){
-        glog[o] <- (1L+exp(-gamma1[o,t]*(data$st[z]-c1[o,t])))^(-1)}
-      ifelse(data$singlecgamma == TRUE, GT[[t]] <- diag(rep(glog[1], ncol(y))), GT[[t]] <- diag(glog))
+        glog[o] <- (1L+exp(-gamma[o]*(data$st[z]-c[o])))^(-1)}
+      if(data$singlecgamma == TRUE){
+        GT[[t]] <- diag(rep(glog[1], ncol(y)))
+      }else{
+        GT[[t]] <- diag(glog)
+      }
     }
     #Gtilde <- t(cbind(diag(ncol(y)), do.call(cbind,GT)))
     dify[z] <-  t(y[z, ] - t(t(cbind(diag(ncol(y)), do.call(cbind,GT))))%*%t(data$BB)%*%data$x[z,])%*%(y[z, ] - t(t(cbind(diag(ncol(y)), do.call(cbind,GT))))%*%t(data$BB)%*%data$x[z,])
