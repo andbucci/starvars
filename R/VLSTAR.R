@@ -375,7 +375,7 @@ if(method == 'ML'){
 
       if (err<epsi | iter == n.iter) message('Converged\n')}
   }
-stopCluster(cl)
+parallel::stopCluster(cl)
 
     #Calculating residuals and estimating standard errors
     residuals1 <- t(do.call("cbind", resi))

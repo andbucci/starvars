@@ -42,6 +42,7 @@ SSQ <- function(param, data){
   c1 <- matrix(c, ncol = (data$m-1))
   glog <- rep(0, ncol(y))
   GT <- list()
+  Gtilde <- matrix(ncol = ncol(y), nrow = (ncol(y)+ncol(y)*(data$m-1)))
   dify <- matrix(ncol = 1, nrow = nrow(y))
   for (z in 1:nrow(y)){
     for(t in 1:(data$m-1)){
@@ -53,8 +54,8 @@ SSQ <- function(param, data){
         GT[[t]] <- diag(glog)
       }
     }
-    #Gtilde <- t(cbind(diag(ncol(y)), do.call(cbind,GT)))
-    dify[z] <-  t(y[z, ] - t(t(cbind(diag(ncol(y)), do.call(cbind,GT))))%*%t(data$BB)%*%data$x[z,])%*%(y[z, ] - t(t(cbind(diag(ncol(y)), do.call(cbind,GT))))%*%t(data$BB)%*%data$x[z,])
+    Gtilde <- t(cbind(diag(ncol(y)), do.call(cbind,GT)))
+    dify[z] <-  t(y[z, ] - t(Gtilde)%*%t(data$BB)%*%data$x[z,])%*%(y[z, ] - t(Gtilde)%*%t(data$BB)%*%data$x[z,])
   }
   sumdif <- sum(dify)
   return(sumdif)
