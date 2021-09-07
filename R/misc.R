@@ -44,7 +44,6 @@ SSQ <- function(param, data){
       for (o in 1:ncol(y)){
         glog[o] <- (1L+exp(-gamma1[o,t]*(data$st[z]-c1[o,t])))^(-1)}
       ifelse(data$singlecgamma == TRUE, GT[[t]] <- diag(rep(glog[1], ncol(y))), GT[[t]] <- diag(glog))
-      }
     }
     #Gtilde <- t(cbind(diag(ncol(y)), do.call(cbind,GT)))
     dify[z] <-  t(y[z, ] - t(t(cbind(diag(ncol(y)), do.call(cbind,GT))))%*%t(data$BB)%*%data$x[z,])%*%(y[z, ] - t(t(cbind(diag(ncol(y)), do.call(cbind,GT))))%*%t(data$BB)%*%data$x[z,])
