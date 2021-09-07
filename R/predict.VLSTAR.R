@@ -85,7 +85,7 @@ if(!is.null(st.new)){
   lower <- matrix(NA, ncol = ncoly, nrow = n.ahead)
   upper <- matrix(NA, ncol = ncoly, nrow = n.ahead)
   for(j in 1:ncoly){
-    std_err <- sqrt((ncoly-object$p-1)/(nrowy-object$p-ncoly)*qf(1-alpha/2, df1 = ncoly, df2 = (nrowy-object$p-ncoly)))*sqrt((1+t(Z)%*%ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z)*object$Omega[j,j])
+    std_err <- sqrt((ncoly-object$p-1)/(nrowy-object$p-ncoly)*qf(1-alpha/2, df1 = ncoly, df2 = (nrowy-object$p-ncoly)))*sqrt((1+t(Z)%*%MASS::ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z)*object$Omega[j,j])
     lower[1,j] <- pred[1,j]-std_err
     upper[1,j] <- pred[1,j]+std_err
   }
@@ -107,7 +107,7 @@ if(!is.null(st.new)){
         st_new <- c(as.vector(st_new),tmp[st.num])
       }
       for(j in 1:ncoly){
-        std_err <- sqrt((ncoly-object$p-1)/(nrowy-object$p-ncoly)*qf(1-alpha/2, df1 = ncoly, df2 = (nrowy-object$p-ncoly)))*sqrt((1+t(Z)%*%ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z)*object$Omega[j,j])
+        std_err <- sqrt((ncoly-object$p-1)/(nrowy-object$p-ncoly)*qf(1-alpha/2, df1 = ncoly, df2 = (nrowy-object$p-ncoly)))*sqrt((1+t(Z)%*%MASS::ginv(t(object$Data[[2]])%*%object$Data[[2]])%*%Z)*object$Omega[j,j])
         lower[i,j] <- pred[1,j]-std_err
         upper[i,j] <- pred[1,j]+std_err
       }
