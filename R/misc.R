@@ -10,7 +10,6 @@ loglike <- function(param, data){
   c <- param[(ncol(y)*(data$m-1)+1):length(param)]
   glog <- rep(0, ncol(y))
   GT <- list()
-  Gtilde <- list()
   dify <- matrix(ncol = 1, nrow = nrow(y))
   for (z in 1:nrow(y)){
     for(t in 1:(data$m-1)){
@@ -22,8 +21,8 @@ loglike <- function(param, data){
         GT[[t]] <- diag(glog)
       }
     }
-    Gtilde[[z]] <- t(cbind(diag(ncol(y)), do.call(cbind,GT)))
-    dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(data$BB)%*%data$x[z,])%*%MASS::ginv(Omegahat)%*%(y[z, ] - t(Gtilde[[z]])%*%t(data$BB)%*%data$x[z,])
+    Gtilde <- t(cbind(diag(ncol(y)), do.call(cbind,GT)))
+    dify[z] <-  t(y[z, ] - t(Gtilde)%*%t(data$BB)%*%data$x[z,])%*%MASS::ginv(Omegahat)%*%(y[z, ] - t(Gtilde)%*%t(data$BB)%*%data$x[z,])
   }
   sumdif <- sum(dify)
   logll <- -(nrow(y)*log(det(Omegahat))/2L) - sumdif/2L  - (nrow(y)*ncol(y)/2L)*log(2L*pi)##Normal distribution assumed
@@ -43,7 +42,6 @@ SSQ <- function(param, data){
   c1 <- matrix(c, ncol = (data$m-1))
   glog <- rep(0, ncol(y))
   GT <- list()
-  Gtilde <- list()
   dify <- matrix(ncol = 1, nrow = nrow(y))
   for (z in 1:nrow(y)){
     for(t in 1:(data$m-1)){
@@ -55,8 +53,8 @@ SSQ <- function(param, data){
         GT[[t]] <- diag(glog)
       }
     }
-    Gtilde[[z]] <- t(cbind(diag(ncol(y)), do.call(cbind,GT)))
-    dify[z] <-  t(y[z, ] - t(Gtilde[[z]])%*%t(data$BB)%*%data$x[z,])%*%(y[z, ] - t(Gtilde[[z]])%*%t(data$BB)%*%data$x[z,])
+    Gtilde <- t(cbind(diag(ncol(y)), do.call(cbind,GT)))
+    dify[z] <-  t(y[z, ] - t(Gtilde)%*%t(data$BB)%*%data$x[z,])%*%(y[z, ] - t(Gtilde)%*%t(data$BB)%*%data$x[z,])
   }
   sumdif <- sum(dify)
   return(sumdif)
