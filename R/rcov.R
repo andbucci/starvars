@@ -17,13 +17,11 @@
 #' @importFrom methods is
 #' @importFrom zoo as.yearqtr
 #' @importFrom xts xts apply.daily apply.monthly apply.quarterly apply.yearly
-#' @importFrom lubridate year
 #' @importFrom matrixcalc vech
 #' @importFrom quantmod dailyReturn monthlyReturn yearlyReturn
 #' @importFrom ks invvech
 #' @importFrom zoo zoo
 #' @importFrom lessR to
-#' @importFrom dplyr if_else
 #' @export
 #' @keywords RCOV
 #' @examples
@@ -56,8 +54,8 @@ elapsed_quarters <- function(end_date, start_date){
      as.yearqtr(start_date))*4+1
 }
 elapsed_years <- function(end_date, start_date){
-  year(end_date)-
-    year(start_date)+1
+  as.numeric(format(end_date, format = '%Y'))-
+    as.numeric(format(start_date, format = '%Y'))+1
 }
 
 makeReturns <- function (ts){

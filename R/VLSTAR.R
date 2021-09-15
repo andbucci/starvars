@@ -53,7 +53,6 @@
 #' Terasvirta T. and Yang Y. (2014), Specification, Estimation and Evaluation of Vector Smooth Transition Autoregressive Models with Applications. \emph{CREATES Research Paper 2014-8}
 #' @author Andrea Bucci
 #' @export
-#' @exportClass VLSTAR
 #' @keywords VLSTAR
 #' @examples
 #' \donttest{
@@ -65,7 +64,7 @@
 #' stvalues <- startingVLSTAR(y, p = 1, n.combi = 3,
 #'  singlecgamma = FALSE, st = st)
 #'fit.VLSTAR <- VLSTAR(y, p = 1, singlecgamma = FALSE, starting = stvalues,
-#'  n.iter = 3, st = st, method ='NLS')
+#'  n.iter = 3, st = st, method ='NLS', ncores = 2)
 #'# a few methods for VLSTAR
 #'print(fit.VLSTAR)
 #'summary(fit.VLSTAR)
