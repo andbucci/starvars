@@ -64,7 +64,7 @@
 #' stvalues <- startingVLSTAR(y, p = 1, n.combi = 3,
 #'  singlecgamma = FALSE, st = st)
 #'fit.VLSTAR <- VLSTAR(y, p = 1, singlecgamma = FALSE, starting = stvalues,
-#'  n.iter = 3, st = st, method ='NLS', ncores = 2)
+#'  n.iter = 2, st = st, method ='NLS', ncores = 1)
 #'# a few methods for VLSTAR
 #'print(fit.VLSTAR)
 #'summary(fit.VLSTAR)
@@ -130,6 +130,13 @@ VLSTAR <- function(y, exo = NULL, p = 1,
   }
   y <- y[-c(1:p), ]
   ncoly <- ncol(y)
+  if(singlecgamma == TRUE){
+    starting1 <- list()
+    for(i in 1:(m-1)){
+      starting1[[i]] <- cbind(rep(starting[[i]][,1], ncoly), rep(starting[[i]][,2], ncoly))
+    }
+    starting = starting1
+  }
   if(!is.null(starting)){
     if(length(starting)!= (m-1)){
       stop('The length of the list of initial values should be equal to m-1.')
@@ -158,14 +165,6 @@ VLSTAR <- function(y, exo = NULL, p = 1,
   nrowx <- nrow(x)
   st <- st[(1+p):length(st)]
   ncolx <- ncol(x)
-  param.init <- list()
-  if(singlecgamma == TRUE){
-    param.init$gamma <- 1
-    param.init$c <- mean(y)
-  } else{
-    param.init$gamma <- rep(1L, ncoly)
-    param.init$c <- colMeans(y)
-  }
   ny <- ifelse(singlecgamma == TRUE, 1, ncoly)
   q <- ncol(x)-ncolylag
   PARAM <- starting
