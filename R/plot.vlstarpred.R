@@ -24,6 +24,7 @@
 #' @param ylab Character vector signifying the labels for the y-axis.
 #' @param ylim Vector, the limits of the y-axis.
 #' @param \dots Passed to internal plot function.
+#' @return Plot of predictions from VLSTAR with their prediction interval
 #' @export
 #' @author Andrea Bucci
 #' @seealso \code{\link{predict.VLSTAR}}

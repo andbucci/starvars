@@ -12,6 +12,9 @@
 
 \item{\dots}{further arguments to be passed to and from other methods}
 }
+\value{
+Print of VLSTAR results
+}
 \description{
 \sQuote{\code{print}} methods for class \sQuote{\code{VLSTAR}}.
 }

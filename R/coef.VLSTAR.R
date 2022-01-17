@@ -7,7 +7,7 @@
 #' @references Terasvirta T. and Yang Y. (2014), Specification, Estimation and Evaluation of Vector Smooth Transition
 #'  Autoregressive Models with Applications. \emph{CREATES Research Paper 2014-8}
 #' @author Andrea Bucci
-#' @export
+#' @return Estimated coefficients of the VLSTAR model
 #' @keywords VLSTAR
 #' @examples
 #' mean(1:3)

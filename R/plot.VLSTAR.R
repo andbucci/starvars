@@ -43,6 +43,7 @@
 #' @param \dots Passed to internal plot function.
 #' @importFrom stats fitted resid plot.ts quantile na.omit rnorm sd pacf pt qf qt symnum
 #' @importFrom graphics abline axis box layout lcm lines mtext par plot points
+#' @return Plot of VLSTAR fitted values, residuals, ACF, PACF and logistic function
 #' @export
 #' @keywords VLSTAR
 #' @author Andrea Bucci

@@ -74,6 +74,9 @@
 
 \item{\dots}{Passed to internal plot function.}
 }
+\value{
+Plot of predictions from VLSTAR with their prediction interval
+}
 \description{
 Plot method for objects with class attribute \code{vlstarpred}.
 }

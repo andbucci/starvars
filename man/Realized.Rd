@@ -1,18 +1,14 @@
 \name{Realized}
 \alias{Realized}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Monthly time series used to test VLSTAR models.
-  %%  ~~function to do ... ~~
 }
 \description{
-  %%  ~~ A concise (1-5 lines) description of what the function does. ~~
     This data set contains the series of realized covariances in 4 stock market indices, i.e. SP-500, Nikkei, DAX, and FTSE, Dividend Yield and Earning Price growth rate, inflation growth rates for U.S., U.K., Japan and Germany, from August 1990 to June 2018.
 }
 \usage{
   data(Realized)
 }
-%- maybe also 'usage' for other objects documented here.
 
 \format{
   A zoo data frame with 334 monthly observations,
@@ -41,15 +37,11 @@
 
 \author{
   Andrea Bucci
-  %%  ~~who you are~~
 }
 
 
 \seealso{
-  %% ~~objects to See Also as \code{\link{help}}, ~~~
     \code{\link{rcov}} to build realized covariances from stock prices or returns.
 }
 
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{datasets}% use one of  RShowDoc("KEYWORDS")
+\keyword{datasets}

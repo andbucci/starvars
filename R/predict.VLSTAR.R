@@ -1,6 +1,7 @@
 #' VLSTAR Prediction
 #'
 #' One-step or multi-step ahead forecasts, with interval forecast, of a VLSTAR object.
+#'
 #' @param object An object of class \sQuote{\code{VLSTAR}} obtained through \command{VLSTAR()}
 #' @param n.ahead An integer specifying the number of ahead predictions
 #' @param conf.lev Confidence level of the interval forecast
@@ -23,7 +24,6 @@
 #' Terasvirta T. and Yang Y. (2014), Specification, Estimation and Evaluation of Vector Smooth Transition Autoregressive Models with Applications. \emph{CREATES Research Paper 2014-8}
 #' @author Andrea Bucci and Eduardo Rossi
 #' @seealso \code{\link{VLSTAR}} for log-likehood and nonlinear least squares estimation of the VLSTAR model.
-#' @export
 #' @keywords VLSTAR
 
 

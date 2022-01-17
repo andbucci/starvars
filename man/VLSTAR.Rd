@@ -90,9 +90,9 @@ y <- y[-nrow(y),]
 st <- Realized[-nrow(Realized),1]
 st <- st[-length(st)]
 stvalues <- startingVLSTAR(y, p = 1, n.combi = 3,
- singlecgamma = FALSE, st = st)
+ singlecgamma = FALSE, st = st, ncores = 1)
 fit.VLSTAR <- VLSTAR(y, p = 1, singlecgamma = FALSE, starting = stvalues,
- n.iter = 3, st = st, method ='NLS', ncores = 2)
+ n.iter = 1, st = st, method ='NLS', ncores = 1)
 # a few methods for VLSTAR
 print(fit.VLSTAR)
 summary(fit.VLSTAR)

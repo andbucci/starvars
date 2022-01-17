@@ -115,6 +115,9 @@
 
 \item{ylim}{Vector, the limits of the y-axis.}
 }
+\value{
+Plot of VLSTAR fitted values, residuals, ACF, PACF and logistic function
+}
 \description{
 Plot method for objects with class attribute \code{VLSTAR}.
 }

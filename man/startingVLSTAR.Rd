@@ -54,7 +54,8 @@ y <- y[-nrow(y),]
 st <- Realized[-nrow(Realized),1]
 st <- st[-length(st)]
 starting <- startingVLSTAR(y, p = 1, n.combi = 3,
-                           singlecgamma = FALSE, st = st)}
+                           singlecgamma = FALSE, st = st,
+                           ncores = 1)}
 }
 \references{
 Anderson H.M. and Vahid F. (1998), Testing multiple equation systems for common nonlinear components. \emph{Journal of Econometrics}. 84: 1-36

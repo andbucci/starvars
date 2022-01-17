@@ -6,6 +6,7 @@
 #' @param \dots further arguments to be passed to and from other methods
 #' @references Terasvirta T. and Yang Y. (2014), Specification, Estimation and Evaluation of Vector Smooth Transition Autoregressive Models with Applications. \emph{CREATES Research Paper 2014-8}
 #' @author Andrea Bucci
+#' @return Print of VLSTAR results
 #' @keywords VLSTAR
 #' @seealso \code{\link{VLSTAR}}
 #' @export

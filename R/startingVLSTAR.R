@@ -37,7 +37,8 @@
 #' st <- Realized[-nrow(Realized),1]
 #' st <- st[-length(st)]
 #' starting <- startingVLSTAR(y, p = 1, n.combi = 3,
-#'                            singlecgamma = FALSE, st = st)}
+#'                            singlecgamma = FALSE, st = st,
+#'                            ncores = 1)}
 
 
 startingVLSTAR <- function(y, exo = NULL, p = 1,

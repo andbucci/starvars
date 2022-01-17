@@ -7,6 +7,7 @@
 #' @param \dots further arguments to be passed to and from other methods
 #' @references Terasvirta T. and Yang Y. (2014), Specification, Estimation and Evaluation of Vector Smooth Transition Autoregressive Models with Applications. \emph{CREATES Research Paper 2014-8}
 #' @author Andrea Bucci
+#' @return An object of class \code{summary.VLSTAR} containing a list of summary information from VLSTAR estimates. When \code{print} is applied to this object, summary information are printed
 #' @keywords VLSTAR
 #' @seealso \code{\link{VLSTAR}}
 #' @export
@@ -66,36 +67,62 @@ print.summary.VLSTAR<-function(x,...){
   }
   for(i in 1:length(x$bigcoefficients)){
     a<-myformat(x$coefficients[[i]], digits)
-    b<-myformat(x$StDev[[i]], digits)
-    c<-myformat(x$Pvalues[[i]], digits)
+    #b<-myformat(x$StDev[[i]], digits)
+    #c<-myformat(x$Pvalues[[i]], digits)
     aic1 <- round(x$AIC,2)
     bic1 <- round(x$BIC,2)
+    ll1 <- round(x$LL, 2)
     stars1<-x$stars[[i]]
-    coeftop <- cbind(a, b, c, stars1)
-    colnames(coeftop) <- c('Estimate', 'Std. Error', 'p-value', '')
+    coeftop <- cbind(a, stars1)
+    coeftop1 <- rep(NA, )
+    for(j in 1:nrow(coeftop)){
+      coeftop1[j] <- paste(coeftop[j,1], coeftop[j,2], sep = '')
+    }
+    names(coeftop1) = rownames(x$Bhat)
+    #colnames(coeftop) <- c('Estimate','stars')
     if(x$singlecgamma == TRUE){
-      coeftoprint[[i]] <- rbind(coeftop, rep('', 4), c(aic1[i],'','',''), c(bic1[i], '','',''))
-      rownames(coeftoprint[[i]])<- c(rownames(x$Bhat),"---",'AIC', 'BIC')
+      coeftoprint[[i]] <- list(coefficients = coeftop1, AIC = aic1[i], BIC = bic1[i], LL = ll1[i])
     } else{
-      coeftoprint[[i]] <- rbind(coeftop, rep('', 4), c(round(x$Gammac[seq(i, nrow(x$Gammac), ncol(x$Data[[1]])),1],4),rep('',(4-x$m+1))),
-                                c(round(x$Gammac[seq(i, nrow(x$Gammac), ncol(x$Data[[1]])),2],4),rep('',(4-x$m+1))),
-                                rep('', 4), c(aic1[i],'','',''), c(bic1[i], '','',''))
-      rownames(coeftoprint[[i]])<- c(rownames(x$Bhat),"---",'gamma', 'c',"---", 'AIC', 'BIC')
+      coeftoprint[[i]] <- list(coefficients = coeftop1, gamma =  round(x$Gammac[seq(i, nrow(x$Gammac), ncol(x$Data[[1]])),1],4),
+                               c = round(x$Gammac[seq(i, nrow(x$Gammac), ncol(x$Data[[1]])),2],4),
+                               AIC = aic1[i], BIC = bic1[i], LL = ll1[i])
     }
 
   }
   names(coeftoprint) <- colnames(x$Bhat)
   cat("Model VLSTAR with ", x$m, " regimes\n", sep ='')
-  cat("\nFull sample size:",x$T)
-  cat("\nNumber of variables used as covariates:", x$k,"\tNumber of estimated parameters:", x$npar)
-  #cat("\nAIC",x$aic)
-  #cat("\nBIC", x$bic)
-  cat("\nMultivariate log-likelihood:", x$MultiLL,"\n")
+  cat("Full sample size:",x$T, "\n")
+  cat("Number of estimated parameters:", x$npar, "\tMultivariate log-likelihood:", x$MultiLL,"\n")
+
   if(x$singlecgamma == TRUE){
     cat("\nUnique gamma:", round(x$Gammac[seq(1, nrow(x$Gammac), ncol(x$Data[[1]])),1],4),"\tUnique c:", round(x$Gammac[seq(1, nrow(x$Gammac), ncol(x$Data[[1]])),2],4), "\n")
   }
-  cat('\nCoefficients:')
-  print(noquote(coeftoprint))
-  cat("=================================\n")
+  cat("==================================================\n")
+  #cat('\nEquation:\n')
+  #print(noquote(coeftoprint))
+  for(i in 1:length(x$bigcoefficients)){
+    cat("\nEquation", paste("y", i, sep =''), "\n")
+
+    for(k in 1:x$m){
+      cat("\nCoefficients regime", k, "\n")
+      coeftmp = coeftoprint[[i]]$coefficients[grepl(paste("m_", k, sep = ''), names(coeftoprint[[i]]$coefficients))]
+      names(coeftmp) = colnames(x$Data[[2]])
+      print(noquote(coeftmp))
+    }
+    if(x$singlecgamma == FALSE){
+    if(x$m == 2){
+      cat("\nGamma:", coeftoprint[[i]]$gamma, "\tc:", coeftoprint[[i]]$c, "\n")
+    }else{
+      cat("\nGamma:", coeftoprint[[i]]$gamma, "\n")
+      cat("\nc:", coeftoprint[[i]]$c, "\n")
+    }
+      }
+
+
+    cat("AIC:", coeftoprint[[i]]$AIC, "\tBIC:", coeftoprint[[i]]$BIC, "\tLL:", coeftoprint[[i]]$LL, "\n")
+
+    #cat("==================================================\n")
+  }
+  cat("==================================================\n")
   cat("\n Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 \n")
 }

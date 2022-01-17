@@ -18,6 +18,9 @@
 
 \item{x}{A summary object of class \sQuote{\code{VLSTAR}} obtained through \command{summary()}.}
 }
+\value{
+An object of class \code{summary.VLSTAR} containing a list of summary information from VLSTAR estimates. When \code{print} is applied to this object, summary information are printed
+}
 \description{
 \sQuote{\code{summary}} methods for class \sQuote{\code{VLSTAR}}.
 }

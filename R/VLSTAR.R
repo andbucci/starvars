@@ -62,9 +62,9 @@
 #' st <- Realized[-nrow(Realized),1]
 #' st <- st[-length(st)]
 #' stvalues <- startingVLSTAR(y, p = 1, n.combi = 3,
-#'  singlecgamma = FALSE, st = st)
+#'  singlecgamma = FALSE, st = st, ncores = 1)
 #'fit.VLSTAR <- VLSTAR(y, p = 1, singlecgamma = FALSE, starting = stvalues,
-#'  n.iter = 2, st = st, method ='NLS', ncores = 1)
+#'  n.iter = 1, st = st, method ='NLS', ncores = 1)
 #'# a few methods for VLSTAR
 #'print(fit.VLSTAR)
 #'summary(fit.VLSTAR)
@@ -224,8 +224,8 @@ VLSTAR <- function(y, exo = NULL, p = 1,
 
 
 ##Actual iteration to estimate the coefficients
-cl <- parallel::makeCluster(ncores)     # set the number of processor cores
-parallel::setDefaultCluster(cl=cl)
+# cl <- parallel::makeCluster(ncores, outfile="")     # set the number of processor cores
+# parallel::setDefaultCluster(cl=cl)
 if(method == 'ML'){
     #NLS Estimation of Bhat and Omegahat to be used in the first iteration of maximum likelihood
   message('Maximum likelihood estimation\n')
@@ -241,8 +241,11 @@ if(method == 'ML'){
       #Parameters
       low1 <- replicate(ncoly, 0)
       #1.Maximum likelihood estimation of gamma and c
+      cl <- parallel::makeCluster(ncores)     # set the number of processor cores
+      parallel::setDefaultCluster(cl=cl)
       param1 <- optimParallel::optimParallel(par = as.vector(param), fn = loglike, lower = c(low1, apply(y, 2, min)),
                       data = data, parallel = list(cl = cl, forward = FALSE, loginfo = FALSE))
+      parallel::stopCluster(cl)
       cgam1 <- matrix(param1$par, ncol = 2, nrow = (ny*(m-1)))
 
       #2.Maximum likelihood estimation of Bhat with new values of gamma and c
@@ -314,8 +317,11 @@ if(method == 'ML'){
       #Parameters
       low1 <- replicate(ny, 0)
       #1.Maximum likelihood estimation of gamma and c
+      cl <- parallel::makeCluster(ncores)     # set the number of processor cores
+      parallel::setDefaultCluster(cl=cl)
       param1 <- optimParallel::optimParallel(par = as.vector(param), fn = SSQ, lower = c(low1, apply(y, 2, min)),
                       data = data, parallel = list(cl = cl, forward = FALSE, loginfo = FALSE))
+      parallel::stopCluster(cl)
       cgam1 <- matrix(param1$par, ncol = 2L, nrow = (ny*(m-1)))
 
       #2.NLS estimation of Bhat with new values of gamma and c
@@ -373,7 +379,7 @@ if(method == 'ML'){
 
       if (err<epsi | iter == n.iter) message('Converged\n')}
   }
-parallel::stopCluster(cl)
+
 
     #Calculating residuals and estimating standard errors
     residuals1 <- t(do.call("cbind", resi))
@@ -427,7 +433,7 @@ parallel::stopCluster(cl)
     }
     names1 <- list()
     for(j in 1:m){
-      names1[[j]] <- as.data.frame(paste(colnames(x), 'm_', j))
+      names1[[j]] <- as.data.frame(paste(colnames(x), ' m_', j, sep = ''))
     }
     names1 <- as.matrix(do.call(rbind,names1))
     rownames(BBhat) <- names1

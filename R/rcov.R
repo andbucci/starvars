@@ -87,7 +87,7 @@ if(make.ret == TRUE){
       cross1 <- zoo(crosspro, order.by = index(data))
 
       realized <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
-      for (k in 1:nday){
+      for (k in 1:(ncoly*(ncoly+1)/2)){
         realized[, k] <- apply.daily(cross1[,k], sum)
       }
       chol2 <- matrix(ncol = (ncoly*(ncoly+1)/2), nrow = nday)
